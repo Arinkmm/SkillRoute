@@ -11,3 +11,24 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/db/master.xml
+  mail:
+    host: smtp.gmail.com
+    username: ${MAIL_USER}
+    password: ${MAIL_PASSWORD}
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connectionTimeout: 5000
+          timeout: 5000
+          writeTimeout: 5000
+          starttls:
+            enable: true
+
+mail:
+  base-url: http://localhost:8080
+  sender: SkillRoute
+  from: ${spring.mail.username}
+  subject: Please verify your account
+  content: "Dear user, please follow the link below to verify your account: <a href=$url>VERIFY</a>"
