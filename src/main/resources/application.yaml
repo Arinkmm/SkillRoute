@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DB_DRIVER}
+  freemarker:
+    charset: UTF-8
+    enabled: true
+    suffix: .ftl
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/master.xml
