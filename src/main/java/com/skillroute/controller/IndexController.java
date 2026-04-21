@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class IndexController {
     private final CompanyProfileService companyProfileService;
     @GetMapping
-    public String index(Model model) {
+    public String indexPage(Model model) {
         model.addAttribute("companies", companyProfileService.getAllCompanies());
         return "index";
     }

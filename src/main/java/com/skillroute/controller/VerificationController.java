@@ -14,7 +14,7 @@ public class VerificationController {
     private final AccountService accountService;
 
     @GetMapping
-    public String verifyUser(@RequestParam("token") String token) {
+    public String verifyAccount(@RequestParam("token") String token) {
         boolean isVerified = accountService.verifyUser(token);
         if (isVerified) {
             return "verified";
