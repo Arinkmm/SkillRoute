@@ -28,7 +28,7 @@ CREATE TABLE student_profile (
 
 CREATE TABLE company_profile (
     account_id BIGINT PRIMARY KEY,
-    company_name VARCHAR(150) NOT NULL,
+    company_name VARCHAR(150),
     description TEXT,
     website_url VARCHAR(255),
     is_confirmed BOOLEAN DEFAULT FALSE,
