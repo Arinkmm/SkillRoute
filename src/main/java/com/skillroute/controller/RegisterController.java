@@ -2,7 +2,7 @@ package com.skillroute.controller;
 
 import com.skillroute.dto.RegistrationDto;
 import com.skillroute.model.Role;
-import com.skillroute.service.RegisterService;
+import com.skillroute.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/register")
 @RequiredArgsConstructor
 public class RegisterController {
-    private final RegisterService registerService;
+    private final AccountService accountService;
 
     @GetMapping
     public String registrationPage(Model model) {
@@ -33,7 +33,7 @@ public class RegisterController {
         }
 
         try {
-            registerService.register(form);
+            accountService.register(form);
         } catch (Exception e) {
             model.addAttribute("roles", Role.values());
             model.addAttribute("error", "Пользователь с таким Email уже существует");

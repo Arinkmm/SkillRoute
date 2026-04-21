@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class RegisterService {
+public class AccountService {
     private final AccountRepository accountRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final CompanyProfileRepository companyProfileRepository;
