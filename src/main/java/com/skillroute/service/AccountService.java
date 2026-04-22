@@ -2,6 +2,7 @@ package com.skillroute.service;
 
 import com.skillroute.dto.RegistrationDto;
 import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.exception.UserAlreadyExistsException;
 import com.skillroute.model.Account;
 import com.skillroute.model.CompanyProfile;
 import com.skillroute.model.Role;
@@ -34,6 +35,9 @@ public class AccountService {
 
     @Transactional
     public void register(RegistrationDto form) {
+        if (accountRepository.existsByEmail(form.getEmail())) {
+            throw new UserAlreadyExistsException("Email already exists");
+        }
         Account account = Account.builder()
                 .email(form.getEmail())
                 .password(passwordEncoder.encode(form.getPassword()))

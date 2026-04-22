@@ -1,6 +1,7 @@
 package com.skillroute.controller;
 
 import com.skillroute.dto.RegistrationDto;
+import com.skillroute.exception.UserAlreadyExistsException;
 import com.skillroute.model.Role;
 import com.skillroute.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class RegisterController {
 
         try {
             accountService.register(form);
-        } catch (Exception e) {
+        } catch (UserAlreadyExistsException e) {
             model.addAttribute("roles", Role.values());
             model.addAttribute("error", "Пользователь с таким Email уже существует");
             return "register";
