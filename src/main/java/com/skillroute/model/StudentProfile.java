@@ -27,7 +27,7 @@ public class StudentProfile {
     @Column(name = "github_url")
     private String githubUrl;
 
-    @ManyToOne
+    @ManyToOne(fetch =  FetchType.LAZY)
     @JoinColumn(name = "specialization_id")
     private Specialization specialization;
 
