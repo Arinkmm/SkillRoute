@@ -24,7 +24,7 @@ public class CompanyProfileService {
 
     @Transactional
     public void updateProfile(Long id, EditCompanyDto form) {
-        CompanyProfile companyProfile = companyProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Company Profile Not Found"));
+        CompanyProfile companyProfile = companyProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Профиль компании с таким id " + id + " не найден"));
 
         companyProfile.setCompanyName(form.getCompanyName());
         companyProfile.setDescription(form.getDescription());

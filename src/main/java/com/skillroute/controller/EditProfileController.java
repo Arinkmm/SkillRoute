@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/profile/edit")
@@ -41,9 +42,10 @@ public class EditProfileController {
     }
 
     @PostMapping("/company")
-    public String editCompany(@AuthenticationPrincipal UserDetails userDetails, @ModelAttribute EditCompanyDto form) {
+    public String editCompany(@AuthenticationPrincipal UserDetails userDetails, @ModelAttribute EditCompanyDto form, RedirectAttributes redirectAttributes) {
         Account account = accountService.getAccount(userDetails.getUsername());
         companyProfileService.updateProfile(account.getId(), form);
+        redirectAttributes.addFlashAttribute("message", "Профиль успешно обновлён");
         return "redirect:/profile";
     }
 }

@@ -1,6 +1,7 @@
 package com.skillroute.controller;
 
 import com.skillroute.dto.RegistrationDto;
+import com.skillroute.exception.InvalidPasswordException;
 import com.skillroute.exception.UserAlreadyExistsException;
 import com.skillroute.model.Role;
 import com.skillroute.service.AccountService;
@@ -26,21 +27,14 @@ public class RegisterController {
     }
 
     @PostMapping
-    public String processRegistration(@ModelAttribute RegistrationDto form,
-                                      Model model) {
-        if (!form.getPassword().equals(form.getConfirmPassword())) {
-            model.addAttribute("error", "Пароли не совпадают");
-            return "register";
-        }
-
+    public String processRegistration(@ModelAttribute RegistrationDto form, Model model) {
         try {
             accountService.register(form);
-        } catch (UserAlreadyExistsException e) {
+        } catch (UserAlreadyExistsException | InvalidPasswordException e) {
             model.addAttribute("roles", Role.values());
-            model.addAttribute("error", "Пользователь с таким Email уже существует");
+            model.addAttribute("error", e.getMessage());
             return "register";
         }
-
         return "redirect:/login";
     }
 }

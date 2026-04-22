@@ -18,7 +18,7 @@ public class StudentProfileService {
 
     @Transactional
     public void updateProfile(Long id, EditStudentDto form) {
-        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("StudentProfile not found"));
+        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Профиль студента с таким id " + id + " не найден"));
 
         studentProfile.setFirstName(form.getFirstName());
         studentProfile.setLastName(form.getLastName());

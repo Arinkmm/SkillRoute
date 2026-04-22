@@ -38,8 +38,13 @@ public class AccountService {
     @Transactional
     public void register(RegistrationDto form) {
         if (accountRepository.existsByEmail(form.getEmail())) {
-            throw new UserAlreadyExistsException("Email already exists");
+            throw new UserAlreadyExistsException("Пользователь с таким email уже существует");
         }
+
+        if (!form.getPassword().equals(form.getConfirmPassword())) {
+            throw new InvalidPasswordException("Пароли не совпадают");
+        }
+
         Account account = Account.builder()
                 .email(form.getEmail())
                 .password(passwordEncoder.encode(form.getPassword()))
@@ -73,7 +78,7 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public Account getAccount(String email) {
-        return accountRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Account with email " + email + " not found"));
+        return accountRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Аккаунт с email " + email + " не найден"));
     }
 
     @Transactional
