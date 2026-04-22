@@ -21,7 +21,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth.requestMatchers("/", "/register", "/login", "/verification/**").permitAll()
                 .anyRequest().authenticated())
                 .formLogin(form -> form.loginPage("/login").loginProcessingUrl("/login").defaultSuccessUrl("/main", true).failureHandler(customAuthenticationFailureHandler).permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
+                .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/").invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll());
         return http.build();
     }
 
