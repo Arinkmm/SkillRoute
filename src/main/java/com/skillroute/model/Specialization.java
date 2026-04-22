@@ -21,5 +21,5 @@ public class Specialization {
     private Direction direction;
 
     @Column(nullable = false, unique = true)
-    private String name;
+    private String language;
 }
