@@ -12,6 +12,7 @@ CREATE TABLE account (
 
 CREATE TABLE specialization (
     id BIGSERIAL PRIMARY KEY,
+    direction VARCHAR(50) NOT NULL DEFAULT 'BACKEND',
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
