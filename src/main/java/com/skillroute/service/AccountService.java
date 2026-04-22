@@ -1,7 +1,9 @@
 package com.skillroute.service;
 
+import com.skillroute.dto.PasswordChangeDto;
 import com.skillroute.dto.RegistrationDto;
 import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.exception.InvalidPasswordException;
 import com.skillroute.exception.UserAlreadyExistsException;
 import com.skillroute.model.Account;
 import com.skillroute.model.CompanyProfile;
@@ -72,6 +74,27 @@ public class AccountService {
     @Transactional(readOnly = true)
     public Account getAccount(String email) {
         return accountRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Account with email " + email + " not found"));
+    }
+
+    @Transactional
+    public void changePassword(Long id, PasswordChangeDto form) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Account with id " + id + " not found"));
+        if (!passwordEncoder.matches(form.getOldPassword(), account.getPassword())) {
+            throw new InvalidPasswordException("Текущий пароль введен неверно");
+        }
+
+        if (!form.getNewPassword().equals(form.getConfirmNewPassword())) {
+            throw new InvalidPasswordException("Новый пароль и подтверждение не совпадают");
+        }
+
+        if (passwordEncoder.matches(form.getNewPassword(), account.getPassword())) {
+            throw new InvalidPasswordException("Новый пароль не может быть таким же, как старый");
+        }
+
+        String encodedPassword = passwordEncoder.encode(form.getNewPassword());
+        account.setPassword(encodedPassword);
+        accountRepository.save(account);
+
     }
 
     private void sendVerificationMail(RegistrationDto form, String verificationToken) {
