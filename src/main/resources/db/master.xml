@@ -7,4 +7,5 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <include relativeToChangelogFile="true" file="changelog/2026-04-21--01-create-profiles-tables.sql"/>
+    <include relativeToChangelogFile="true" file="changelog/2026-04-22--02-create-skill-tables.sql"/>
 </databaseChangeLog>

@@ -3,6 +3,9 @@ package com.skillroute.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "student_profile")
 @Getter
@@ -33,4 +36,7 @@ public class StudentProfile {
 
     @Column(columnDefinition = "TEXT")
     private String bio;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<StudentSkill> skills = new HashSet<>();
 }
