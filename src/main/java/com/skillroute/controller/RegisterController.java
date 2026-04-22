@@ -25,7 +25,7 @@ public class RegisterController {
     }
 
     @PostMapping
-    public String processRegistration(@ModelAttribute("form") RegistrationDto form,
+    public String processRegistration(@ModelAttribute RegistrationDto form,
                                       Model model) {
         if (!form.getPassword().equals(form.getConfirmPassword())) {
             model.addAttribute("error", "Пароли не совпадают");

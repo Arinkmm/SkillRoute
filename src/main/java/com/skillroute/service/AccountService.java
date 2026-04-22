@@ -1,6 +1,7 @@
 package com.skillroute.service;
 
 import com.skillroute.dto.RegistrationDto;
+import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Account;
 import com.skillroute.model.CompanyProfile;
 import com.skillroute.model.Role;
@@ -62,6 +63,11 @@ public class AccountService {
             accountRepository.save(account);
             return true;
         }).orElse(false);
+    }
+
+    @Transactional(readOnly = true)
+    public Account getAccount(String email) {
+        return accountRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Account with email " + email + " not found"));
     }
 
     private void sendVerificationMail(RegistrationDto form, String verificationToken) {
