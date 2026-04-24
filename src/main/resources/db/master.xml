@@ -8,4 +8,5 @@
 
     <include relativeToChangelogFile="true" file="changelog/2026-04-21--01-create-profiles-tables.sql"/>
     <include relativeToChangelogFile="true" file="changelog/2026-04-22--02-create-skill-tables.sql"/>
+    <include relativeToChangelogFile="true" file="changelog/2026-04-24-03--create-vacancies-tables.sql"/>
 </databaseChangeLog>
