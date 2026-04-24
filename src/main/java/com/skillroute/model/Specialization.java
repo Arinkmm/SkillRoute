@@ -20,6 +20,7 @@ public class Specialization {
     @Column(nullable = false)
     private Direction direction;
 
-    @Column(nullable = false, unique = true)
-    private String language;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Language language;
 }

@@ -5,16 +5,16 @@ CREATE TABLE account (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'STUDENT',
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     verification_token VARCHAR(255),
     is_verified BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE specialization (
     id BIGSERIAL PRIMARY KEY,
-    direction VARCHAR(50) NOT NULL DEFAULT 'BACKEND',
-    language VARCHAR(100) NOT NULL UNIQUE,
-    CONSTRAINT check_direction CHECK (direction IN ('BACKEND', 'FRONTEND', 'FULLSTACK'))
+    direction VARCHAR(50) NOT NULL,
+    language VARCHAR(100) NOT NULL,
+    CONSTRAINT check_direction CHECK (direction IN ('BACKEND')),
+    CONSTRAINT check_language CHECK (language IN ('JAVA'))
 );
 
 CREATE TABLE student_profile (

@@ -18,9 +18,11 @@ public class Account {
     private Long id;
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
     private StudentProfile studentProfile;
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
     private CompanyProfile companyProfile;
 
     @Column(nullable = false, unique = true)
@@ -32,9 +34,6 @@ public class Account {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private LocalDateTime createdAt;
 
     @Column(name = "verification_token")
     private String verificationToken;

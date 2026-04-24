@@ -19,7 +19,7 @@ public class VerificationController {
         if (isVerified) {
             return "verified";
         } else {
-            return "redirect:/login?error=invalid_token";
+            return "redirect:/login";
         }
     }
 }

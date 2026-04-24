@@ -14,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class StudentProfile {
     @Id
+    @Column(name = "account_id")
     private Long id;
 
     @OneToOne
