@@ -4,7 +4,7 @@ import com.skillroute.dto.EditStudentDto;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Specialization;
 import com.skillroute.model.StudentProfile;
-import com.skillroute.repository.SpecificationRepository;
+import com.skillroute.repository.SpecializationRepository;
 import com.skillroute.repository.StudentProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StudentProfileService {
     private final StudentProfileRepository studentProfileRepository;
-    private final SpecificationRepository specificationRepository;
+    private final SpecializationRepository specializationRepository;
 
     @Transactional
     public void updateProfile(Long id, EditStudentDto form) {
@@ -26,7 +26,7 @@ public class StudentProfileService {
         studentProfile.setBio(form.getBio());
 
         if (form.getSpecializationId() != null) {
-            Specialization specialization = specificationRepository.getReferenceById(form.getSpecializationId());
+            Specialization specialization = specializationRepository.getReferenceById(form.getSpecializationId());
             studentProfile.setSpecialization(specialization);
         }
     }

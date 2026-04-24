@@ -20,8 +20,9 @@ public class VacancyProfile {
     @JoinColumn(name = "vacancy_id")
     private Vacancy vacancy;
 
-    @Column(name = "specialization_id")
-    private Long specializationId;
+    @ManyToOne
+    @JoinColumn(name = "specialization_id")
+    private Specialization specialization;
 
     private Long salary;
 

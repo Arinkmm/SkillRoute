@@ -12,4 +12,11 @@ public class GlobalExceptionHandler {
         model.addAttribute("errorCode", 404);
         return "error";
     }
+
+    @ExceptionHandler(ResourceOwnershipException.class)
+    public String handleResourceOwnershipException(ResourceOwnershipException ex,  Model model) {
+        model.addAttribute("message", ex.getMessage());
+        model.addAttribute("errorCode", 403);
+        return "error";
+    }
 }

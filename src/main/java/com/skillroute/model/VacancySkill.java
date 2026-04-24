@@ -20,6 +20,11 @@ public class VacancySkill {
     @JoinColumn(name = "vacancy_id")
     private Vacancy vacancy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "skill_id")
+    private Skill skill;
+
     @Column(nullable = false)
     private Integer level;
 }
