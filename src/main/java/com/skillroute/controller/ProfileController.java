@@ -28,10 +28,10 @@ public class ProfileController {
 
         if (account.getRole() == Role.STUDENT) {
             model.addAttribute("profile", account.getStudentProfile());
-            return "student_profile";
+            return "student/profile";
         } else {
             model.addAttribute("profile", account.getCompanyProfile());
-            return "company_profile";
+            return "company/profile";
         }
     }
 }
