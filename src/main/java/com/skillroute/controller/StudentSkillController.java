@@ -26,12 +26,6 @@ public class StudentSkillController {
     private final AccountService accountService;
     private final SkillService skillService;
 
-    @GetMapping("/search")
-    @ResponseBody
-    public List<StudentSkillDto> searchSkills(@RequestParam("name") String name) {
-        return studentSkillService.searchSkillsByName(name);
-    }
-
     @GetMapping("/add")
     public String addSkillPage(Model model) {
         model.addAttribute("form", new SkillAddDto());
