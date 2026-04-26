@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 @Controller
-@RequestMapping("/profile/skills")
+@RequestMapping("/skills")
 @RequiredArgsConstructor
 public class StudentSkillController {
     private final StudentSkillService studentSkillService;
@@ -43,6 +43,6 @@ public class StudentSkillController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "add_skill";
         }
-        return "redirect:/profile";
+        return "redirect:/skills";
     }
 }

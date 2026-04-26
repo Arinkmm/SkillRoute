@@ -17,5 +17,4 @@ public interface StudentSkillRepository extends JpaRepository<StudentSkill, Stud
 
     @Query("SELECT ss FROM StudentSkill ss JOIN FETCH ss.skill WHERE ss.skill.name = :name")
     Optional<StudentSkill> findByNameContainingIgnoreCase(@Param("name") String name);
-
-    List<StudentSkill> findByStudentId(Long studentId);}
+}

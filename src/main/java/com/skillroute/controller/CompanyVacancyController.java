@@ -4,6 +4,7 @@ import com.skillroute.dto.VacancyCreateDto;
 import com.skillroute.dto.VacancyUpdateDto;
 import com.skillroute.model.Account;
 import com.skillroute.service.AccountService;
+import com.skillroute.service.SkillService;
 import com.skillroute.service.SpecializationService;
 import com.skillroute.service.VacancyService;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +22,13 @@ public class CompanyVacancyController {
     private final SpecializationService specializationService;
     private final VacancyService vacancyService;
     private final AccountService accountService;
+    private final SkillService skillService;
 
     @GetMapping("/create")
     public String createVacancyForm(Model model) {
         model.addAttribute("vacancy", new VacancyCreateDto());
         model.addAttribute("specializations", specializationService.getSpecializations());
+        model.addAttribute("skills", skillService.getSkills());
         return "company/vacancy-create";
     }
 

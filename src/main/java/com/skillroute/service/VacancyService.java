@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,8 +21,21 @@ import java.util.stream.Collectors;
 public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final CompanyProfileRepository companyProfileRepository;
     private final StudentSkillRepository studentSkillRepository;
     private final SpecializationRepository specializationRepository;
+    private final SkillRepository skillRepository;
+
+
+    @Transactional(readOnly = true)
+    public List<VacancyResponseDto> getFollowedVacancies(Long studentId) {
+        StudentProfile profile = studentProfileRepository.findById(studentId).orElseThrow(() -> new EntityNotFoundException("Профиль студента не найден: " + studentId));
+
+        return profile.getStudentVacancies().stream()
+                .map(StudentVacancy::getVacancy)
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
 
     @Transactional(readOnly = true)
     public List<VacancyResponseDto> getAllActive() {
@@ -76,7 +90,7 @@ public class VacancyService {
     public SkillGapReport calculateSkillGap(Long studentId, Long vacancyId) {
         Vacancy vacancy = getVacancyById(vacancyId);
 
-        Map<Long, Integer> studentSkillsMap = studentSkillRepository.findByStudentId(studentId)
+        Map<Long, Integer> studentSkillsMap = studentSkillRepository.findAllByStudentId(studentId)
                 .stream()
                 .collect(Collectors.toMap(
                         sk -> sk.getId().getSkillId(),
@@ -86,7 +100,7 @@ public class VacancyService {
         List<VacancySkill> missingSkills = new ArrayList<>();
         List<SkillLevelDifference> lowLevelSkills = new ArrayList<>();
 
-        for (VacancySkill requiredSkill : vacancy.getSkills()) {
+        for (VacancySkill requiredSkill : vacancy.getVacancySkills()) {
             Long skillId = requiredSkill.getId().getSkillId();
             Integer requiredLevel = requiredSkill.getLevel();
             Integer studentLevel = studentSkillsMap.get(skillId);
@@ -108,7 +122,7 @@ public class VacancyService {
     public void deleteVacancy(Long vacancyId, Long currentCompanyId) {
         Vacancy vacancy = getVacancyById(vacancyId);
 
-        if (!vacancy.getCompanyId().equals(currentCompanyId)) {
+        if (!vacancy.getCompany().getId().equals(currentCompanyId)) {
             throw new ResourceOwnershipException("У вас нет прав на удаление этой вакансии");
         }
 
@@ -119,7 +133,7 @@ public class VacancyService {
     public void update(Long vacancyId, VacancyUpdateDto dto, Long companyId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() -> new EntityNotFoundException("Вакансия с таким id " + vacancyId + " не найдена"));
 
-        if (!vacancy.getCompanyId().equals(companyId)) {
+        if (!vacancy.getCompany().getId().equals(companyId)) {
             throw new ResourceOwnershipException("У вас нет прав на редактирование этой вакансии");
         }
 
@@ -130,7 +144,7 @@ public class VacancyService {
         profile.setWorkSchedule(dto.getWorkSchedule());
         profile.setStatus(dto.getStatus());
 
-        vacancy.getSkills().clear();
+        vacancy.getVacancySkills().clear();
 
         if (dto.getSkills() != null) {
             dto.getSkills().forEach(sDto -> {
@@ -139,7 +153,7 @@ public class VacancyService {
                         .vacancy(vacancy)
                         .level(sDto.getLevel())
                         .build();
-                vacancy.getSkills().add(skill);
+                vacancy.getVacancySkills().add(skill);
             });
         }
     }
@@ -147,11 +161,14 @@ public class VacancyService {
     @Transactional
     public void create(VacancyCreateDto dto, Long companyId) {
         Specialization specialization = specializationRepository.findById(dto.getSpecializationId())
-                .orElseThrow(() -> new EntityNotFoundException("Специализация не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException("Специализация с id " + dto.getSpecializationId() + " не найдена"));
+
+        CompanyProfile companyProfile = companyProfileRepository.findById(companyId)
+                .orElseThrow(() -> new EntityNotFoundException("Компания с id " + companyId + " не найдена"));
 
         Vacancy vacancy = Vacancy.builder()
                 .name(dto.getName())
-                .companyId(companyId)
+                .company(companyProfile)
                 .build();
 
         VacancyProfile profile = VacancyProfile.builder()
@@ -165,15 +182,22 @@ public class VacancyService {
         vacancy.setProfile(profile);
 
         if (dto.getSkills() != null) {
-            List<VacancySkill> skills = dto.getSkills().stream()
+            Set<VacancySkill> skills = dto.getSkills().stream()
                     .map(sDto -> {
+                        Skill skill = skillRepository.findById(sDto.getSkillId())
+                                .orElseThrow(() -> new EntityNotFoundException("Навык с id " + sDto.getSkillId() + " не найден"));
+
                         VacancySkill vs = new VacancySkill();
-                        vs.setId(new VacancySkillId(null, sDto.getSkillId()));
+                        vs.setSkill(skill);
                         vs.setVacancy(vacancy);
+
+                        vs.setId(new VacancySkillId(vacancy.getId(), skill.getId()));
+
                         vs.setLevel(sDto.getLevel());
                         return vs;
-                    }).collect(Collectors.toList());
-            vacancy.setSkills(skills);
+                    }).collect(Collectors.toSet());
+
+            vacancy.setVacancySkills(skills);
         }
 
         vacancyRepository.save(vacancy);
@@ -186,14 +210,14 @@ public class VacancyService {
         return VacancyResponseDto.builder()
                 .id(vacancy.getId())
                 .name(vacancy.getName())
-                .companyId(vacancy.getCompanyId())
+                .companyId(vacancy.getCompany().getId())
                 .salary(profile.getSalary())
                 .workSchedule(profile.getWorkSchedule())
                 .status(profile.getStatus())
                 .language(spec.getLanguage())
                 .direction(spec.getDirection())
                 .fullSpecialization(spec.getLanguage() + " (" + spec.getDirection() + ")")
-                .skills(vacancy.getSkills().stream()
+                .skills(vacancy.getVacancySkills().stream()
                         .map(vs -> new SkillResponseDto(
                                 vs.getSkill().getName(),
                                 vs.getLevel()))

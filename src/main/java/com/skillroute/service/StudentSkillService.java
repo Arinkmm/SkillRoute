@@ -43,6 +43,11 @@ public class StudentSkillService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public boolean hasSkill(Long studentId, Long skillId) {
+        return studentSkillRepository.existsByStudentIdAndSkillId(studentId, skillId);
+    }
+
     @Transactional
     public void addSkillToStudent(Long id, SkillAddDto form) {
         StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Профиль студента с таким id " + id + " не найден"));
