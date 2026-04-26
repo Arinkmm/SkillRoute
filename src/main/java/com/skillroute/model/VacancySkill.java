@@ -15,13 +15,13 @@ public class VacancySkill {
     @EmbeddedId
     private VacancySkillId id;
 
-    @ManyToOne
-    @MapsId
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("vacancyId")
     @JoinColumn(name = "vacancy_id")
     private Vacancy vacancy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId
+    @MapsId("skillId")
     @JoinColumn(name = "skill_id")
     private Skill skill;
 

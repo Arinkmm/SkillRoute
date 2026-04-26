@@ -15,12 +15,12 @@ public class VacancyProfile {
     @Column(name = "vacancy_id")
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "vacancy_id")
     private Vacancy vacancy;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "specialization_id")
     private Specialization specialization;
 

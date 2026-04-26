@@ -24,4 +24,10 @@ public class Skill {
 
     @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL)
     private Set<StudentSkill> studentSkills = new HashSet<>();
+
+    @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL)
+    private Set<VacancySkill> vacancySkills = new HashSet<>();
+
+    @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL)
+    private Set<Resource> resources = new HashSet<>();
 }

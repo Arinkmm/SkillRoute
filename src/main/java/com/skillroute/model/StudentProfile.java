@@ -17,7 +17,7 @@ public class StudentProfile {
     @Column(name = "account_id")
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "account_id")
     private Account account;
@@ -39,5 +39,8 @@ public class StudentProfile {
     private String bio;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<StudentSkill> skills = new HashSet<>();
+    private Set<StudentSkill> studentSkills = new HashSet<>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<StudentVacancy> studentVacancies = new HashSet<>();
 }

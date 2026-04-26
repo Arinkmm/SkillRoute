@@ -11,7 +11,7 @@ CREATE TABLE student_skill (
     is_confirmed_by_github BOOLEAN DEFAULT FALSE,
     level INT NOT NULL DEFAULT 1 CONSTRAINT check_student_skill_level CHECK (level >= 1 AND level <= 5),
     PRIMARY KEY (student_id, skill_id),
-    CONSTRAINT fk_student_skill_student FOREIGN KEY (student_id) REFERENCES student_profile(account_id) ON DELETE CASCADE,
+    CONSTRAINT fk_student_skill_student FOREIGN KEY (student_id) REFERENCES account(id) ON DELETE CASCADE,
     CONSTRAINT fk_student_skill_skill FOREIGN KEY (skill_id) REFERENCES skill(id) ON DELETE CASCADE
 );
 

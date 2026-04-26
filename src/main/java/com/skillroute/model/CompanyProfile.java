@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "company_profile")
 @Getter
@@ -16,7 +19,7 @@ public class CompanyProfile {
     @Id
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "account_id")
     private Account account;
@@ -32,4 +35,7 @@ public class CompanyProfile {
 
     @Column(name = "is_confirmed")
     private boolean isConfirmed;
+
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Vacancy> vacancies = new HashSet<>();
 }

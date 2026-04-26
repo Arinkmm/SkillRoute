@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "vacancy")
@@ -17,8 +19,9 @@ public class Vacancy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "company_id")
-    private Long companyId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private CompanyProfile company;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -28,5 +31,8 @@ public class Vacancy {
     private VacancyProfile profile;
 
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VacancySkill> skills = new ArrayList<>();
+    private Set<VacancySkill> vacancySkills = new HashSet<>();
+
+    @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<StudentVacancy> studentVacancies = new HashSet<>();
 }
