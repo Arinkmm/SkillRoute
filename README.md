@@ -41,7 +41,7 @@
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/Arinkmm/SkillRoute.git](https://github.com/Arinkmm/SkillRoute.git)
+    git clone https://github.com/Arinkmm/SkillRoute.git
     cd SkillRoute
     ```
 
