@@ -37,7 +37,7 @@ public class CompanyVacancyController {
                               @AuthenticationPrincipal UserDetails userDetails,
                               RedirectAttributes redirectAttributes) {
         Account account = accountService.getAccount(userDetails.getUsername());
-        vacancyService.create(form, account.getId());
+        vacancyService.createVacancy(form, account.getId());
 
         redirectAttributes.addFlashAttribute("message", "Вакансия успешно опубликована!");
         return "redirect:/vacancies";
@@ -45,7 +45,7 @@ public class CompanyVacancyController {
 
     @GetMapping("/{id}/edit")
     public String editVacancyForm(@PathVariable Long id, Model model) {
-        model.addAttribute("vacancy", vacancyService.getVacancyResponseById(id));
+        model.addAttribute("vacancy", vacancyService.getVacancyById(id));
         model.addAttribute("specializations", specializationService.getSpecializations());
         return "company/vacancy-edit";
     }
@@ -57,7 +57,7 @@ public class CompanyVacancyController {
                                 RedirectAttributes redirectAttributes) {
 
         Account account = accountService.getAccount(userDetails.getUsername());
-        vacancyService.update(id, form, account.getId());
+        vacancyService.updateVacancy(id, form, account.getId());
 
         redirectAttributes.addFlashAttribute("message", "Изменения сохранены!");
         return "redirect:/vacancies/" + id;

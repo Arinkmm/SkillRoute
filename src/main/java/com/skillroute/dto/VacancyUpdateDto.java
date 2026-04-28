@@ -18,5 +18,5 @@ public class VacancyUpdateDto {
     private Long salary;
     private WorkSchedule workSchedule;
     private VacancyStatus status;
-    private List<SkillUpdateDto> skills;
+    private List<SkillRequestDto> skills;
 }

@@ -1,12 +1,13 @@
 package com.skillroute.controller;
 
+import com.skillroute.dto.RoadmapResponseDto;
 import com.skillroute.dto.RouteSkillDto;
 import com.skillroute.dto.SkillAddDto;
-import com.skillroute.dto.SkillGapReport;
 import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Account;
 import com.skillroute.service.AccountService;
+import com.skillroute.service.RoadmapService;
 import com.skillroute.service.SkillService;
 import com.skillroute.service.StudentSkillService;
 import com.skillroute.service.VacancyService;
@@ -22,7 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/route")
 @RequiredArgsConstructor
 public class StudentRoadmapController {
-
+    private final RoadmapService roadmapService;
     private final VacancyService vacancyService;
     private final AccountService accountService;
     private final StudentSkillService studentSkillService;
@@ -40,10 +41,11 @@ public class StudentRoadmapController {
                               @AuthenticationPrincipal UserDetails userDetails,
                               Model model) {
         Account account = accountService.getAccount(userDetails.getUsername());
-        SkillGapReport skillGap = vacancyService.calculateSkillGap(account.getId(), id);
 
-        model.addAttribute("vacancy", vacancyService.getVacancyResponseById(id));
-        model.addAttribute("skillGap", skillGap);
+        RoadmapResponseDto roadmap = roadmapService.generateRoadmap(account.getId(), id);
+
+        model.addAttribute("roadmap", roadmap);
+
         return "student/roadmap-details";
     }
 
@@ -56,7 +58,7 @@ public class StudentRoadmapController {
 
         RouteSkillDto skill = skillService.getRouteSkillById(skillId);
 
-        model.addAttribute("vacancy", vacancyService.getVacancyResponseById(vacancyId));
+        model.addAttribute("vacancy", vacancyService.getVacancyById(vacancyId));
         model.addAttribute("skill", skill);
 
         boolean isAlreadyAcquired = studentSkillService.hasSkill(account.getId(), skillId);
@@ -66,18 +68,17 @@ public class StudentRoadmapController {
     }
 
     @PostMapping("/{vacancyId}/skills/{skillId}/acquire")
-    public String acquireSkill(@RequestParam Long skillId,
-                               @RequestParam Long vacancyId,
+    public String acquireSkill(@PathVariable Long vacancyId,
+                               @PathVariable Long skillId,
+                               @ModelAttribute SkillAddDto addDto,
                                @AuthenticationPrincipal UserDetails userDetails,
                                RedirectAttributes redirectAttributes) {
         Account account = accountService.getAccount(userDetails.getUsername());
-
+        addDto.setId(skillId);
         try {
-            SkillAddDto addDto = new SkillAddDto();
-            addDto.setId(skillId);
             studentSkillService.addSkillToStudent(account.getId(), addDto);
-            redirectAttributes.addFlashAttribute("success", "Навык добавлен в твой профиль!");
-        } catch (DuplicateEntityException | EntityNotFoundException e) {
+            redirectAttributes.addFlashAttribute("success", "Навык добавлен!");
+        } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/route/" + vacancyId;

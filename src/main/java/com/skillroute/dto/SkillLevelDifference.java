@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SkillLevelDifference {
+    private Long skillId;
     private String skillName;
     private int currentLevel;
     private int requiredLevel;

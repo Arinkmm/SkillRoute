@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SkillResponseDto {
+    private Long id;
     private String name;
     private int level;
 }
