@@ -1,12 +1,15 @@
 package com.skillroute.service;
 
 import com.skillroute.dto.EditStudentDto;
+import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.model.Role;
 import com.skillroute.model.Specialization;
 import com.skillroute.model.StudentProfile;
 import com.skillroute.repository.SpecializationRepository;
 import com.skillroute.repository.StudentProfileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +18,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudentProfileService {
     private final StudentProfileRepository studentProfileRepository;
     private final SpecializationRepository specializationRepository;
+
+    @EventListener
+    public void handleAccountRegistration(AccountRegisteredEvent event) {
+        if (event.getAccount().getRole() == Role.STUDENT) {
+            StudentProfile profile = new StudentProfile();
+            profile.setAccount(event.getAccount());
+            studentProfileRepository.save(profile);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public StudentProfile getStudentById(Long id) {
+        return studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Студент с таким id " + id + " не найден"));
+    }
 
     @Transactional
     public void updateProfile(Long id, EditStudentDto form) {
@@ -29,5 +46,12 @@ public class StudentProfileService {
             Specialization specialization = specializationRepository.getReferenceById(form.getSpecializationId());
             studentProfile.setSpecialization(specialization);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasSpecialization(Long studentId) {
+        return studentProfileRepository.findById(studentId)
+                .map(profile -> profile.getSpecialization() != null)
+                .orElse(false);
     }
 }

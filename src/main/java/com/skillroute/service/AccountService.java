@@ -2,6 +2,7 @@ package com.skillroute.service;
 
 import com.skillroute.dto.PasswordChangeDto;
 import com.skillroute.dto.RegistrationDto;
+import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.InvalidPasswordException;
 import com.skillroute.exception.UserAlreadyExistsException;
@@ -16,6 +17,7 @@ import com.skillroute.repository.StudentProfileRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,11 +31,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccountService {
     private final AccountRepository accountRepository;
-    private final StudentProfileRepository studentProfileRepository;
-    private final CompanyProfileRepository companyProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender javaMailSender;
     private final MailProperties mailProperties;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void register(RegistrationDto form) {
@@ -55,15 +56,7 @@ public class AccountService {
         Account savedAccount = accountRepository.save(account);
         sendVerificationMail(form, account.getVerificationToken());
 
-        if (form.getRole() == Role.STUDENT) {
-            StudentProfile student = new StudentProfile();
-            student.setAccount(savedAccount);
-            studentProfileRepository.save(student);
-        } else if (form.getRole() == Role.COMPANY) {
-            CompanyProfile company = new CompanyProfile();
-            company.setAccount(savedAccount);
-            companyProfileRepository.save(company);
-        }
+        eventPublisher.publishEvent(new AccountRegisteredEvent(savedAccount));
     }
 
     @Transactional
