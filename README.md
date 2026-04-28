@@ -69,4 +69,4 @@
 
 Остались вопросы? Нужна помощь с настройкой? Нашли баг?
 
-Email: [mairabeeva42@gmail.com](mailto:mairabeeva42@gmail.com)
+Email: [mairabeeva42@gmail.com](mailto:mairabeeva42@gmail.com) | Telegram: @arinkmm
