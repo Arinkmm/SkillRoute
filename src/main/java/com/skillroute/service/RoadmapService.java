@@ -30,35 +30,39 @@ public class RoadmapService {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена: " + vacancyId));
 
-        Map<Long, Integer> studentSkillsMap = studentSkillRepository.findAllByStudentId(studentId)
+        Map<Long, Integer> studentSkills = studentSkillRepository.findAllByStudentId(studentId)
                 .stream()
-                .collect(Collectors.toMap(sk -> sk.getId().getSkillId(), StudentSkill::getLevel));
+                .collect(Collectors.toMap(ss -> ss.getSkill().getId(), StudentSkill::getLevel));
 
-        List<RoadmapStepDto> steps = new ArrayList<>();
+        List<Long> skillIds = vacancy.getVacancySkills().stream()
+                .map(vs -> vs.getSkill().getId()).toList();
 
-        for (VacancySkill req : vacancy.getVacancySkills()) {
-            Long sId = req.getSkill().getId();
-            int required = req.getLevel();
-            int current = studentSkillsMap.getOrDefault(sId, 0);
+        Map<Long, List<String>> resourcesMap = resourceRepository.findAllBySkillIdIn(skillIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.getSkill().getId(),
+                        Collectors.mapping(Resource::getResource, Collectors.toList())
+                ));
 
-            if (current < required) {
-                Status status = (current == 0) ? Status.MISSING : Status.UPGRADE_REQUIRED;
-                steps.add(mapToStep(sId, req.getSkill().getName(), current, required, status));
-            }
-        }
+        List<RoadmapStepDto> steps = vacancy.getVacancySkills().stream()
+                .filter(vs -> studentSkills.getOrDefault(vs.getSkill().getId(), 0) < vs.getLevel())
+                .map(vs -> {
+                    Long sId = vs.getSkill().getId();
+                    int current = studentSkills.getOrDefault(sId, 0);
+                    return new RoadmapStepDto(
+                            vs.getSkill().getName(),
+                            current,
+                            vs.getLevel(),
+                            resourcesMap.getOrDefault(sId, List.of()),
+                            current == 0 ? Status.MISSING : Status.UPGRADE_REQUIRED
+                    );
+                }).toList();
 
         return RoadmapResponseDto.builder()
                 .vacancyId(vacancyId)
-                .vacancyName(vacancy.getName())
                 .steps(steps)
                 .matchPercentage(calculateMatch(vacancy.getVacancySkills().size(), steps.size()))
                 .build();
-    }
-
-    private RoadmapStepDto mapToStep(Long skillId, String name, int cur, int target, Status status) {
-        List<String> resources = resourceRepository.findAllBySkillId(skillId)
-                .stream().map(Resource::getResource).toList();
-        return new RoadmapStepDto(name, cur, target, resources, status);
     }
 
     private double calculateMatch(int total, int gaps) {

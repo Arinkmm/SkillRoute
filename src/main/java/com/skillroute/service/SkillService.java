@@ -1,9 +1,11 @@
 package com.skillroute.service;
 
 import com.skillroute.dto.RouteSkillDto;
+import com.skillroute.dto.StudentSkillDto;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Skill;
 import com.skillroute.repository.SkillRepository;
+import com.skillroute.repository.StudentSkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SkillService {
     private final SkillRepository skillRepository;
+    private final StudentSkillRepository studentSkillRepository;
+
+    @Transactional(readOnly = true)
+    public List<StudentSkillDto> searchSkillsByName(String query) {
+        return studentSkillRepository.findByNameContainingIgnoreCase(query).stream()
+                .map(ss -> new StudentSkillDto(ss.getSkill().getName(), ss.getLevel(), ss.isConfirmedByGitHub()))
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public List<Skill> getSkills() {

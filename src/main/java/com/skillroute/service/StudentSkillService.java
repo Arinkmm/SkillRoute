@@ -37,13 +37,6 @@ public class StudentSkillService {
     }
 
     @Transactional(readOnly = true)
-    public List<StudentSkillDto> searchSkillsByName(String query) {
-        return studentSkillRepository.findByNameContainingIgnoreCase(query).stream()
-                .map(ss -> new StudentSkillDto(ss.getSkill().getName(), ss.getLevel(), ss.isConfirmedByGitHub()))
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
     public boolean hasSkill(Long studentId, Long skillId) {
         return studentSkillRepository.existsByStudentIdAndSkillId(studentId, skillId);
     }

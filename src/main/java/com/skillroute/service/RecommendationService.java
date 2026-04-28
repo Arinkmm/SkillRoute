@@ -2,54 +2,36 @@ package com.skillroute.service;
 
 import com.skillroute.dto.SkillResponseDto;
 import com.skillroute.dto.VacancyResponseDto;
-import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.*;
-import com.skillroute.model.id.StudentVacancyId;
 import com.skillroute.repository.StudentProfileRepository;
-import com.skillroute.repository.StudentVacancyRepository;
 import com.skillroute.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class StudentVacancyService {
-    private final StudentVacancyRepository studentVacancyRepository;
+public class RecommendationService {
+    private final VacancyRepository vacancyRepository;
     private final StudentProfileRepository studentProfileRepository;
 
     @Transactional(readOnly = true)
-    public List<VacancyResponseDto> getFollowedVacancies(Long studentId) {
+    public List<VacancyResponseDto> getRecommendedForStudent(Long studentId) {
         StudentProfile profile = studentProfileRepository.findById(studentId)
-                .orElseThrow(() -> new EntityNotFoundException("Профиль студента не найден: " + studentId));
+                .orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
 
-        return profile.getStudentVacancies().stream()
-                .map(StudentVacancy::getVacancy)
+        if (profile.getSpecialization() == null) return List.of();
+
+        return vacancyRepository.findAllByProfileSpecializationIdAndProfileStatus(
+                profile.getSpecialization().getId(), VacancyStatus.OPEN)
+                .stream()
                 .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
-
-    @Transactional
-    public void applyToVacancy(Long studentId, Long vacancyId) {
-        StudentVacancyId id = new StudentVacancyId(studentId, vacancyId);
-
-        if (studentVacancyRepository.existsById(id)) {
-            throw new DuplicateEntityException("Студент уже отслеживает эту вакансию");
-        }
-
-        StudentVacancy application = StudentVacancy.builder()
-                .id(id)
-                .status(StudentVacancyStatus.SUBMITTED)
-                .build();
-
-        studentVacancyRepository.save(application);
-    }
-
 
     private VacancyResponseDto mapToResponseDto(Vacancy vacancy) {
         VacancyProfile profile = vacancy.getProfile();

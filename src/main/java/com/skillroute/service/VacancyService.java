@@ -22,38 +22,10 @@ public class VacancyService {
     private final CompanyProfileRepository companyProfileRepository;
     private final SpecializationRepository specializationRepository;
     private final SkillRepository skillRepository;
-    private final StudentProfileRepository studentProfileRepository;
-
-    @Transactional(readOnly = true)
-    public List<VacancyResponseDto> getFollowedVacancies(Long studentId) {
-        StudentProfile profile = studentProfileRepository.findById(studentId)
-                .orElseThrow(() -> new EntityNotFoundException("Профиль студента не найден: " + studentId));
-
-        return profile.getStudentVacancies().stream()
-                .map(StudentVacancy::getVacancy)
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
-    }
 
     @Transactional(readOnly = true)
     public List<VacancyResponseDto> getAllActive() {
         return vacancyRepository.findAllByProfileStatus(VacancyStatus.OPEN)
-                .stream()
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<VacancyResponseDto> getRecommendedForStudent(Long studentId) {
-        StudentProfile profile = studentProfileRepository.findById(studentId)
-                .orElseThrow(() -> new EntityNotFoundException("Профиль студента не найден: " + studentId));
-
-        if (profile.getSpecialization() == null) {
-            return new ArrayList<>();
-        }
-
-        return vacancyRepository.findAllByProfileSpecializationIdAndProfileStatus(
-                        profile.getSpecialization().getId(), VacancyStatus.OPEN)
                 .stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
@@ -72,13 +44,6 @@ public class VacancyService {
         Vacancy vacancy = vacancyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена: " + id));
         return mapToResponseDto(vacancy);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean hasSpecialization(Long studentId) {
-        return studentProfileRepository.findById(studentId)
-                .map(profile -> profile.getSpecialization() != null)
-                .orElse(false);
     }
 
     @Transactional
