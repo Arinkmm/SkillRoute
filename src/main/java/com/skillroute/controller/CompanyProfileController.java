@@ -1,30 +1,23 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.CompanyDto;
+import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.CompanyProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/company/profile")
 @RequiredArgsConstructor
-public class IndexController {
+public class CompanyProfileController {
     private final CompanyProfileService companyProfileService;
 
-    @ModelAttribute("companies")
-    public List<CompanyDto> getCompanies() {
-        return companyProfileService.getAllCompanies();
-    }
-
     @GetMapping
-    public String indexPage() {
-        return "index";
+    public String profilePage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
+        model.addAttribute("profile", companyProfileService.getCompanyById(user.getId()));
+        return "company/profile";
     }
 }

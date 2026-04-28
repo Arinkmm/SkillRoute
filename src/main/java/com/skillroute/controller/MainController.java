@@ -1,7 +1,10 @@
 package com.skillroute.controller;
 
 import com.skillroute.model.Account;
+import com.skillroute.model.CompanyProfile;
 import com.skillroute.model.Role;
+import com.skillroute.model.StudentProfile;
+import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,23 +18,32 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/main")
 @RequiredArgsConstructor
 public class MainController {
-    private final AccountService accountService;
     @GetMapping
-    public String mainPage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        Account account = accountService.getAccount(userDetails.getUsername());
-        model.addAttribute("account", account);
-        model.addAttribute("role",  account.getRole());
+    public String mainPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
+        model.addAttribute("account", user);
+        model.addAttribute("role", user.getRole());
 
-        boolean isNewAccount = false;
-        boolean isConfirmed = false;
-        if (account.getRole() == Role.STUDENT) {
-            isNewAccount = (account.getStudentProfile() == null || account.getStudentProfile().getFirstName() == null);
-        } else if (account.getRole() == Role.COMPANY) {
-            isNewAccount = (account.getCompanyProfile() == null || account.getCompanyProfile().getCompanyName() == null);
-            isConfirmed = (account.getCompanyProfile() == null || account.getCompanyProfile().isConfirmed());
-        }
-        model.addAttribute("isConfirmed", isConfirmed);
+        boolean isNewAccount = checkIsNew(user);
+        boolean isConfirmed = checkIsConfirmed(user);
+
         model.addAttribute("isNewAccount", isNewAccount);
+        model.addAttribute("isConfirmed", isConfirmed);
+
         return "main";
+    }
+
+    private boolean checkIsNew(CustomUserDetails user) {
+        if (user.getRole() == Role.STUDENT) {
+            StudentProfile profile = user.getAccount().getStudentProfile();
+            return profile == null || profile.getFirstName() == null;
+        }
+        CompanyProfile profile = user.getAccount().getCompanyProfile();
+        return profile == null || profile.getCompanyName() == null;
+    }
+
+    private boolean checkIsConfirmed(CustomUserDetails user) {
+        return user.getRole() == Role.COMPANY &&
+                user.getAccount().getCompanyProfile() != null &&
+                user.getAccount().getCompanyProfile().isConfirmed();
     }
 }

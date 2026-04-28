@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class RegisterController {
     private final AccountService accountService;
 
+    @ModelAttribute("roles")
+    public Role[] getRoles() {
+        return Role.values();
+    }
+
     @GetMapping
     public String registrationPage(Model model) {
         model.addAttribute("form", new RegistrationDto());
@@ -27,14 +32,8 @@ public class RegisterController {
     }
 
     @PostMapping
-    public String processRegistration(@ModelAttribute RegistrationDto form, Model model) {
-        try {
-            accountService.register(form);
-        } catch (UserAlreadyExistsException | InvalidPasswordException e) {
-            model.addAttribute("roles", Role.values());
-            model.addAttribute("error", e.getMessage());
-            return "register";
-        }
+    public String processRegistration(@ModelAttribute RegistrationDto form) {
+        accountService.register(form);
         return "redirect:/login";
     }
 }

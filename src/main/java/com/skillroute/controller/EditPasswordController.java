@@ -3,6 +3,7 @@ package com.skillroute.controller;
 import com.skillroute.dto.PasswordChangeDto;
 import com.skillroute.exception.InvalidPasswordException;
 import com.skillroute.model.Account;
+import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,19 +24,15 @@ public class EditPasswordController {
 
     @GetMapping
     public String editPasswordPage() {
-        return "edit_password";
+        return "edit-password";
     }
 
     @PostMapping
-    public String editPassword(@AuthenticationPrincipal UserDetails userDetails, @ModelAttribute PasswordChangeDto form, Model model, RedirectAttributes redirectAttributes) {
-        Account account = accountService.getAccount(userDetails.getUsername());
-        try {
-            accountService.changePassword(account.getId(), form);
-            redirectAttributes.addFlashAttribute("message", "Пароль успешно обновлён!");
-        } catch (InvalidPasswordException e) {
-            model.addAttribute("error", e.getMessage());
-            return "edit_password";
-        }
+    public String editPassword(@AuthenticationPrincipal CustomUserDetails user,
+                               @ModelAttribute PasswordChangeDto form,
+                               RedirectAttributes redirectAttributes) {
+        accountService.changePassword(user.getId(), form);
+        redirectAttributes.addFlashAttribute("message", "Пароль успешно обновлён!");
         return "redirect:/profile";
     }
 }

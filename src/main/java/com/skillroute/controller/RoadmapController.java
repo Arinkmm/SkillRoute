@@ -3,14 +3,9 @@ package com.skillroute.controller;
 import com.skillroute.dto.RoadmapResponseDto;
 import com.skillroute.dto.RouteSkillDto;
 import com.skillroute.dto.SkillAddDto;
-import com.skillroute.exception.DuplicateEntityException;
-import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Account;
-import com.skillroute.service.AccountService;
-import com.skillroute.service.RoadmapService;
-import com.skillroute.service.SkillService;
-import com.skillroute.service.StudentSkillService;
-import com.skillroute.service.VacancyService;
+import com.skillroute.security.CustomUserDetails;
+import com.skillroute.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,18 +17,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/route")
 @RequiredArgsConstructor
-public class StudentRoadmapController {
+public class RoadmapController {
     private final RoadmapService roadmapService;
     private final VacancyService vacancyService;
     private final AccountService accountService;
     private final StudentSkillService studentSkillService;
+    private final StudentVacancyService studentVacancyService;
     private final SkillService skillService;
 
     @GetMapping
-    public String roadmapSelection(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        Account account = accountService.getAccount(userDetails.getUsername());
-        model.addAttribute("vacancies", vacancyService.getFollowedVacancies(account.getId()));
-        return "student/roadmap-list";
+    public String roadmapSelectionPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
+        model.addAttribute("vacancies", studentVacancyService.getFollowedVacancies(user.getId()));
+        return "student/roadmap-selection";
     }
 
     @GetMapping("/{id}")
@@ -71,16 +66,11 @@ public class StudentRoadmapController {
     public String acquireSkill(@PathVariable Long vacancyId,
                                @PathVariable Long skillId,
                                @ModelAttribute SkillAddDto addDto,
-                               @AuthenticationPrincipal UserDetails userDetails,
+                               @AuthenticationPrincipal CustomUserDetails user,
                                RedirectAttributes redirectAttributes) {
-        Account account = accountService.getAccount(userDetails.getUsername());
         addDto.setId(skillId);
-        try {
-            studentSkillService.addSkillToStudent(account.getId(), addDto);
-            redirectAttributes.addFlashAttribute("success", "Навык добавлен!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-        }
+        studentSkillService.addSkillToStudent(user.getId(), addDto);
+        redirectAttributes.addFlashAttribute("success", "Навык добавлен!");
         return "redirect:/route/" + vacancyId;
     }
 }
