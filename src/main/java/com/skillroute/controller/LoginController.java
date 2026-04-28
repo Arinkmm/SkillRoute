@@ -16,11 +16,13 @@ import java.util.Map;
 public class LoginController {
     @GetMapping
     public String loginPage(HttpServletRequest request, Model model) {
-        Map<String, ?> flashAttributes = RequestContextUtils.getInputFlashMap(request);
+        String error = (String) request.getSession().getAttribute("loginError");
 
-        if (flashAttributes != null && flashAttributes.containsKey("error")) {
-            model.addAttribute("error", flashAttributes.get("error"));
+        if (error != null) {
+            model.addAttribute("error", error);
+            request.getSession().removeAttribute("loginError");
         }
+
         return "login";
     }
 }
