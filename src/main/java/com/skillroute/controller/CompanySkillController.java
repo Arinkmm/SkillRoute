@@ -3,6 +3,7 @@ package com.skillroute.controller;
 import com.skillroute.dto.request.AddResourceRequest;
 import com.skillroute.service.ResourceService;
 import com.skillroute.service.SkillService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,13 +32,13 @@ public class CompanySkillController {
     @GetMapping("/{id}/resources")
     public String addResourceForm(@PathVariable Long id, Model model) {
         model.addAttribute("skillId", id);
-        model.addAttribute("resourceForm", new AddResourceRequest());
+        model.addAttribute("addResourceForm", new AddResourceRequest());
         return "company/add-resource";
     }
 
     @PostMapping("/{id}/resources")
     public String addResource(@PathVariable Long id,
-                              @ModelAttribute AddResourceRequest form,
+                              @Valid @ModelAttribute AddResourceRequest form,
                               RedirectAttributes redirectAttributes) {
         resourceService.addResourceToSkill(id, form);
         redirectAttributes.addFlashAttribute("success", "Материал добавлен!");

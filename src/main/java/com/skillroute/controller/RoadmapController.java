@@ -5,6 +5,7 @@ import com.skillroute.dto.response.RouteSkillResponse;
 import com.skillroute.dto.request.AddSkillRequest;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -58,7 +59,7 @@ public class RoadmapController {
     @PostMapping("/{vacancyId}/skills/{skillId}/acquire")
     public String acquireSkill(@PathVariable Long vacancyId,
                                @PathVariable Long skillId,
-                               @ModelAttribute AddSkillRequest addDto,
+                               @Valid @ModelAttribute AddSkillRequest addDto,
                                @AuthenticationPrincipal CustomUserDetails user,
                                RedirectAttributes redirectAttributes) {
         addDto.setId(skillId);

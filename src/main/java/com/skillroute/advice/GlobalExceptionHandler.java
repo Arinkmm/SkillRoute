@@ -3,9 +3,14 @@ package com.skillroute.advice;
 import com.skillroute.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.ui.Model;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -37,5 +42,33 @@ public class GlobalExceptionHandler {
 
         String referer = request.getHeader("Referer");
         return "redirect:" + (referer != null ? referer : "/register");
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public String handleValidationExceptions(
+            MethodArgumentNotValidException e,
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
+
+        Map<String, String> errors = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        FieldError::getDefaultMessage,
+                        (existing, replacement) -> existing
+                ));
+
+        redirectAttributes.addFlashAttribute("validationErrors", errors);
+
+        String referer = request.getHeader("Referer");
+        return "redirect:" + (referer != null ? referer : "/");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public String handleAll(Model model) {
+        model.addAttribute("message", "Произошла внутренняя ошибка сервера. Мы уже работаем над этим.");
+        model.addAttribute("errorCode", 500);
+        return "error";
     }
 }

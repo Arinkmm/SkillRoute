@@ -26,6 +26,13 @@ spring:
           ssl:
             enable: true
 
+server:
+  error:
+    whitelabel:
+      enabled: false
+    include-message: always
+    include-binding-errors: always
+
 mail:
   base-url: http://localhost:8080
   sender: SkillRoute

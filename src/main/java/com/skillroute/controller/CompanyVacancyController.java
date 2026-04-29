@@ -6,6 +6,7 @@ import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.SkillService;
 import com.skillroute.service.SpecializationService;
 import com.skillroute.service.VacancyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -29,14 +30,14 @@ public class CompanyVacancyController {
 
     @GetMapping("/create")
     public String createVacancyForm(Model model) {
-        model.addAttribute("vacancy", new CreateVacancyRequest());
+        model.addAttribute("createVacancyForm", new CreateVacancyRequest());
         model.addAttribute("specializations", specializationService.getSpecializations());
         model.addAttribute("skills", skillService.getSkills());
         return "company/create-vacancy";
     }
 
     @PostMapping("/create")
-    public String createVacancy(@ModelAttribute CreateVacancyRequest form, @AuthenticationPrincipal CustomUserDetails user) {
+    public String createVacancy(@Valid @ModelAttribute CreateVacancyRequest form, @AuthenticationPrincipal CustomUserDetails user) {
         vacancyService.createVacancy(form, user.getId());
         return "redirect:/company/vacancies";
     }
@@ -50,7 +51,7 @@ public class CompanyVacancyController {
 
     @PostMapping("/{id}/update")
     public String updateVacancy(@PathVariable Long id,
-                                @ModelAttribute UpdateVacancyRequest form,
+                                @Valid @ModelAttribute UpdateVacancyRequest form,
                                 @AuthenticationPrincipal CustomUserDetails user,
                                 RedirectAttributes redirectAttributes) {
         vacancyService.updateVacancy(id, form, user.getId());

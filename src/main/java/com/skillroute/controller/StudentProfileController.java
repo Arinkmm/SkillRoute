@@ -5,6 +5,7 @@ import com.skillroute.dto.request.UpdateStudentRequest;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
 import com.skillroute.service.StudentProfileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -37,7 +38,7 @@ public class StudentProfileController {
 
     @PostMapping("/update")
     public String updateProfile(@AuthenticationPrincipal CustomUserDetails user,
-                                @ModelAttribute UpdateStudentRequest form) {
+                                @Valid @ModelAttribute UpdateStudentRequest form) {
         studentProfileService.updateProfile(user.getId(), form);
         return "redirect:/student/profile";
     }
@@ -49,7 +50,7 @@ public class StudentProfileController {
 
     @PostMapping("/edit-password")
     public String editPassword(@AuthenticationPrincipal CustomUserDetails user,
-                               @ModelAttribute EditPasswordRequest form,
+                               @Valid @ModelAttribute EditPasswordRequest form,
                                RedirectAttributes redirectAttributes) {
         accountService.editPassword(user.getId(), form);
         redirectAttributes.addFlashAttribute("message", "Пароль успешно обновлён!");

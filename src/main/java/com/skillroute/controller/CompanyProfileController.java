@@ -5,6 +5,7 @@ import com.skillroute.dto.request.UpdateCompanyRequest;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
 import com.skillroute.service.CompanyProfileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -37,7 +38,7 @@ public class CompanyProfileController {
 
     @PostMapping("/update")
     public String updateProfile(@AuthenticationPrincipal CustomUserDetails user,
-                                @ModelAttribute UpdateCompanyRequest form,
+                                @Valid @ModelAttribute UpdateCompanyRequest form,
                                 RedirectAttributes redirectAttributes) {
         companyProfileService.updateProfile(user.getId(), form);
         redirectAttributes.addFlashAttribute("message", "Профиль успешно обновлён");
@@ -51,7 +52,7 @@ public class CompanyProfileController {
 
     @PostMapping("/edit-password")
     public String editPassword(@AuthenticationPrincipal CustomUserDetails user,
-                               @ModelAttribute EditPasswordRequest form,
+                               @Valid @ModelAttribute EditPasswordRequest form,
                                RedirectAttributes redirectAttributes) {
         accountService.editPassword(user.getId(), form);
         redirectAttributes.addFlashAttribute("message", "Пароль успешно обновлён!");

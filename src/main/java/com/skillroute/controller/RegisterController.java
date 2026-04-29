@@ -3,6 +3,7 @@ package com.skillroute.controller;
 import com.skillroute.dto.request.RegistrationRequest;
 import com.skillroute.model.Role;
 import com.skillroute.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,13 +25,13 @@ public class RegisterController {
 
     @GetMapping
     public String registrationPage(Model model) {
-        model.addAttribute("form", new RegistrationRequest());
+        model.addAttribute("registrationForm", new RegistrationRequest());
         model.addAttribute("roles", Role.values());
         return "register";
     }
 
     @PostMapping
-    public String processRegistration(@ModelAttribute RegistrationRequest form) {
+    public String processRegistration(@Valid @ModelAttribute RegistrationRequest form) {
         accountService.register(form);
         return "redirect:/login";
     }
