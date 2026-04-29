@@ -4,6 +4,8 @@ import com.skillroute.model.id.StudentVacancyId;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "student_vacancy")
 @Getter
@@ -28,4 +30,17 @@ public class StudentVacancy {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StudentVacancyStatus status;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StudentVacancy that = (StudentVacancy) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(id);
+    }
 }

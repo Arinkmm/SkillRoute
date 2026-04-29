@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "student_skill")
 @Getter
@@ -34,4 +36,17 @@ public class StudentSkill {
     @Max(value = 5, message = "Уровень не может быть выше 5")
     @Column(nullable = false)
     private int level;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StudentSkill that = (StudentSkill) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(id);
+    }
 }

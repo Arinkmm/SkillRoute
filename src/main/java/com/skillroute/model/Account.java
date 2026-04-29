@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "account")
@@ -40,4 +41,17 @@ public class Account {
 
     @Column(name = "is_verified")
     private boolean isVerified;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return Objects.equals(email, account.email);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(email);
+    }
 }

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "vacancy_profile")
 @Getter
@@ -37,4 +39,17 @@ public class VacancyProfile {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VacancyStatus status;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VacancyProfile that = (VacancyProfile) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public final int hashCode() {
+        return getClass().hashCode();
+    }
 }

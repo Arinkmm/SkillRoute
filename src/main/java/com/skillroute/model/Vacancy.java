@@ -3,10 +3,7 @@ package com.skillroute.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "vacancy")
@@ -35,4 +32,17 @@ public class Vacancy {
 
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StudentVacancy> studentVacancies = new HashSet<>();
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vacancy vacancy = (Vacancy) o;
+        return Objects.equals(name, vacancy.name);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(name);
+    }
 }
