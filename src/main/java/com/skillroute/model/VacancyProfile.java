@@ -1,6 +1,8 @@
 package com.skillroute.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 @Entity
@@ -24,6 +26,8 @@ public class VacancyProfile {
     @JoinColumn(name = "specialization_id")
     private Specialization specialization;
 
+    @Positive(message = "Зарплата должна быть больше нуля")
+    @Max(value = 100000000, message = "Слишком большая сумма, проверьте корректность")
     private Long salary;
 
     @Enumerated(EnumType.STRING)

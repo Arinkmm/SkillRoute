@@ -2,6 +2,8 @@ package com.skillroute.model;
 
 import com.skillroute.model.id.StudentSkillId;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 @Entity
@@ -28,6 +30,8 @@ public class StudentSkill {
     @Column(name = "is_confirmed_by_github")
     private boolean isConfirmedByGitHub;
 
+    @Min(value = 1, message = "Уровень не может быть ниже 1")
+    @Max(value = 5, message = "Уровень не может быть выше 5")
     @Column(nullable = false)
     private int level;
 }

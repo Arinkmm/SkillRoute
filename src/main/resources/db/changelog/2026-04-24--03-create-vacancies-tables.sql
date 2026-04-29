@@ -15,6 +15,7 @@ CREATE TABLE vacancy_profile (
     status VARCHAR(50) NOT NULL DEFAULT 'OPEN',
     CONSTRAINT fk_profile_vacancy FOREIGN KEY (vacancy_id) REFERENCES vacancy(id) ON DELETE CASCADE,
     CONSTRAINT fk_vacancy_specialization FOREIGN KEY (specialization_id) REFERENCES specialization(id) ON DELETE CASCADE,
+    CONSTRAINT check_salary_range CHECK (salary > 0 AND salary < 100000000),
     CONSTRAINT check_work_schedule CHECK (work_schedule IN ('FULL_TIME', 'PART_TIME', 'REMOTE', 'HYBRID', 'FLEXIBLE')),
     CONSTRAINT check_vacancy_status CHECK (status IN ('OPEN', 'CLOSE', 'IN_PROGRESS'))
 );

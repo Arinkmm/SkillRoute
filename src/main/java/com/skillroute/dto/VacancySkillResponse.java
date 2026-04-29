@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SkillVacancyResponse {
+public class VacancySkillResponse {
     private Long id;
     private String name;
     private int level;

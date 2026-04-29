@@ -1,6 +1,6 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.SkillVacancyResponse;
+import com.skillroute.dto.VacancySkillResponse;
 import com.skillroute.dto.VacancyResponse;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.*;
@@ -48,7 +48,7 @@ public class RecommendationService {
                 .direction(spec.getDirection())
                 .fullSpecialization(spec.getLanguage() + " (" + spec.getDirection() + ")")
                 .skills(vacancy.getVacancySkills().stream()
-                        .map(vs -> new SkillVacancyResponse(
+                        .map(vs -> new VacancySkillResponse(
                                 vs.getSkill().getId(),
                                 vs.getSkill().getName(),
                                 vs.getLevel()))

@@ -137,7 +137,7 @@ public class VacancyService {
                 .direction(spec.getDirection())
                 .fullSpecialization(spec.getLanguage() + " (" + spec.getDirection() + ")")
                 .skills(vacancy.getVacancySkills().stream()
-                        .map(vs -> new SkillVacancyResponse(
+                        .map(vs -> new VacancySkillResponse(
                                 vs.getSkill().getId(),
                                 vs.getSkill().getName(),
                                 vs.getLevel()))

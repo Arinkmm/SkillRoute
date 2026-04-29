@@ -26,5 +26,5 @@ public class VacancyResponse {
     private Language language;
     private Direction direction;
     private String fullSpecialization;
-    private List<SkillVacancyResponse> skills;
+    private List<VacancySkillResponse> skills;
 }
