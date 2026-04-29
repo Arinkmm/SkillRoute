@@ -1,6 +1,5 @@
-package com.skillroute.dto;
+package com.skillroute.dto.response;
 
-import com.skillroute.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

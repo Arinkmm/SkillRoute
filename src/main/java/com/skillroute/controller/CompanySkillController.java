@@ -1,6 +1,6 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.AddResourceRequest;
+import com.skillroute.dto.request.AddResourceRequest;
 import com.skillroute.service.ResourceService;
 import com.skillroute.service.SkillService;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.SpecializationResponse;
+import com.skillroute.dto.response.SpecializationResponse;
 import com.skillroute.model.Specialization;
 import com.skillroute.repository.SpecializationRepository;
 import lombok.RequiredArgsConstructor;

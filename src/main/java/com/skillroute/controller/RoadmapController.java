@@ -1,8 +1,8 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.RoadmapResponse;
-import com.skillroute.dto.RouteSkillResponse;
-import com.skillroute.dto.AddSkillRequest;
+import com.skillroute.dto.response.RoadmapResponse;
+import com.skillroute.dto.response.RouteSkillResponse;
+import com.skillroute.dto.request.AddSkillRequest;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.*;
 import lombok.RequiredArgsConstructor;

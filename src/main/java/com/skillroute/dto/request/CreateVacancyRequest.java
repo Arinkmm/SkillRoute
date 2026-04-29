@@ -1,4 +1,4 @@
-package com.skillroute.dto;
+package com.skillroute.dto.request;
 
 import com.skillroute.model.WorkSchedule;
 import jakarta.validation.constraints.Max;

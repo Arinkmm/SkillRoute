@@ -1,6 +1,6 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.AddResourceRequest;
+import com.skillroute.dto.request.AddResourceRequest;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Resource;
 import com.skillroute.model.Skill;

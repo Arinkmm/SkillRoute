@@ -1,7 +1,7 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.UpdateStudentRequest;
-import com.skillroute.dto.StudentProfileResponse;
+import com.skillroute.dto.request.UpdateStudentRequest;
+import com.skillroute.dto.response.StudentProfileResponse;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Role;

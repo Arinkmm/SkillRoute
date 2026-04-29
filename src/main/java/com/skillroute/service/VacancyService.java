@@ -1,6 +1,10 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.*;
+import com.skillroute.dto.request.AddSkillRequest;
+import com.skillroute.dto.request.CreateVacancyRequest;
+import com.skillroute.dto.request.UpdateVacancyRequest;
+import com.skillroute.dto.response.VacancyResponse;
+import com.skillroute.dto.response.VacancySkillResponse;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.ResourceOwnershipException;
 import com.skillroute.model.*;

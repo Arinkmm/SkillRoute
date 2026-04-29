@@ -1,4 +1,4 @@
-package com.skillroute.dto;
+package com.skillroute.dto.response;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.CompanyProfileResponse;
-import com.skillroute.dto.UpdateCompanyRequest;
+import com.skillroute.dto.response.CompanyProfileResponse;
+import com.skillroute.dto.request.UpdateCompanyRequest;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.CompanyProfile;

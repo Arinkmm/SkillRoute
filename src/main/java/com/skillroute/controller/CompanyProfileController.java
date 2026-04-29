@@ -1,9 +1,7 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.EditPasswordRequest;
-import com.skillroute.dto.UpdateCompanyRequest;
-import com.skillroute.dto.UpdateStudentRequest;
-import com.skillroute.model.Role;
+import com.skillroute.dto.request.EditPasswordRequest;
+import com.skillroute.dto.request.UpdateCompanyRequest;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
 import com.skillroute.service.CompanyProfileService;

@@ -1,6 +1,6 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.StudentSkillResponse;
+import com.skillroute.dto.response.StudentSkillResponse;
 import com.skillroute.service.StudentSkillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

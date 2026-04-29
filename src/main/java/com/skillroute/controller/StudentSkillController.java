@@ -1,6 +1,6 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.AddSkillRequest;
+import com.skillroute.dto.request.AddSkillRequest;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.SkillService;
 import com.skillroute.service.StudentSkillService;

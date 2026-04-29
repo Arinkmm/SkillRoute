@@ -1,6 +1,6 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.RegistrationRequest;
+import com.skillroute.dto.request.RegistrationRequest;
 import com.skillroute.model.Role;
 import com.skillroute.service.AccountService;
 import lombok.RequiredArgsConstructor;

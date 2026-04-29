@@ -1,8 +1,8 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.AddResourceRequest;
-import com.skillroute.dto.RouteSkillResponse;
-import com.skillroute.dto.SkillResponse;
+import com.skillroute.dto.request.AddResourceRequest;
+import com.skillroute.dto.response.RouteSkillResponse;
+import com.skillroute.dto.response.SkillResponse;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Skill;
 import com.skillroute.repository.SkillRepository;

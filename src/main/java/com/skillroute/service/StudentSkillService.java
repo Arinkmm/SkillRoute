@@ -1,7 +1,7 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.AddSkillRequest;
-import com.skillroute.dto.StudentSkillResponse;
+import com.skillroute.dto.request.AddSkillRequest;
+import com.skillroute.dto.response.StudentSkillResponse;
 import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Skill;

@@ -1,6 +1,6 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.CompanyProfileResponse;
+import com.skillroute.dto.response.CompanyProfileResponse;
 import com.skillroute.service.CompanyProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

@@ -1,5 +1,7 @@
-package com.skillroute.dto;
+package com.skillroute.dto.request;
 
+import com.skillroute.model.Role;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -11,17 +13,20 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EditPasswordRequest {
-    @NotBlank(message = "Старый пароль обязателен")
-    private String oldPassword;
+public class RegistrationRequest {
+    @NotBlank(message = "Email обязателен")
+    @Email
+    private String email;
 
-    @NotBlank(message = "Новый пароль обязателен")
+    @NotBlank(message = "Пароль обязателен")
     @Pattern(
             regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$",
             message = "Пароль должен содержать минимум 8 символов, хотя бы одну цифру, строчную и заглавную букву (латиница)"
     )
-    private String newPassword;
+    private String password;
 
     @NotBlank(message = "Подтверждение пароля обязательно")
-    private String confirmNewPassword;
+    private String confirmPassword;
+
+    private Role role;
 }

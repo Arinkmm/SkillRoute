@@ -1,4 +1,4 @@
-package com.skillroute.dto;
+package com.skillroute.dto.response;
 
 import com.skillroute.model.Direction;
 import com.skillroute.model.Language;

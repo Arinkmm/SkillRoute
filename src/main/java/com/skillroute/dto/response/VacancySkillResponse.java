@@ -1,4 +1,4 @@
-package com.skillroute.dto;
+package com.skillroute.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SkillResponse {
+public class VacancySkillResponse {
     private Long id;
     private String name;
+    private int level;
 }

@@ -1,7 +1,7 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.CreateVacancyRequest;
-import com.skillroute.dto.UpdateVacancyRequest;
+import com.skillroute.dto.request.CreateVacancyRequest;
+import com.skillroute.dto.request.UpdateVacancyRequest;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.SkillService;
 import com.skillroute.service.SpecializationService;

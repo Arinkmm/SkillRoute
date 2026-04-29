@@ -1,15 +1,12 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.EditPasswordRequest;
-import com.skillroute.dto.UpdateStudentRequest;
-import com.skillroute.model.Account;
-import com.skillroute.model.Role;
+import com.skillroute.dto.request.EditPasswordRequest;
+import com.skillroute.dto.request.UpdateStudentRequest;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
 import com.skillroute.service.StudentProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

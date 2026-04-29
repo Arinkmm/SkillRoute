@@ -1,7 +1,7 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.EditPasswordRequest;
-import com.skillroute.dto.RegistrationRequest;
+import com.skillroute.dto.request.EditPasswordRequest;
+import com.skillroute.dto.request.RegistrationRequest;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.InvalidPasswordException;
