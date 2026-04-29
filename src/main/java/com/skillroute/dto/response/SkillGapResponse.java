@@ -1,7 +1,5 @@
 package com.skillroute.dto.response;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,12 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoadmapStepResponse {
+public class SkillGapResponse {
     private Long skillId;
     private String skillName;
     private int currentLevel;
     private int targetLevel;
-    private int gap;
-    private List<ResourceResponse> resources;
-    private RoadmapStepStatus roadmapStepStatus;
+    private int gapDepth;
 }
