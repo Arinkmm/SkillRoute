@@ -16,23 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/register")
 @RequiredArgsConstructor
 public class RegisterController {
-    private final AccountService accountService;
-
-    @ModelAttribute("roles")
-    public Role[] getRoles() {
-        return Role.values();
-    }
 
     @GetMapping
     public String registrationPage(Model model) {
         model.addAttribute("registrationForm", new RegistrationRequest());
         model.addAttribute("roles", Role.values());
         return "register";
-    }
-
-    @PostMapping
-    public String processRegistration(@Valid @ModelAttribute RegistrationRequest form) {
-        accountService.register(form);
-        return "redirect:/login";
     }
 }
