@@ -1,6 +1,7 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.EditStudentDto;
+import com.skillroute.dto.UpdateStudentRequest;
+import com.skillroute.dto.StudentProfileResponse;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Role;
@@ -29,13 +30,13 @@ public class StudentProfileService {
     }
 
     @Transactional(readOnly = true)
-    public StudentProfile getStudentById(Long id) {
-        return studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Студент с таким id " + id + " не найден"));
+    public StudentProfileResponse getStudentById(Long id) {
+        return studentProfileRepository.findById(id).map(this::mapToResponseDto).orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
     }
 
     @Transactional
-    public void updateProfile(Long id, EditStudentDto form) {
-        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Профиль студента с таким id " + id + " не найден"));
+    public void updateProfile(Long id, UpdateStudentRequest form) {
+        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
 
         studentProfile.setFirstName(form.getFirstName());
         studentProfile.setLastName(form.getLastName());
@@ -48,10 +49,13 @@ public class StudentProfileService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public boolean hasSpecialization(Long studentId) {
-        return studentProfileRepository.findById(studentId)
-                .map(profile -> profile.getSpecialization() != null)
-                .orElse(false);
+    private StudentProfileResponse mapToResponseDto(StudentProfile profile) {
+        return StudentProfileResponse.builder()
+                .firstName(profile.getFirstName())
+                .lastName(profile.getLastName())
+                .githubUrl(profile.getBio())
+                .specializationId(profile.getSpecialization().getId())
+                .bio(profile.getBio())
+                .build();
     }
 }

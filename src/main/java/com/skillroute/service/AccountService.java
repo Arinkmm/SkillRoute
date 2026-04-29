@@ -1,19 +1,14 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.PasswordChangeDto;
-import com.skillroute.dto.RegistrationDto;
+import com.skillroute.dto.EditPasswordRequest;
+import com.skillroute.dto.RegistrationRequest;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.InvalidPasswordException;
 import com.skillroute.exception.UserAlreadyExistsException;
 import com.skillroute.model.Account;
-import com.skillroute.model.CompanyProfile;
-import com.skillroute.model.Role;
-import com.skillroute.model.StudentProfile;
 import com.skillroute.properties.MailProperties;
 import com.skillroute.repository.AccountRepository;
-import com.skillroute.repository.CompanyProfileRepository;
-import com.skillroute.repository.StudentProfileRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +32,7 @@ public class AccountService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public void register(RegistrationDto form) {
+    public void register(RegistrationRequest form) {
         if (accountRepository.existsByEmail(form.getEmail())) {
             throw new UserAlreadyExistsException("Пользователь с таким email уже существует");
         }
@@ -69,14 +64,9 @@ public class AccountService {
         }).orElse(false);
     }
 
-    @Transactional(readOnly = true)
-    public Account getAccount(String email) {
-        return accountRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Аккаунт с email " + email + " не найден"));
-    }
-
     @Transactional
-    public void changePassword(Long id, PasswordChangeDto form) {
-        Account account = accountRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Account with id " + id + " not found"));
+    public void editPassword(Long id, EditPasswordRequest form) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Аккаунт не найден"));
         if (!passwordEncoder.matches(form.getOldPassword(), account.getPassword())) {
             throw new InvalidPasswordException("Текущий пароль введен неверно");
         }
@@ -95,7 +85,7 @@ public class AccountService {
 
     }
 
-    private void sendVerificationMail(RegistrationDto form, String verificationToken) {
+    private void sendVerificationMail(RegistrationRequest form, String verificationToken) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);

@@ -1,11 +1,11 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.RouteSkillDto;
-import com.skillroute.dto.StudentSkillDto;
+import com.skillroute.dto.AddResourceRequest;
+import com.skillroute.dto.RouteSkillResponse;
+import com.skillroute.dto.SkillResponse;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Skill;
 import com.skillroute.repository.SkillRepository;
-import com.skillroute.repository.StudentSkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,27 +16,42 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SkillService {
     private final SkillRepository skillRepository;
-    private final StudentSkillRepository studentSkillRepository;
 
     @Transactional(readOnly = true)
-    public List<StudentSkillDto> searchSkillsByName(String query) {
-        return studentSkillRepository.findByNameContainingIgnoreCase(query).stream()
-                .map(ss -> new StudentSkillDto(ss.getSkill().getName(), ss.getLevel(), ss.isConfirmedByGitHub()))
+    public List<SkillResponse> getSkills() {
+        return skillRepository.findAll().stream()
+                .map(this::mapToResponseDto)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Skill> getSkills() {
-        return skillRepository.findAll();
+    public SkillResponse getSkillById(Long id) {
+        return skillRepository.findById(id)
+                .map(this::mapToResponseDto)
+                .orElseThrow(() -> new EntityNotFoundException("Скилл не найден"));
     }
 
-    @Transactional(readOnly = true)
-    public Skill getSkillById(Long id) {
-        return skillRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Скилл с таким id " + id + " не найден"));
+    public RouteSkillResponse getRouteSkillById(Long id) {
+        return skillRepository.findById(id)
+                .map(this::mapToRouteSkillDto)
+                .orElseThrow(() -> new EntityNotFoundException("Скилл не найден"));
     }
 
-    @Transactional(readOnly = true)
-    public RouteSkillDto getRouteSkillById(Long id) {
-        return skillRepository.findById(id).map(s -> RouteSkillDto.builder().name(s.getName()).resources(s.getResources()).build()).orElseThrow(() -> new EntityNotFoundException("Скилл с таким id " + id + " не найден"));
+    private RouteSkillResponse mapToRouteSkillDto(Skill skill) {
+        return RouteSkillResponse.builder()
+                .name(skill.getName())
+                .resources(skill.getResources().stream()
+                        .map(res -> AddResourceRequest.builder()
+                                .resource(res.getResource())
+                                .build())
+                        .toList())
+                .build();
+    }
+
+    private SkillResponse mapToResponseDto(Skill skill) {
+        return SkillResponse.builder()
+                .id(skill.getId())
+                .name(skill.getName())
+                .build();
     }
 }

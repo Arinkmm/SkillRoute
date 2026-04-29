@@ -1,8 +1,6 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.RegistrationDto;
-import com.skillroute.exception.InvalidPasswordException;
-import com.skillroute.exception.UserAlreadyExistsException;
+import com.skillroute.dto.RegistrationRequest;
 import com.skillroute.model.Role;
 import com.skillroute.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +24,13 @@ public class RegisterController {
 
     @GetMapping
     public String registrationPage(Model model) {
-        model.addAttribute("form", new RegistrationDto());
+        model.addAttribute("form", new RegistrationRequest());
         model.addAttribute("roles", Role.values());
         return "register";
     }
 
     @PostMapping
-    public String processRegistration(@ModelAttribute RegistrationDto form) {
+    public String processRegistration(@ModelAttribute RegistrationRequest form) {
         accountService.register(form);
         return "redirect:/login";
     }

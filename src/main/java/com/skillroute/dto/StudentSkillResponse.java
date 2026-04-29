@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PasswordChangeDto {
-    private String oldPassword;
-    private String newPassword;
-    private String confirmNewPassword;
+public class StudentSkillResponse {
+    private String name;
+    private int level;
+    private boolean isConfirmedByGitHub;
 }

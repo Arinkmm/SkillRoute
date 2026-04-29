@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,7 +23,7 @@ public class VacancyService {
     private final SkillRepository skillRepository;
 
     @Transactional(readOnly = true)
-    public List<VacancyResponseDto> getAllActive() {
+    public List<VacancyResponse> getAllActive() {
         return vacancyRepository.findAllByProfileStatus(VacancyStatus.OPEN)
                 .stream()
                 .map(this::mapToResponseDto)
@@ -32,7 +31,7 @@ public class VacancyService {
     }
 
     @Transactional(readOnly = true)
-    public List<VacancyResponseDto> getVacanciesByCompany(Long companyId) {
+    public List<VacancyResponse> getVacanciesByCompany(Long companyId) {
         return vacancyRepository.findAllByCompanyId(companyId)
                 .stream()
                 .map(this::mapToResponseDto)
@@ -40,14 +39,14 @@ public class VacancyService {
     }
 
     @Transactional(readOnly = true)
-    public VacancyResponseDto getVacancyById(Long id) {
+    public VacancyResponse getVacancyById(Long id) {
         Vacancy vacancy = vacancyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
         return mapToResponseDto(vacancy);
     }
 
     @Transactional
-    public void createVacancy(VacancyCreateDto dto, Long companyId) {
+    public void createVacancy(CreateVacancyRequest dto, Long companyId) {
         CompanyProfile company = companyProfileRepository.findById(companyId)
                 .orElseThrow(() -> new EntityNotFoundException("Компания не найдена"));
 
@@ -74,9 +73,9 @@ public class VacancyService {
     }
 
     @Transactional
-    public void updateVacancy(Long vacancyId, VacancyUpdateDto dto, Long companyId) {
+    public void updateVacancy(Long vacancyId, UpdateVacancyRequest dto, Long companyId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена: " + vacancyId));
+                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
 
         if (!vacancy.getCompany().getId().equals(companyId)) {
             throw new ResourceOwnershipException("У вас нет прав на редактирование этой вакансии");
@@ -96,7 +95,7 @@ public class VacancyService {
     @Transactional
     public void deleteVacancy(Long vacancyId, Long currentCompanyId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена: " + vacancyId));
+                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
 
         if (!vacancy.getCompany().getId().equals(currentCompanyId)) {
             throw new ResourceOwnershipException("У вас нет прав на удаление этой вакансии");
@@ -105,12 +104,12 @@ public class VacancyService {
         vacancyRepository.delete(vacancy);
     }
 
-    private void processSkills(Vacancy vacancy, List<SkillRequestDto> skillDtos) {
+    private void processSkills(Vacancy vacancy, List<AddSkillRequest> skillDtos) {
         if (skillDtos == null || skillDtos.isEmpty()) return;
 
         Set<VacancySkill> skills = skillDtos.stream().map(sDto -> {
-            Skill skill = skillRepository.findById(sDto.getSkillId())
-                    .orElseThrow(() -> new EntityNotFoundException("Навык с id " + sDto.getSkillId() + " не найден"));
+            Skill skill = skillRepository.findById(sDto.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Навык не найден"));
 
             return VacancySkill.builder()
                     .id(new VacancySkillId(vacancy.getId(), skill.getId()))
@@ -123,11 +122,11 @@ public class VacancyService {
         vacancy.getVacancySkills().addAll(skills);
     }
 
-    private VacancyResponseDto mapToResponseDto(Vacancy vacancy) {
+    private VacancyResponse mapToResponseDto(Vacancy vacancy) {
         VacancyProfile profile = vacancy.getProfile();
         Specialization spec = profile.getSpecialization();
 
-        return VacancyResponseDto.builder()
+        return VacancyResponse.builder()
                 .id(vacancy.getId())
                 .name(vacancy.getName())
                 .companyId(vacancy.getCompany().getId())
@@ -138,7 +137,7 @@ public class VacancyService {
                 .direction(spec.getDirection())
                 .fullSpecialization(spec.getLanguage() + " (" + spec.getDirection() + ")")
                 .skills(vacancy.getVacancySkills().stream()
-                        .map(vs -> new SkillResponseDto(
+                        .map(vs -> new SkillVacancyResponse(
                                 vs.getSkill().getId(),
                                 vs.getSkill().getName(),
                                 vs.getLevel()))

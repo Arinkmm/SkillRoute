@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EditCompanyDto {
-    private String companyName;
-    private String description;
-    private String websiteUrl;
+public class SkillVacancyResponse {
+    private Long id;
+    private String name;
+    private int level;
 }

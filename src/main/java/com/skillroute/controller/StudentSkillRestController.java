@@ -1,8 +1,6 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.StudentSkillDto;
-import com.skillroute.repository.SkillRepository;
-import com.skillroute.service.SkillService;
+import com.skillroute.dto.StudentSkillResponse;
 import com.skillroute.service.StudentSkillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +12,10 @@ import java.util.List;
 @RequestMapping("/student/skills")
 @RequiredArgsConstructor
 public class StudentSkillRestController {
-    private final SkillService skillService;
+    private final StudentSkillService studentSkillService;
 
     @GetMapping("/search")
-    public ResponseEntity<List<StudentSkillDto>> searchSkills(@RequestParam("name") String name) {
-        return ResponseEntity.ok(skillService.searchSkillsByName(name));
+    public ResponseEntity<List<StudentSkillResponse>> searchSkills(@RequestParam("name") String name) {
+        return ResponseEntity.ok(studentSkillService.getStudentsSkillsByName(name));
     }
 }

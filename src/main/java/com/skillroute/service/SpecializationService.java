@@ -1,5 +1,6 @@
 package com.skillroute.service;
 
+import com.skillroute.dto.SpecializationResponse;
 import com.skillroute.model.Specialization;
 import com.skillroute.repository.SpecializationRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,17 @@ public class SpecializationService {
     private final SpecializationRepository specializationRepository;
 
     @Transactional(readOnly = true)
-    public List<Specialization> getSpecializations() {
-        return specializationRepository.findAll();
+    public List<SpecializationResponse> getSpecializations() {
+        return specializationRepository.findAll()
+                .stream()
+                .map(this::mapToResponseDto)
+                .toList();
+    }
+
+    private SpecializationResponse mapToResponseDto(Specialization specialization) {
+        return SpecializationResponse.builder()
+                .direction(specialization.getDirection())
+                .language(specialization.getLanguage())
+                .build();
     }
 }

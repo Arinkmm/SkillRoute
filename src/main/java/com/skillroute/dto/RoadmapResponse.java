@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoadmapResponseDto {
+public class RoadmapResponse {
     private Long vacancyId;
     private String vacancyName;
-    private List<RoadmapStepDto> steps;
+    private List<RoadmapStepResponse> steps;
     private double matchPercentage;
  }

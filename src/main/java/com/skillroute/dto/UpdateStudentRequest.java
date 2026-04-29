@@ -9,7 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SkillRequestDto {
-    private Long skillId;
-    private int level;
+public class UpdateStudentRequest {
+    private String firstName;
+    private String lastName;
+    private String gitHubUrl;
+    private Long specializationId;
+    private String bio;
+
 }

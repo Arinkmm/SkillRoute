@@ -1,5 +1,6 @@
 package com.skillroute.dto;
 
+import com.skillroute.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +10,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SkillResponseDto {
-    private Long id;
-    private String name;
-    private int level;
+public class ResourceResponse {
+    private String resource;
 }

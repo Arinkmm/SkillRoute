@@ -1,14 +1,12 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.RoadmapResponseDto;
-import com.skillroute.dto.RouteSkillDto;
-import com.skillroute.dto.SkillAddDto;
-import com.skillroute.model.Account;
+import com.skillroute.dto.RoadmapResponse;
+import com.skillroute.dto.RouteSkillResponse;
+import com.skillroute.dto.AddSkillRequest;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +18,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class RoadmapController {
     private final RoadmapService roadmapService;
     private final VacancyService vacancyService;
-    private final AccountService accountService;
     private final StudentSkillService studentSkillService;
     private final StudentVacancyService studentVacancyService;
     private final SkillService skillService;
@@ -33,11 +30,9 @@ public class RoadmapController {
 
     @GetMapping("/{id}")
     public String viewRoadmap(@PathVariable Long id,
-                              @AuthenticationPrincipal UserDetails userDetails,
+                              @AuthenticationPrincipal CustomUserDetails user,
                               Model model) {
-        Account account = accountService.getAccount(userDetails.getUsername());
-
-        RoadmapResponseDto roadmap = roadmapService.generateRoadmap(account.getId(), id);
+        RoadmapResponse roadmap = roadmapService.generateRoadmap(user.getId(), id);
 
         model.addAttribute("roadmap", roadmap);
 
@@ -47,16 +42,14 @@ public class RoadmapController {
     @GetMapping("/{vacancyId}/skills/{skillId}")
     public String viewRoadmapSkillStep(@PathVariable Long vacancyId,
                                        @PathVariable Long skillId,
-                                       @AuthenticationPrincipal UserDetails userDetails,
+                                       @AuthenticationPrincipal CustomUserDetails user,
                                        Model model) {
-        Account account = accountService.getAccount(userDetails.getUsername());
-
-        RouteSkillDto skill = skillService.getRouteSkillById(skillId);
+        RouteSkillResponse skill = skillService.getRouteSkillById(skillId);
 
         model.addAttribute("vacancy", vacancyService.getVacancyById(vacancyId));
         model.addAttribute("skill", skill);
 
-        boolean isAlreadyAcquired = studentSkillService.hasSkill(account.getId(), skillId);
+        boolean isAlreadyAcquired = studentSkillService.hasSkill(user.getId(), skillId);
         model.addAttribute("isAcquired", isAlreadyAcquired);
 
         return "student/roadmap-skill-step";
@@ -65,7 +58,7 @@ public class RoadmapController {
     @PostMapping("/{vacancyId}/skills/{skillId}/acquire")
     public String acquireSkill(@PathVariable Long vacancyId,
                                @PathVariable Long skillId,
-                               @ModelAttribute SkillAddDto addDto,
+                               @ModelAttribute AddSkillRequest addDto,
                                @AuthenticationPrincipal CustomUserDetails user,
                                RedirectAttributes redirectAttributes) {
         addDto.setId(skillId);

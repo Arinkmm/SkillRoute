@@ -1,6 +1,6 @@
 package com.skillroute.dto;
 
-public enum Status {
+public enum RoadmapStepStatus {
     MISSING,
     UPGRADE_REQUIRED
 }

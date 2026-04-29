@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoadmapStepDto {
+public class RoadmapStepResponse {
     private String skillName;
     private int currentLevel;
     private int targetLevel;
-    private List<String> resources;
-    private Status status;
+    private List<ResourceResponse> resources;
+    private RoadmapStepStatus roadmapStepStatus;
 }

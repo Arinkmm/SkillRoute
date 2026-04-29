@@ -1,6 +1,6 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.ResourceCreateDto;
+import com.skillroute.dto.AddResourceRequest;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Resource;
 import com.skillroute.model.Skill;
@@ -17,8 +17,8 @@ public class ResourceService {
     private final ResourceRepository resourceRepository;
 
     @Transactional
-    public void addResourceToSkill(Long skillId, ResourceCreateDto form) {
-        Skill skill = skillRepository.findById(skillId).orElseThrow(() -> new EntityNotFoundException("Скилл с таким id " + skillId + " не найден"));
+    public void addResourceToSkill(Long skillId, AddResourceRequest form) {
+        Skill skill = skillRepository.findById(skillId).orElseThrow(() -> new EntityNotFoundException("Скилл не найден"));
 
         Resource resource = Resource.builder()
                 .resource(form.getResource())

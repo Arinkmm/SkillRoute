@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SkillLevelDifference {
-    private Long skillId;
-    private String skillName;
-    private int currentLevel;
-    private int requiredLevel;
+public class EditPasswordRequest {
+    private String oldPassword;
+    private String newPassword;
+    private String confirmNewPassword;
 }

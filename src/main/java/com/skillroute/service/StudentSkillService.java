@@ -1,7 +1,7 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.SkillAddDto;
-import com.skillroute.dto.StudentSkillDto;
+import com.skillroute.dto.AddSkillRequest;
+import com.skillroute.dto.StudentSkillResponse;
 import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Skill;
@@ -26,9 +26,9 @@ public class StudentSkillService {
     private final StudentProfileRepository studentProfileRepository;
 
     @Transactional(readOnly = true)
-    public List<StudentSkillDto> getStudentSkills(Long studentId) {
+    public List<StudentSkillResponse> getStudentSkills(Long studentId) {
         return studentSkillRepository.findAllByStudentId(studentId).stream()
-                .map(ss -> StudentSkillDto.builder()
+                .map(ss -> StudentSkillResponse.builder()
                         .name(ss.getSkill().getName())
                         .level(ss.getLevel())
                         .isConfirmedByGitHub(ss.isConfirmedByGitHub())
@@ -37,13 +37,20 @@ public class StudentSkillService {
     }
 
     @Transactional(readOnly = true)
+    public List<StudentSkillResponse> getStudentsSkillsByName(String query) {
+        return studentSkillRepository.findByNameContainingIgnoreCase(query).stream()
+                .map(ss -> new StudentSkillResponse(ss.getSkill().getName(), ss.getLevel(), ss.isConfirmedByGitHub()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public boolean hasSkill(Long studentId, Long skillId) {
         return studentSkillRepository.existsByStudentIdAndSkillId(studentId, skillId);
     }
 
     @Transactional
-    public void addSkillToStudent(Long id, SkillAddDto form) {
-        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Профиль студента с таким id " + id + " не найден"));
+    public void addSkillToStudent(Long id, AddSkillRequest form) {
+        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
 
         Skill skill = skillRepository.findById(form.getId()).orElseThrow(() -> new EntityNotFoundException("Скилл отсутствует"));
 

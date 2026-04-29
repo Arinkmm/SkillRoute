@@ -1,11 +1,9 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.ResourceCreateDto;
-import com.skillroute.security.CustomUserDetails;
+import com.skillroute.dto.AddResourceRequest;
 import com.skillroute.service.ResourceService;
 import com.skillroute.service.SkillService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +18,7 @@ public class CompanySkillController {
 
     @GetMapping
     public String skillsPage(Model model) {
-        model.addAttribute("allSkills", skillService.getSkills());
+        model.addAttribute("skills", skillService.getSkills());
         return "company/skills";
     }
 
@@ -31,16 +29,16 @@ public class CompanySkillController {
     }
 
     @GetMapping("/{id}/resources")
-    public String addResourcePage(@PathVariable Long id, Model model) {
+    public String addResourceForm(@PathVariable Long id, Model model) {
         model.addAttribute("skillId", id);
-        model.addAttribute("resourceForm", new ResourceCreateDto());
+        model.addAttribute("resourceForm", new AddResourceRequest());
         return "company/add-resource";
     }
 
     @PostMapping("/{id}/resources")
-    public String saveResource(@PathVariable Long id,
-                               @ModelAttribute ResourceCreateDto form,
-                               RedirectAttributes redirectAttributes) {
+    public String addResource(@PathVariable Long id,
+                              @ModelAttribute AddResourceRequest form,
+                              RedirectAttributes redirectAttributes) {
         resourceService.addResourceToSkill(id, form);
         redirectAttributes.addFlashAttribute("success", "Материал добавлен!");
         return "redirect:/company/skills/" + id;

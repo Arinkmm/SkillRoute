@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResourceCreateDto {
-    private String resource;
+public class CompanyProfileResponse {
+    private String companyName;
+    private String description;
+    private String websiteUrl;
 }

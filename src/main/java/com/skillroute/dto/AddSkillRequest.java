@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SkillAddDto {
+public class AddSkillRequest {
     private Long id;
     private int level;
 }

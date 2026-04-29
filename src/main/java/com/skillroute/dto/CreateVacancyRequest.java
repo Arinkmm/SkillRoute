@@ -1,22 +1,21 @@
 package com.skillroute.dto;
 
-import java.util.List;
-
-import com.skillroute.model.VacancyStatus;
 import com.skillroute.model.WorkSchedule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VacancyUpdateDto {
+public class CreateVacancyRequest {
     private String name;
+    private Long specializationId;
     private Long salary;
     private WorkSchedule workSchedule;
-    private VacancyStatus status;
-    private List<SkillRequestDto> skills;
+    private List<AddSkillRequest> skills;
 }

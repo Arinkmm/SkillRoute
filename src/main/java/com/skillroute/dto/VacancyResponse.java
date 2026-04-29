@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VacancyResponseDto {
+public class VacancyResponse {
     private Long id;
     private String name;
     private Long companyId;
@@ -26,5 +26,5 @@ public class VacancyResponseDto {
     private Language language;
     private Direction direction;
     private String fullSpecialization;
-    private List<SkillResponseDto> skills;
+    private List<SkillVacancyResponse> skills;
 }

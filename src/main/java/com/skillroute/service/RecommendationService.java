@@ -1,7 +1,7 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.SkillResponseDto;
-import com.skillroute.dto.VacancyResponseDto;
+import com.skillroute.dto.SkillVacancyResponse;
+import com.skillroute.dto.VacancyResponse;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.*;
 import com.skillroute.repository.StudentProfileRepository;
@@ -20,7 +20,7 @@ public class RecommendationService {
     private final StudentProfileRepository studentProfileRepository;
 
     @Transactional(readOnly = true)
-    public List<VacancyResponseDto> getRecommendedForStudent(Long studentId) {
+    public List<VacancyResponse> getRecommendedVacanciesForStudent(Long studentId) {
         StudentProfile profile = studentProfileRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
 
@@ -33,11 +33,11 @@ public class RecommendationService {
                 .toList();
     }
 
-    private VacancyResponseDto mapToResponseDto(Vacancy vacancy) {
+    private VacancyResponse mapToResponseDto(Vacancy vacancy) {
         VacancyProfile profile = vacancy.getProfile();
         Specialization spec = profile.getSpecialization();
 
-        return VacancyResponseDto.builder()
+        return VacancyResponse.builder()
                 .id(vacancy.getId())
                 .name(vacancy.getName())
                 .companyId(vacancy.getCompany().getId())
@@ -48,7 +48,7 @@ public class RecommendationService {
                 .direction(spec.getDirection())
                 .fullSpecialization(spec.getLanguage() + " (" + spec.getDirection() + ")")
                 .skills(vacancy.getVacancySkills().stream()
-                        .map(vs -> new SkillResponseDto(
+                        .map(vs -> new SkillVacancyResponse(
                                 vs.getSkill().getId(),
                                 vs.getSkill().getName(),
                                 vs.getLevel()))

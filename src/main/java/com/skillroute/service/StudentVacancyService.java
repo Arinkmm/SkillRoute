@@ -1,19 +1,17 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.SkillResponseDto;
-import com.skillroute.dto.VacancyResponseDto;
+import com.skillroute.dto.SkillVacancyResponse;
+import com.skillroute.dto.VacancyResponse;
 import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.*;
 import com.skillroute.model.id.StudentVacancyId;
 import com.skillroute.repository.StudentProfileRepository;
 import com.skillroute.repository.StudentVacancyRepository;
-import com.skillroute.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +22,9 @@ public class StudentVacancyService {
     private final StudentProfileRepository studentProfileRepository;
 
     @Transactional(readOnly = true)
-    public List<VacancyResponseDto> getFollowedVacancies(Long studentId) {
+    public List<VacancyResponse> getFollowedVacancies(Long studentId) {
         StudentProfile profile = studentProfileRepository.findById(studentId)
-                .orElseThrow(() -> new EntityNotFoundException("Профиль студента не найден: " + studentId));
+                .orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
 
         return profile.getStudentVacancies().stream()
                 .map(StudentVacancy::getVacancy)
@@ -51,11 +49,11 @@ public class StudentVacancyService {
     }
 
 
-    private VacancyResponseDto mapToResponseDto(Vacancy vacancy) {
+    private VacancyResponse mapToResponseDto(Vacancy vacancy) {
         VacancyProfile profile = vacancy.getProfile();
         Specialization spec = profile.getSpecialization();
 
-        return VacancyResponseDto.builder()
+        return VacancyResponse.builder()
                 .id(vacancy.getId())
                 .name(vacancy.getName())
                 .companyId(vacancy.getCompany().getId())
@@ -66,7 +64,7 @@ public class StudentVacancyService {
                 .direction(spec.getDirection())
                 .fullSpecialization(spec.getLanguage() + " (" + spec.getDirection() + ")")
                 .skills(vacancy.getVacancySkills().stream()
-                        .map(vs -> new SkillResponseDto(
+                        .map(vs -> new SkillVacancyResponse(
                                 vs.getSkill().getId(),
                                 vs.getSkill().getName(),
                                 vs.getLevel()))

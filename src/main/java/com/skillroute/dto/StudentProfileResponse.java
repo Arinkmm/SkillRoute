@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentSkillDto {
-    private String name;
-    private int level;
-    private boolean isConfirmedByGitHub;
+public class StudentProfileResponse {
+    private String firstName;
+    private String lastName;
+    private String githubUrl;
+    private Long specializationId;
+    private String bio;
 }
