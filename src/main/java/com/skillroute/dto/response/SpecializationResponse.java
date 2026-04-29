@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SpecializationResponse {
+    private Long id;
     private Direction direction;
     private Language language;
 }

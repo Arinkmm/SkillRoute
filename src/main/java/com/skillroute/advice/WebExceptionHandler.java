@@ -3,6 +3,7 @@ package com.skillroute.advice;
 import com.skillroute.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.FieldError;
@@ -20,14 +21,14 @@ public class WebExceptionHandler {
     @ExceptionHandler(ResourceOwnershipException.class)
     public String handleResourceOwnershipException(ResourceOwnershipException e, Model model) {
         model.addAttribute("message", e.getMessage());
-        model.addAttribute("errorCode", 403);
+        model.addAttribute("errorCode", HttpStatus.FORBIDDEN.value());
         return "error";
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public String handleEntityNotFound(EntityNotFoundException e, Model model) {
         model.addAttribute("message", e.getMessage());
-        model.addAttribute("errorCode", 404);
+        model.addAttribute("errorCode", HttpStatus.NOT_FOUND.value());
         return "error";
     }
 
@@ -51,8 +52,8 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public String handleAll(Model model) {
-        model.addAttribute("message", "Произошла ошибка на сервере.");
-        model.addAttribute("errorCode", 500);
+        model.addAttribute("message", "Произошла внутренняя ошибка сервера. Мы уже работаем над исправлением");
+        model.addAttribute("errorCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return "error";
     }
 }

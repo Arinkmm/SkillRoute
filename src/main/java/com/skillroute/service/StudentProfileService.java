@@ -51,6 +51,7 @@ public class StudentProfileService {
 
     private StudentProfileResponse mapToResponseDto(StudentProfile profile) {
         return StudentProfileResponse.builder()
+                .id(profile.getId())
                 .firstName(profile.getFirstName())
                 .lastName(profile.getLastName())
                 .githubUrl(profile.getBio())

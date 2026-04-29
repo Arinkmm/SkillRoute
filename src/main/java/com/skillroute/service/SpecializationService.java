@@ -24,6 +24,7 @@ public class SpecializationService {
 
     private SpecializationResponse mapToResponseDto(Specialization specialization) {
         return SpecializationResponse.builder()
+                .id(specialization.getId())
                 .direction(specialization.getDirection())
                 .language(specialization.getLanguage())
                 .build();

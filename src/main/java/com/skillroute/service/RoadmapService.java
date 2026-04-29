@@ -1,13 +1,11 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.response.ResourceResponse;
-import com.skillroute.dto.response.RoadmapResponse;
-import com.skillroute.dto.response.RoadmapStepResponse;
-import com.skillroute.dto.response.RoadmapStepStatus;
+import com.skillroute.dto.response.*;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Resource;
 import com.skillroute.model.StudentSkill;
 import com.skillroute.model.Vacancy;
+import com.skillroute.model.VacancySkill;
 import com.skillroute.repository.ResourceRepository;
 import com.skillroute.repository.StudentSkillRepository;
 import com.skillroute.repository.VacancyRepository;
@@ -25,61 +23,74 @@ public class RoadmapService {
     private final VacancyRepository vacancyRepository;
     private final StudentSkillRepository studentSkillRepository;
     private final ResourceRepository resourceRepository;
+    private final MatchingService matchingService;
 
     @Transactional(readOnly = true)
     public RoadmapResponse generateRoadmap(Long studentId, Long vacancyId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
 
-        Map<Long, Integer> studentSkills = studentSkillRepository.findAllByStudentId(studentId)
-                .stream()
-                .collect(Collectors.toMap(
-                        ss -> ss.getSkill().getId(),
-                        StudentSkill::getLevel
-                ));
+        Map<Long, Integer> studentSkills = getStudentSkillsMap(studentId);
 
-        List<Long> skillIds = vacancy.getVacancySkills().stream()
+        List<Long> skillIdsToLearn = vacancy.getVacancySkills().stream()
+                .filter(vs -> studentSkills.getOrDefault(vs.getSkill().getId(), 0) < vs.getLevel())
                 .map(vs -> vs.getSkill().getId())
                 .toList();
 
-        Map<Long, List<ResourceResponse>> resourcesMap = resourceRepository.findAllBySkillIdIn(skillIds)
-                .stream()
-                .collect(Collectors.groupingBy(
-                        r -> r.getSkill().getId(),
-                        Collectors.mapping(this::mapToResourceResponse, Collectors.toList())
-                ));
+        Map<Long, List<ResourceResponse>> resourcesMap = getResourcesForSkills(skillIdsToLearn);
 
         List<RoadmapStepResponse> steps = vacancy.getVacancySkills().stream()
                 .filter(vs -> studentSkills.getOrDefault(vs.getSkill().getId(), 0) < vs.getLevel())
                 .map(vs -> {
-                    Long sId = vs.getSkill().getId();
-                    int current = studentSkills.getOrDefault(sId, 0);
-
-                    return RoadmapStepResponse.builder()
-                            .skillName(vs.getSkill().getName())
-                            .currentLevel(current)
-                            .targetLevel(vs.getLevel())
-                            .resources(resourcesMap.getOrDefault(sId, List.of()))
-                            .roadmapStepStatus(current == 0 ? RoadmapStepStatus.MISSING : RoadmapStepStatus.UPGRADE_REQUIRED)
-                            .build();
-                }).toList();
+                    int currentLevel = studentSkills.getOrDefault(vs.getSkill().getId(), 0);
+                    return buildStep(vs, currentLevel, resourcesMap);
+                })
+                .toList();
 
         return RoadmapResponse.builder()
                 .vacancyId(vacancyId)
+                .vacancyName(vacancy.getName())
                 .steps(steps)
-                .matchPercentage(calculateMatch(vacancy.getVacancySkills().size(), steps.size()))
+                .matchPercentage(matchingService.calculateMatch(vacancy.getVacancySkills().size(), steps.size()))
                 .build();
+    }
+
+    private RoadmapStepResponse buildStep(VacancySkill vs, int currentLevel, Map<Long, List<ResourceResponse>> resourcesMap) {
+        Long skillId = vs.getSkill().getId();
+        int targetLevel = vs.getLevel();
+
+        return RoadmapStepResponse.builder()
+                .skillId(vs.getSkill().getId())
+                .skillName(vs.getSkill().getName())
+                .currentLevel(currentLevel)
+                .targetLevel(targetLevel)
+                .gap(matchingService.calculateGapDepth(currentLevel, targetLevel))
+                .roadmapStepStatus(matchingService.determineStatus(currentLevel, targetLevel))
+                .resources(resourcesMap.getOrDefault(skillId, List.of()))
+                .build();
+    }
+
+    private Map<Long, Integer> getStudentSkillsMap(Long studentId) {
+        return studentSkillRepository.findAllByStudentId(studentId).stream()
+                .collect(Collectors.toMap(
+                        ss -> ss.getSkill().getId(),
+                        StudentSkill::getLevel
+                ));
+    }
+
+    private Map<Long, List<ResourceResponse>> getResourcesForSkills(List<Long> skillIds) {
+        if (skillIds.isEmpty()) return Map.of();
+
+        return resourceRepository.findAllBySkillIdIn(skillIds).stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.getSkill().getId(),
+                        Collectors.mapping(this::mapToResourceResponse, Collectors.toList())
+                ));
     }
 
     private ResourceResponse mapToResourceResponse(Resource resource) {
         return ResourceResponse.builder()
                 .resource(resource.getResource())
                 .build();
-    }
-
-    private double calculateMatch(int total, int gaps) {
-        if (total == 0) return 100.0;
-        double match = (double) (total - gaps) / total * 100;
-        return Math.round(match * 10.0) / 10.0;
     }
 }

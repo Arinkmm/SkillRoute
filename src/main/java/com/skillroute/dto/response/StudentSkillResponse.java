@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StudentSkillResponse {
+    private Long skillId;
     private String name;
     private int level;
     private boolean isConfirmedByGitHub;

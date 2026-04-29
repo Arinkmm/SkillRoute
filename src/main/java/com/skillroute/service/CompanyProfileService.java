@@ -51,6 +51,7 @@ public class CompanyProfileService {
 
     private CompanyProfileResponse mapToResponseDto(CompanyProfile profile) {
         return CompanyProfileResponse.builder()
+                .id(profile.getId())
                 .companyName(profile.getCompanyName())
                 .description(profile.getDescription())
                 .websiteUrl(profile.getWebsiteUrl())

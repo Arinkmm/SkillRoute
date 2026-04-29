@@ -39,6 +39,7 @@ public class SkillService {
 
     private RouteSkillResponse mapToRouteSkillDto(Skill skill) {
         return RouteSkillResponse.builder()
+                .skillId(skill.getId())
                 .name(skill.getName())
                 .resources(skill.getResources().stream()
                         .map(res -> AddResourceRequest.builder()

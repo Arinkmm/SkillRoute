@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RouteSkillResponse {
+    private Long skillId;
     private String name;
     private List<AddResourceRequest> resources;
 }

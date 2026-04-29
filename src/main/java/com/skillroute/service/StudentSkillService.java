@@ -39,7 +39,7 @@ public class StudentSkillService {
     @Transactional(readOnly = true)
     public List<StudentSkillResponse> getStudentsSkillsByName(String query) {
         return studentSkillRepository.findByNameContainingIgnoreCase(query).stream()
-                .map(ss -> new StudentSkillResponse(ss.getSkill().getName(), ss.getLevel(), ss.isConfirmedByGitHub()))
+                .map(ss -> new StudentSkillResponse(ss.getSkill().getId(), ss.getSkill().getName(), ss.getLevel(), ss.isConfirmedByGitHub()))
                 .toList();
     }
 

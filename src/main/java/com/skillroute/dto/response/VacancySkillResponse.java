@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VacancySkillResponse {
-    private Long id;
+    private Long skillId;
     private String name;
     private int level;
 }

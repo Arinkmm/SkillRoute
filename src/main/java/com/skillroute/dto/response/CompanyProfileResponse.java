@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompanyProfileResponse {
+    private Long id;
     private String companyName;
     private String description;
     private String websiteUrl;
