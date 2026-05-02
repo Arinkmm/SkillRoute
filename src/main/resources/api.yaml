@@ -1,0 +1,231 @@
+openapi: 3.0.1
+info:
+  title: SkillRoute API
+  description: API сервиса SkillRoute для управления вакансиями компании
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер разработки
+
+tags:
+  - name: Vacancies
+    description: Операции по управлению вакансиями компании
+
+paths:
+  /company/vacancies:
+    get:
+      tags:
+        - Vacancies
+      summary: Получить список всех вакансий компании
+      responses:
+        '200':
+          description: Список вакансий успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VacancyResponse'
+    post:
+      tags:
+        - Vacancies
+      summary: Создать новую вакансию
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVacancyRequest'
+      responses:
+        '201':
+          description: Вакансия создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacancyResponse'
+
+  /company/vacancies/{id}:
+    get:
+      tags:
+        - Vacancies
+      summary: Получить полную информацию о вакансии по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Информация о вакансии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacancyResponse'
+    patch:
+      tags:
+        - Vacancies
+      summary: Обновить существующую вакансию
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVacancyRequest'
+      responses:
+        '200':
+          description: Вакансия успешно обновлена
+    delete:
+      tags:
+        - Vacancies
+      summary: Удалить вакансию
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Вакансия удалена
+
+components:
+  schemas:
+    AddSkillRequest:
+      type: object
+      description: Связка навыка и уровня владения
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID навыка из справочника
+          example: 5
+        level:
+          type: integer
+          description: Требуемый уровень (1-5)
+          minimum: 1
+          maximum: 5
+          example: 5
+
+    CreateVacancyRequest:
+      type: object
+      description: Объект для создания новой вакансии
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Название вакансии
+          example: Java Developer
+        specializationId:
+          type: integer
+          format: int64
+          description: Идентификатор специализации
+          example: 1
+        salary:
+          type: integer
+          format: int64
+          description: Предлагаемая заработная плата
+          maximum: 100000000
+          example: 150000
+        workSchedule:
+          $ref: '#/components/schemas/WorkSchedule'
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddSkillRequest'
+
+    UpdateVacancyRequest:
+      type: object
+      description: Объект для обновления существующей вакансии
+      properties:
+        name:
+          type: string
+          description: Новое название вакансии
+          example: Senior Java Developer
+        salary:
+          type: integer
+          format: int64
+          description: Обновленная заработная плата
+          maximum: 100000000
+          example: 250000
+        workSchedule:
+          $ref: '#/components/schemas/WorkSchedule'
+        status:
+          $ref: '#/components/schemas/VacancyStatus'
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddSkillRequest'
+
+    VacancyResponse:
+      type: object
+      description: DTO ответа с полной информацией о вакансии
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Уникальный идентификатор вакансии
+        name:
+          type: string
+          description: Название вакансии
+        companyId:
+          type: integer
+          format: int64
+          description: ID компании-работодателя
+        salary:
+          type: integer
+          format: int64
+          description: Заработная плата
+        workSchedule:
+          $ref: '#/components/schemas/WorkSchedule'
+        status:
+          $ref: '#/components/schemas/VacancyStatus'
+        language:
+          $ref: '#/components/schemas/Language'
+        direction:
+          $ref: '#/components/schemas/Direction'
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/VacancySkillResponse'
+
+    VacancySkillResponse:
+      type: object
+      description: Сведения о навыке для вакансии
+      properties:
+        skillId:
+          type: integer
+          format: int64
+          description: ID навыка
+        name:
+          type: string
+          description: Название технологии
+        level:
+          type: integer
+          description: Требуемый уровень владения (1-5)
+
+    WorkSchedule:
+      type: string
+      enum: [FULL_TIME, PART_TIME, REMOTE, HYBRID, FLEXIBLE]
+
+    VacancyStatus:
+      type: string
+      enum: [OPEN, CLOSE, IN_PROGRESS]
+
+    Language:
+      type: string
+      enum: [JAVA]
+
+    Direction:
+      type: string
+      enum: [BACKEND]
