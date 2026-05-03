@@ -10,4 +10,5 @@
     <include relativeToChangelogFile="true" file="changelog/2026-04-22--02-create-skill-tables.sql"/>
     <include relativeToChangelogFile="true" file="changelog/2026-04-24--03-create-vacancies-tables.sql"/>
     <include relativeToChangelogFile="true" file="changelog/2026-04-25--04-create-resource-table.sql"/>
+    <include relativeToChangelogFile="true" file="changelog/2026-05-03--05-create-chats-tables.sql"/>
 </databaseChangeLog>
