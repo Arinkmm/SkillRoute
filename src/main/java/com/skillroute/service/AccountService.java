@@ -3,16 +3,16 @@ package com.skillroute.service;
 import com.skillroute.dto.request.EditPasswordRequest;
 import com.skillroute.dto.request.RegistrationRequest;
 import com.skillroute.event.AccountRegisteredEvent;
-import com.skillroute.exception.EntityNotFoundException;
-import com.skillroute.exception.InvalidPasswordException;
-import com.skillroute.exception.UserAlreadyExistsException;
+import com.skillroute.exception.*;
 import com.skillroute.model.Account;
 import com.skillroute.properties.MailProperties;
+import com.skillroute.properties.RedisProperties;
 import com.skillroute.repository.AccountRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,8 @@ public class AccountService {
     private final JavaMailSender javaMailSender;
     private final MailProperties mailProperties;
     private final ApplicationEventPublisher eventPublisher;
+    private final StringRedisTemplate redisTemplate;
+    private final RedisProperties redisProperties;
 
     @Transactional
     public void register(RegistrationRequest form) {
@@ -45,23 +48,67 @@ public class AccountService {
                 .email(form.getEmail())
                 .password(passwordEncoder.encode(form.getPassword()))
                 .role(form.getRole())
-                .verificationToken(UUID.randomUUID().toString())
+                .isVerified(false)
                 .build();
 
         Account savedAccount = accountRepository.save(account);
-        sendVerificationMail(form, account.getVerificationToken());
+
+        String token = UUID.randomUUID().toString();
+
+        redisTemplate.opsForValue().set(
+                redisProperties.getPrefix() + token,
+                savedAccount.getEmail(),
+                redisProperties.getTtlMinutes(),
+                TimeUnit.MINUTES
+        );
+
+        sendVerificationMail(form.getEmail(), token);
 
         eventPublisher.publishEvent(new AccountRegisteredEvent(savedAccount));
     }
 
     @Transactional
     public boolean verifyUser(String token) {
-        return accountRepository.findByVerificationToken(token).map(account-> {
+        String redisKey = redisProperties.getPrefix() + token;
+
+        String email = redisTemplate.opsForValue().get(redisKey);
+
+        if (email == null) {
+            return false;
+        }
+
+        return accountRepository.findByEmail(email).map(account -> {
             account.setVerified(true);
-            account.setVerificationToken(null);
             accountRepository.save(account);
+            redisTemplate.delete(redisKey);
             return true;
         }).orElse(false);
+    }
+
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        String limitKey = redisProperties.getResendLimitPrefix() + email;
+        if (redisTemplate.hasKey(limitKey)) {
+            throw new TooManyRequestsException("Повторное письмо можно отправить только через " + redisProperties.getResendIntervalMinutes() + " мин.");
+        }
+
+        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Аккаунт не найден"));
+
+        if (account.isVerified()) {
+            throw new AccountAlreadyVerifiedException("Аккаунт уже подтвержден");
+        }
+
+        String newToken = UUID.randomUUID().toString();
+        redisTemplate.opsForValue().set(
+                redisProperties.getPrefix() + newToken,
+                email,
+                redisProperties.getTtlMinutes(),
+                TimeUnit.MINUTES
+        );
+
+        redisTemplate.opsForValue().set(limitKey, "lock", redisProperties.getResendIntervalMinutes(), TimeUnit.MINUTES);
+
+        sendVerificationMail(email, newToken);
     }
 
     @Transactional
@@ -82,16 +129,16 @@ public class AccountService {
         String encodedPassword = passwordEncoder.encode(form.getNewPassword());
         account.setPassword(encodedPassword);
         accountRepository.save(account);
-
     }
 
-    private void sendVerificationMail(RegistrationRequest form, String verificationToken) {
+    private void sendVerificationMail(String email, String verificationToken) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
             String content = mailProperties.getContent();
+
             mimeMessageHelper.setFrom(mailProperties.getFrom(), mailProperties.getSender());
-            mimeMessageHelper.setTo(form.getEmail());
+            mimeMessageHelper.setTo(email);
             mimeMessageHelper.setSubject(mailProperties.getSubject());
 
             content = content.replace("$url", mailProperties.getBaseUrl() + "/verification?token=" + verificationToken);
@@ -100,7 +147,6 @@ public class AccountService {
 
             javaMailSender.send(mimeMessage);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+            throw new MailSendMessageException("Ошибка при отправке письма. Пожалуйста, попробуйте позже");        }
     }
 }

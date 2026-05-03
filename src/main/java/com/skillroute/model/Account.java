@@ -36,9 +36,6 @@ public class Account {
     @Column(nullable = false)
     private Role role;
 
-    @Column(name = "verification_token")
-    private String verificationToken;
-
     @Column(name = "is_verified")
     private boolean isVerified = false;
 

@@ -1,9 +1,7 @@
 package com.skillroute.advice;
 
 import com.skillroute.dto.response.ErrorResponse;
-import com.skillroute.exception.EntityNotFoundException;
-import com.skillroute.exception.InvalidPasswordException;
-import com.skillroute.exception.UserAlreadyExistsException;
+import com.skillroute.exception.*;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +23,27 @@ public class RestExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.BAD_REQUEST.value()).build());
+    }
+
+    @ExceptionHandler(AccountAlreadyVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountAlreadyVerified(AccountAlreadyVerifiedException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.CONFLICT.value()).build());
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorResponse> handleTooManyRequests(TooManyRequestsException e) {
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.TOO_MANY_REQUESTS.value()).build());
+    }
+
+    @ExceptionHandler(MailSendMessageException.class)
+    public ResponseEntity<ErrorResponse> handleMailSendMessageError(MailSendMessageException e) {
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.SERVICE_UNAVAILABLE.value()).build());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegistrationRequest {
     @NotBlank(message = "Email обязателен")
-    @Email
+    @Email(message = "Некорректный формат email")
     private String email;
 
     @NotBlank(message = "Пароль обязателен")

@@ -11,16 +11,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/register")
 @RequiredArgsConstructor
 public class RegisterController {
+    private final AccountService accountService;
 
     @GetMapping
     public String registrationPage(Model model) {
         model.addAttribute("registrationForm", new RegistrationRequest());
         model.addAttribute("roles", Role.values());
         return "register";
+    }
+
+    @PostMapping
+    public String register(@Valid @ModelAttribute RegistrationRequest form, RedirectAttributes redirectAttributes) {
+        accountService.register(form);
+        redirectAttributes.addFlashAttribute("successMessage", "Регистрация успешна! Проверьте почту для подтверждения");
+        return "redirect:/login";
     }
 }

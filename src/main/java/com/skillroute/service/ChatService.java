@@ -76,7 +76,7 @@ public class ChatService {
 
     @Transactional(readOnly = true)
     public List<ChatPreviewResponse> getPreviews(Long userId) {
-        return chatRepository.findAllByAccountId(userId).stream()
+        return chatRepository.findAllById(userId).stream()
                 .map(chat -> {
                     Message last = messageRepository.findFirstByChatIdOrderByCreatedAtDesc(chat.getId()).orElse(null);
                     String name = chat.getStudent().getId().equals(userId)

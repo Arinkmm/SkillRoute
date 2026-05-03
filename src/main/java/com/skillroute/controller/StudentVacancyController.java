@@ -42,9 +42,9 @@ public class StudentVacancyController {
     }
 
     @PostMapping("/{id}/apply")
-    public String applyToVacancy(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user, RedirectAttributes ra) {
+    public String applyToVacancy(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user, RedirectAttributes redirectAttributes) {
         studentVacancyService.applyToVacancy(user.getId(), id);
-        ra.addFlashAttribute("message", "Отклик успешно отправлен!");
+        redirectAttributes.addFlashAttribute("message", "Отклик успешно отправлен!");
         return "redirect:/student/vacancies/" + id;
     }
 }
