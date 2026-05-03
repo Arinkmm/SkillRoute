@@ -29,9 +29,11 @@ public class ApplicantService {
 
     @Transactional(readOnly = true)
     public List<StudentPreviewResponse> getFilteredApplicants(Long vacancyId, ApplicantFilter filter) {
-        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow();
+        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
 
-        return studentProfileRepository.findAll().stream()
+        List<StudentProfile> applicants = studentProfileRepository.findApplicantsByVacancyAndFilter(vacancyId, filter);
+
+        return applicants.stream()
                 .map(s -> buildPreview(s, vacancy))
                 .filter(s -> s.getMatchPercentage() >= filter.getMinMatch())
                 .filter(s -> filter.getMaxGap() == 0 || s.getTotalGapLevel() <= filter.getMaxGap())

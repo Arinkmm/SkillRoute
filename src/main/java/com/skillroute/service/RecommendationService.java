@@ -1,5 +1,6 @@
 package com.skillroute.service;
 
+import com.skillroute.dto.request.VacancyFilter;
 import com.skillroute.dto.response.VacancySkillResponse;
 import com.skillroute.dto.response.VacancyResponse;
 import com.skillroute.exception.EntityNotFoundException;
@@ -20,14 +21,13 @@ public class RecommendationService {
     private final StudentProfileRepository studentProfileRepository;
 
     @Transactional(readOnly = true)
-    public List<VacancyResponse> getRecommendedVacanciesForStudent(Long studentId) {
+    public List<VacancyResponse> getRecommendedVacanciesForStudent(Long studentId, VacancyFilter filter) {
         StudentProfile profile = studentProfileRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
 
         if (profile.getSpecialization() == null) return List.of();
 
-        return vacancyRepository.findAllByProfileSpecializationIdAndProfileStatus(
-                profile.getSpecialization().getId(), VacancyStatus.OPEN)
+        return vacancyRepository.findRecommendedWithSubquery(studentId, filter)
                 .stream()
                 .map(this::mapToResponseDto)
                 .toList();

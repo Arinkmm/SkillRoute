@@ -43,6 +43,14 @@ public class VacancyService {
     }
 
     @Transactional(readOnly = true)
+    public List<VacancyResponse> getHighDemandVacancies(int minSkills) {
+        return vacancyRepository.findHighDemandVacancies(minSkills)
+                .stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public VacancyResponse getVacancyById(Long id) {
         Vacancy vacancy = vacancyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));

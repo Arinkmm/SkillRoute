@@ -8,6 +8,7 @@ import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.ApplicantService;
 import com.skillroute.service.VacancyService;
 import com.skillroute.service.ChatService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -25,10 +26,7 @@ public class ApplicantController {
     private final ChatService chatService;
 
     @GetMapping("/{id}/applicants")
-    public String showApplicantsPage(
-            @PathVariable Long id,
-            @ModelAttribute ApplicantFilter filter,
-            Model model) {
+    public String showApplicantsPage(@PathVariable Long id, @Valid @ModelAttribute ApplicantFilter filter, Model model) {
         VacancyResponse vacancy = vacancyService.getVacancyById(id);
         List<StudentPreviewResponse> applicants = applicantService.getFilteredApplicants(id, filter);
 
