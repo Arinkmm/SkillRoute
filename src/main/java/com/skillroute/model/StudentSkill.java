@@ -30,12 +30,12 @@ public class StudentSkill {
     private Skill skill;
 
     @Column(name = "is_confirmed_by_github")
-    private boolean isConfirmedByGitHub;
+    private boolean isConfirmedByGitHub = false;
 
     @Min(value = 1, message = "Уровень не может быть ниже 1")
     @Max(value = 5, message = "Уровень не может быть выше 5")
     @Column(nullable = false)
-    private int level;
+    private int level = 1;
 
     @Override
     public final boolean equals(Object o) {

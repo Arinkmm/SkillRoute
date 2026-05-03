@@ -38,7 +38,7 @@ public class VacancyProfile {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private VacancyStatus status;
+    private VacancyStatus status = VacancyStatus.OPEN;
 
     @Override
     public final boolean equals(Object o) {

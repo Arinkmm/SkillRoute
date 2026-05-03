@@ -7,6 +7,7 @@ import com.skillroute.dto.response.StudentPreviewResponse;
 import com.skillroute.model.*;
 import com.skillroute.repository.StudentProfileRepository;
 import com.skillroute.repository.StudentVacancyRepository;
+import com.skillroute.repository.VacancyProfileRepository;
 import com.skillroute.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ApplicantService {
     private final StudentProfileRepository studentProfileRepository;
-    private final StudentVacancyRepository svRepository;
+    private final StudentVacancyRepository studentVacancyRepository;
+    private final VacancyProfileRepository vacancyProfileRepository;
     private final MatchingService matchingService;
     private final VacancyRepository vacancyRepository;
 
@@ -67,8 +69,30 @@ public class ApplicantService {
 
     @Transactional
     public void startReviewing(Long studentId, Long vacancyId) {
-        svRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
+        studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
                 .ifPresent(rel -> rel.setStatus(StudentVacancyStatus.REVIEWING));
+        vacancyProfileRepository.findById(vacancyId)
+                .ifPresent(profile -> profile.setStatus(VacancyStatus.IN_PROGRESS));
+    }
+
+    @Transactional
+    public void startInterviewing(Long studentId, Long vacancyId) {
+        studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
+                .ifPresent(rel -> rel.setStatus(StudentVacancyStatus.INTERVIEW));
+    }
+
+    @Transactional
+    public void rejectStudent(Long studentId, Long vacancyId) {
+        studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
+                .ifPresent(rel -> rel.setStatus(StudentVacancyStatus.REJECTED));
+    }
+
+    @Transactional
+    public void acceptStudent(Long studentId, Long vacancyId) {
+        studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
+                .ifPresent(rel -> rel.setStatus(StudentVacancyStatus.ACCEPTED));
+        vacancyProfileRepository.findById(vacancyId)
+                .ifPresent(profile -> profile.setStatus(VacancyStatus.CLOSE));
     }
 
     private StudentPreviewResponse buildPreview(StudentProfile studentProfile, Vacancy vacancy) {

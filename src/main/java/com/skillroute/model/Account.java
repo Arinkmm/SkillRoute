@@ -40,7 +40,7 @@ public class Account {
     private String verificationToken;
 
     @Column(name = "is_verified")
-    private boolean isVerified;
+    private boolean isVerified = false;
 
     @Override
     public final boolean equals(Object o) {

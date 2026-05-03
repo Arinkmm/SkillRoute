@@ -25,6 +25,5 @@ public class VacancyResponse {
     private VacancyStatus status;
     private Language language;
     private Direction direction;
-    private String fullSpecialization;
     private List<VacancySkillResponse> skills;
 }

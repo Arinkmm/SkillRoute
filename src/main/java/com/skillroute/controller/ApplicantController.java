@@ -4,9 +4,12 @@ import com.skillroute.dto.request.ApplicantFilter;
 import com.skillroute.dto.response.StudentGapResponse;
 import com.skillroute.dto.response.StudentPreviewResponse;
 import com.skillroute.dto.response.VacancyResponse;
+import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.ApplicantService;
 import com.skillroute.service.VacancyService;
+import com.skillroute.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +22,7 @@ import java.util.List;
 public class ApplicantController {
     private final ApplicantService applicantService;
     private final VacancyService vacancyService;
+    private final ChatService chatService;
 
     @GetMapping("/{id}/applicants")
     public String showApplicantsPage(
@@ -30,6 +34,7 @@ public class ApplicantController {
 
         model.addAttribute("vacancy", vacancy);
         model.addAttribute("applicants", applicants);
+        model.addAttribute("filter", filter);
 
         return "company/applicants-list";
     }
@@ -47,7 +52,13 @@ public class ApplicantController {
     @PostMapping("/{vacancyId}/applicants/{studentId}/track")
     public String trackAndChat(@PathVariable Long vacancyId, @PathVariable Long studentId) {
         applicantService.startReviewing(studentId, vacancyId);
+        return "redirect:/company/vacancies/" + vacancyId + "/applicants";
+    }
 
-        return "redirect:/company/vacancies";
+    @PostMapping("/{vacancyId}/applicants/{studentId}/chat")
+    public String initiateChat(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long vacancyId, @PathVariable Long studentId) {
+        Long chatId = chatService.getOrCreateChat(studentId, user.getId());
+        applicantService.startInterviewing(studentId, vacancyId);
+        return "redirect:/chat/" + chatId;
     }
 }

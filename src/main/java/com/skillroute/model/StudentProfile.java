@@ -13,6 +13,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class StudentProfile {
     @Id
     @Column(name = "account_id")
@@ -44,6 +45,9 @@ public class StudentProfile {
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StudentVacancy> studentVacancies = new HashSet<>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private Set<Chat> chats = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {
