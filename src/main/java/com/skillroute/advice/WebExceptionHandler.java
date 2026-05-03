@@ -18,6 +18,13 @@ import java.util.stream.Collectors;
 @ControllerAdvice(annotations = Controller.class)
 @Order(2)
 public class WebExceptionHandler {
+    @ExceptionHandler(DataMappingException.class)
+    public String handleDataMappingException(DataMappingException e, Model model) {
+        model.addAttribute("message", e.getMessage());
+        model.addAttribute("errorCode", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        return "error";
+    }
+
     @ExceptionHandler(ResourceOwnershipException.class)
     public String handleResourceOwnershipException(ResourceOwnershipException e, Model model) {
         model.addAttribute("message", e.getMessage());

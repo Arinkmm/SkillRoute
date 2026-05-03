@@ -4,6 +4,7 @@ import com.skillroute.dto.request.ApplicantFilter;
 import com.skillroute.dto.response.SkillGapResponse;
 import com.skillroute.dto.response.StudentGapResponse;
 import com.skillroute.dto.response.StudentPreviewResponse;
+import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.*;
 import com.skillroute.repository.StudentProfileRepository;
 import com.skillroute.repository.StudentVacancyRepository;

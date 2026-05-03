@@ -6,7 +6,8 @@ CREATE TABLE account (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'STUDENT',
     verification_token VARCHAR(255),
-    is_verified BOOLEAN DEFAULT FALSE
+    is_verified BOOLEAN DEFAULT FALSE,
+    CONSTRAINT check_role CHECK (role IN ('STUDENT', 'COMPANY', 'ADMIN'))
 );
 
 CREATE TABLE specialization (
