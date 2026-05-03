@@ -29,7 +29,7 @@ public class StudentVacancy {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StudentVacancyStatus status;
+    private StudentVacancyStatus status = StudentVacancyStatus.SUBMITTED;
 
     @Override
     public final boolean equals(Object o) {

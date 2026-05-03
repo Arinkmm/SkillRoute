@@ -1,10 +1,7 @@
 package com.skillroute.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -16,6 +13,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CompanyProfile {
     @Id
     private Long id;
@@ -35,10 +33,13 @@ public class CompanyProfile {
     private String websiteUrl;
 
     @Column(name = "is_confirmed")
-    private boolean isConfirmed;
+    private boolean isConfirmed =  false;
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Vacancy> vacancies = new HashSet<>();
+
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    private Set<Chat> chats = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {

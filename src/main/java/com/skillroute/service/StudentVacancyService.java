@@ -42,12 +42,10 @@ public class StudentVacancyService {
 
         StudentVacancy application = StudentVacancy.builder()
                 .id(id)
-                .status(StudentVacancyStatus.SUBMITTED)
                 .build();
 
         studentVacancyRepository.save(application);
     }
-
 
     private VacancyResponse mapToResponseDto(Vacancy vacancy) {
         VacancyProfile profile = vacancy.getProfile();
@@ -62,7 +60,6 @@ public class StudentVacancyService {
                 .status(profile.getStatus())
                 .language(spec.getLanguage())
                 .direction(spec.getDirection())
-                .fullSpecialization(spec.getLanguage() + " (" + spec.getDirection() + ")")
                 .skills(vacancy.getVacancySkills().stream()
                         .map(vs -> new VacancySkillResponse(
                                 vs.getSkill().getId(),

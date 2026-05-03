@@ -46,7 +46,6 @@ public class RecommendationService {
                 .status(profile.getStatus())
                 .language(spec.getLanguage())
                 .direction(spec.getDirection())
-                .fullSpecialization(spec.getLanguage() + " (" + spec.getDirection() + ")")
                 .skills(vacancy.getVacancySkills().stream()
                         .map(vs -> new VacancySkillResponse(
                                 vs.getSkill().getId(),

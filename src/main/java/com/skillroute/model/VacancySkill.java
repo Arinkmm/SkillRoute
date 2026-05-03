@@ -2,6 +2,8 @@ package com.skillroute.model;
 
 import com.skillroute.model.id.VacancySkillId;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.util.Objects;
@@ -27,8 +29,10 @@ public class VacancySkill {
     @JoinColumn(name = "skill_id")
     private Skill skill;
 
+    @Min(value = 1, message = "Уровень не может быть ниже 1")
+    @Max(value = 5, message = "Уровень не может быть выше 5")
     @Column(nullable = false)
-    private Integer level;
+    private Integer level = 1;
 
     @Override
     public final boolean equals(Object o) {
