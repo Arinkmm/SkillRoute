@@ -2,6 +2,7 @@ package com.skillroute.advice;
 
 import com.skillroute.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -15,11 +16,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @ControllerAdvice(annotations = Controller.class)
 @Order(2)
 public class WebExceptionHandler {
+
     @ExceptionHandler(DataMappingException.class)
     public String handleDataMappingException(DataMappingException e, Model model) {
+        log.error("Ошибка маппинга данных: {}", e.getMessage());
         model.addAttribute("message", e.getMessage());
         model.addAttribute("errorCode", HttpStatus.UNPROCESSABLE_ENTITY.value());
         return "error";
@@ -27,6 +31,7 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(ResourceOwnershipException.class)
     public String handleResourceOwnershipException(ResourceOwnershipException e, Model model) {
+        log.warn("Попытка доступа к чужому ресурсу: {}", e.getMessage());
         model.addAttribute("message", e.getMessage());
         model.addAttribute("errorCode", HttpStatus.FORBIDDEN.value());
         return "error";
@@ -34,6 +39,7 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public String handleEntityNotFound(EntityNotFoundException e, Model model) {
+        log.warn("Сущность не найдена: {}", e.getMessage());
         model.addAttribute("message", e.getMessage());
         model.addAttribute("errorCode", HttpStatus.NOT_FOUND.value());
         return "error";
@@ -41,6 +47,7 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(DuplicateEntityException.class)
     public String handleDuplicate(DuplicateEntityException e, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        log.warn("Дубликат сущности на странице {}: {}", request.getRequestURI(), e.getMessage());
         redirectAttributes.addFlashAttribute("error", e.getMessage());
 
         String referer = request.getHeader("Referer");
@@ -52,13 +59,15 @@ public class WebExceptionHandler {
         Map<String, String> errors = e.getBindingResult().getFieldErrors().stream()
                 .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (a, b) -> a));
 
+        log.warn("Ошибки валидации формы (Referer: {}): {}", req.getHeader("Referer"), errors);
         ra.addFlashAttribute("validationErrors", errors);
         ra.addFlashAttribute("formData", e.getBindingResult().getTarget());
         return "redirect:" + req.getHeader("Referer");
     }
 
     @ExceptionHandler(Exception.class)
-    public String handleAll(Model model) {
+    public String handleAll(Exception e, Model model) {
+        log.error("Глобальная ошибка в Web-контроллере: ", e);
         model.addAttribute("message", "Произошла внутренняя ошибка сервера. Мы уже работаем над исправлением");
         model.addAttribute("errorCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return "error";
