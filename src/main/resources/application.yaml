@@ -50,3 +50,6 @@ redis:
     ttl-minutes: 5
     resend-limit-prefix: "limit:resend:"
     resend-interval-minutes: 1
+
+github:
+  token: ${GITHUB_TOKEN}

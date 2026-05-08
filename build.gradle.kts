@@ -33,6 +33,8 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
     runtimeOnly("org.postgresql:postgresql")
 
     compileOnly("org.projectlombok:lombok")

@@ -36,6 +36,14 @@ public class RestExceptionHandler {
                 .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.CONFLICT.value()).build());
     }
 
+    @ExceptionHandler(GithubUrlNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleGithubUrlNotFoundException(GithubUrlNotFoundException e) {
+        log.warn("Отсутствует ссылка на Github профиль: {}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.BAD_REQUEST.value()).build());
+    }
+
     @ExceptionHandler(TooManyRequestsException.class)
     public ResponseEntity<ErrorResponse> handleTooManyRequests(TooManyRequestsException e) {
         log.warn("Превышен лимит запросов (Rate Limit): {}", e.getMessage());

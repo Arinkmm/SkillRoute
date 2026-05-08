@@ -54,9 +54,9 @@ public class StudentProfileService {
                 .id(profile.getId())
                 .firstName(profile.getFirstName())
                 .lastName(profile.getLastName())
-                .githubUrl(profile.getBio())
-                .specializationId(profile.getSpecialization().getId())
+                .githubUrl(profile.getGithubUrl())
                 .bio(profile.getBio())
+                .specializationId(profile.getSpecialization() != null ? profile.getSpecialization().getId() : null)
                 .build();
     }
 }
