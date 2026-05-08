@@ -147,6 +147,6 @@ public class AccountService {
 
             javaMailSender.send(mimeMessage);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new MailSendMessageException("Ошибка при отправке письма. Пожалуйста, попробуйте позже");        }
+            throw new ServiceUnavailableException("Ошибка при отправке письма. Пожалуйста, попробуйте позже");        }
     }
 }

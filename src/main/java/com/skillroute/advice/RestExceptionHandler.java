@@ -40,8 +40,8 @@ public class RestExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGithubUrlNotFoundException(GithubUrlNotFoundException e) {
         log.warn("Отсутствует ссылка на Github профиль: {}", e.getMessage());
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.BAD_REQUEST.value()).build());
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.NOT_FOUND.value()).build());
     }
 
     @ExceptionHandler(TooManyRequestsException.class)
@@ -52,12 +52,15 @@ public class RestExceptionHandler {
                 .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.TOO_MANY_REQUESTS.value()).build());
     }
 
-    @ExceptionHandler(MailSendMessageException.class)
-    public ResponseEntity<ErrorResponse> handleMailSendMessageError(MailSendMessageException e) {
-        log.error("Критическая ошибка почтового сервиса: {}", e.getMessage());
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleServiceUnavailable(ServiceUnavailableException e) {
+        log.error("Внешний сервис недоступен: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.SERVICE_UNAVAILABLE.value()).build());
+                .body(ErrorResponse.builder()
+                        .message(e.getMessage())
+                        .errorCode(HttpStatus.SERVICE_UNAVAILABLE.value())
+                        .build());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

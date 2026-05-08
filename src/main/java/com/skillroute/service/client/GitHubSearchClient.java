@@ -2,6 +2,7 @@ package com.skillroute.service.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skillroute.exception.ServiceUnavailableException;
 import com.skillroute.properties.GithubProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ public class GitHubSearchClient {
 
     public int countImportOccurrences(String username, String importPattern) {
         String query = String.format("import %s user:%s", importPattern, username);
-        
+
         HttpUrl url = HttpUrl.parse("https://api.github.com/search/code").newBuilder()
                 .addQueryParameter("q", query)
                 .build();
@@ -33,16 +34,18 @@ public class GitHubSearchClient {
                 .url(url)
                 .addHeader("Authorization", "Bearer " + githubProperties.getToken())
                 .addHeader("Accept", "application/vnd.github.v3+json")
-                .addHeader("User-Agent", "SkillRoute")
                 .build();
 
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.code() == 403) {
-                log.warn("Лимит запросов исчерпан");
-                return 0; 
+                throw new ServiceUnavailableException("GitHub API лимит запросов исчерпан. Попробуйте позже");
             }
-            if (!response.isSuccessful() || response.body() == null) {
-                log.error("HTTP {}: {}", response.code(), response.message());
+
+            if (!response.isSuccessful()) {
+                throw new ServiceUnavailableException("Ошибка обращения к GitHub API: " + response.code());
+            }
+
+            if (response.body() == null) {
                 return 0;
             }
 
@@ -50,8 +53,7 @@ public class GitHubSearchClient {
             return rootNode.path("total_count").asInt(0);
 
         } catch (IOException e) {
-            log.error("Ошибка при подключению к Github API", e);
-            return 0;
+            throw new ServiceUnavailableException("Сервис синхронизации временно недоступен из-за проблем с сетью");
         }
     }
 }
