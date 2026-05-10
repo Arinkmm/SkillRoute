@@ -49,6 +49,17 @@ public class StudentProfileService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public boolean isProfileComplete(Long id) {
+        return studentProfileRepository.findById(id)
+                .map(profile -> hasText(profile.getFirstName()) && hasText(profile.getLastName()))
+                .orElse(false);
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
+
     private StudentProfileResponse mapToResponseDto(StudentProfile profile) {
         return StudentProfileResponse.builder()
                 .id(profile.getId())

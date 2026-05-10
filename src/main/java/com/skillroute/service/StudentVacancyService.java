@@ -1,6 +1,7 @@
 package com.skillroute.service;
 
 import com.skillroute.dto.response.VacancySkillResponse;
+import com.skillroute.dto.response.TrackedStudentResponse;
 import com.skillroute.dto.response.VacancyResponse;
 import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
@@ -30,6 +31,13 @@ public class StudentVacancyService {
                 .map(StudentVacancy::getVacancy)
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TrackedStudentResponse> getTrackedStudentsForCompany(Long companyId) {
+        return studentVacancyRepository.findAllByCompanyId(companyId).stream()
+                .map(this::mapToTrackedStudentResponse)
+                .toList();
     }
 
     @Transactional
@@ -66,6 +74,20 @@ public class StudentVacancyService {
                                 vs.getSkill().getName(),
                                 vs.getLevel()))
                         .collect(Collectors.toList()))
+                .build();
+    }
+
+    private TrackedStudentResponse mapToTrackedStudentResponse(StudentVacancy studentVacancy) {
+        StudentProfile student = studentVacancy.getStudent();
+        Vacancy vacancy = studentVacancy.getVacancy();
+
+        return TrackedStudentResponse.builder()
+                .studentId(student.getId())
+                .firstName(student.getFirstName())
+                .lastName(student.getLastName())
+                .vacancyId(vacancy.getId())
+                .vacancyName(vacancy.getName())
+                .status(studentVacancy.getStatus())
                 .build();
     }
 }

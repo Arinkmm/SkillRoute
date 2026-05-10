@@ -37,7 +37,9 @@ public class CompanyProfileService {
 
     @Transactional(readOnly = true)
     public List<CompanyProfileResponse> getAllCompanies() {
-        return companyProfileRepository.findAll().stream().map(companyProfile -> CompanyProfileResponse.builder().companyName(companyProfile.getCompanyName()).description(companyProfile.getDescription()).build()).toList();
+        return companyProfileRepository.findAll().stream()
+                .map(this::mapToResponseDto)
+                .toList();
     }
 
     @Transactional
@@ -49,12 +51,47 @@ public class CompanyProfileService {
         companyProfile.setWebsiteUrl(form.getWebsiteUrl());
     }
 
+    @Transactional
+    public void approveCompany(Long companyId) {
+        CompanyProfile companyProfile = companyProfileRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException("Компания не найдена"));
+
+        companyProfile.setConfirmed(true);
+    }
+
+    @Transactional
+    public void rejectCompany(Long companyId) {
+        CompanyProfile companyProfile = companyProfileRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException("Компания не найдена"));
+
+        companyProfile.setConfirmed(false);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isConfirmed(Long companyId) {
+        return companyProfileRepository.findById(companyId)
+                .map(CompanyProfile::isConfirmed)
+                .orElse(false);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isProfileComplete(Long companyId) {
+        return companyProfileRepository.findById(companyId)
+                .map(profile -> hasText(profile.getCompanyName()))
+                .orElse(false);
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
+
     private CompanyProfileResponse mapToResponseDto(CompanyProfile profile) {
         return CompanyProfileResponse.builder()
                 .id(profile.getId())
+                .email(profile.getAccount().getEmail())
                 .companyName(profile.getCompanyName())
                 .description(profile.getDescription())
                 .websiteUrl(profile.getWebsiteUrl())
+                .confirmed(profile.isConfirmed())
+                .accountVerified(profile.getAccount().isVerified())
                 .build();
     }
 }

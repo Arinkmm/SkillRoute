@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CompanyProfileResponse {
     private Long id;
+    private String email;
     private String companyName;
     private String description;
     private String websiteUrl;
+    private boolean confirmed;
+    private boolean accountVerified;
 }
