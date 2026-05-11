@@ -1,6 +1,7 @@
 package com.skillroute.controller;
 
 import com.skillroute.model.Role;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.CompanyProfileService;
 import com.skillroute.service.StudentProfileService;
@@ -22,6 +23,7 @@ public class MainController {
     private final CompanyProfileService companyProfileService;
     private final StudentProfileService studentProfileService;
     private final StudentVacancyService studentVacancyService;
+    private final MessageProperties messages;
 
     @GetMapping
     public String mainPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
@@ -48,7 +50,7 @@ public class MainController {
     @PostMapping("/companies/{id}/approve")
     public String approveCompany(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         companyProfileService.approveCompany(id);
-        redirectAttributes.addFlashAttribute("message", "Компания подтверждена");
+        redirectAttributes.addFlashAttribute("message", messages.getUi().getCompanyApproved());
 
         return "redirect:/main";
     }
@@ -56,7 +58,7 @@ public class MainController {
     @PostMapping("/companies/{id}/reject")
     public String rejectCompany(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         companyProfileService.rejectCompany(id);
-        redirectAttributes.addFlashAttribute("message", "Компания отклонена");
+        redirectAttributes.addFlashAttribute("message", messages.getUi().getCompanyRejected());
 
         return "redirect:/main";
     }

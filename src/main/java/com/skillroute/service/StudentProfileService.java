@@ -7,6 +7,7 @@ import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Role;
 import com.skillroute.model.Specialization;
 import com.skillroute.model.StudentProfile;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.SpecializationRepository;
 import com.skillroute.repository.StudentProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudentProfileService {
     private final StudentProfileRepository studentProfileRepository;
     private final SpecializationRepository specializationRepository;
+    private final MessageProperties messages;
 
     @EventListener
     public void handleAccountRegistration(AccountRegisteredEvent event) {
@@ -31,12 +33,12 @@ public class StudentProfileService {
 
     @Transactional(readOnly = true)
     public StudentProfileResponse getStudentById(Long id) {
-        return studentProfileRepository.findById(id).map(this::mapToResponseDto).orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
+        return studentProfileRepository.findById(id).map(this::mapToResponseDto).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
     }
 
     @Transactional
     public void updateProfile(Long id, UpdateStudentRequest form) {
-        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
+        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
         studentProfile.setFirstName(form.getFirstName());
         studentProfile.setLastName(form.getLastName());

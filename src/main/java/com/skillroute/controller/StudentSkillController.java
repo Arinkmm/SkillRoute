@@ -1,6 +1,7 @@
 package com.skillroute.controller;
 
 import com.skillroute.dto.request.AddSkillRequest;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.SkillService;
 import com.skillroute.service.StudentSkillService;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class StudentSkillController {
     private final StudentSkillService studentSkillService;
     private final SkillService skillService;
+    private final MessageProperties messages;
 
     @GetMapping
     public String skillsPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
@@ -35,7 +37,7 @@ public class StudentSkillController {
     @PostMapping("/add")
     public String addSkill(@Valid @ModelAttribute AddSkillRequest form, @AuthenticationPrincipal CustomUserDetails user, RedirectAttributes redirectAttributes) {
         studentSkillService.addSkillToStudent(user.getId(), form);
-        redirectAttributes.addFlashAttribute("success", "Навык успешно добавлен!");
+        redirectAttributes.addFlashAttribute("success", messages.getUi().getStudentSkillAdded());
         return "redirect:/student/skills";
     }
 }

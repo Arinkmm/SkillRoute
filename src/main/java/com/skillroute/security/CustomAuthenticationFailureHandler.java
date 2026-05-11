@@ -22,6 +22,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         if (exception instanceof DisabledException) {
             errorMessage = "Аккаунт не подтвержден. Проверьте почту";
+            request.getSession().setAttribute("unverifiedEmail", request.getParameter("username"));
         }
 
         request.getSession().setAttribute("loginError", errorMessage);

@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skillroute.exception.ServiceUnavailableException;
 import com.skillroute.properties.GithubProperties;
+import com.skillroute.properties.MessageProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -22,6 +22,7 @@ public class GitHubSearchClient {
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
     private final GithubProperties githubProperties;
+    private final MessageProperties messages;
 
     public int countImportOccurrences(String username, String importPattern) {
         String query = String.format("import %s user:%s", importPattern, username);
@@ -38,11 +39,11 @@ public class GitHubSearchClient {
 
         try (Response response = httpClient.newCall(request).execute()) {
             if (response.code() == 403) {
-                throw new ServiceUnavailableException("GitHub API лимит запросов исчерпан. Попробуйте позже");
+                throw new ServiceUnavailableException(messages.getGithub().getRateLimitExceeded());
             }
 
             if (!response.isSuccessful()) {
-                throw new ServiceUnavailableException("Ошибка обращения к GitHub API: " + response.code());
+                throw new ServiceUnavailableException(messages.getGithub().getApiError().formatted(response.code()));
             }
 
             if (response.body() == null) {
@@ -53,7 +54,7 @@ public class GitHubSearchClient {
             return rootNode.path("total_count").asInt(0);
 
         } catch (IOException e) {
-            throw new ServiceUnavailableException("Сервис синхронизации временно недоступен из-за проблем с сетью");
+            throw new ServiceUnavailableException(messages.getGithub().getNetworkError());
         }
     }
 }

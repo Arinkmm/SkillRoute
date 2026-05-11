@@ -8,6 +8,7 @@ import com.skillroute.model.Skill;
 import com.skillroute.model.StudentProfile;
 import com.skillroute.model.StudentSkill;
 import com.skillroute.model.id.StudentSkillId;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.SkillRepository;
 import com.skillroute.repository.StudentProfileRepository;
 import com.skillroute.repository.StudentSkillRepository;
@@ -24,6 +25,7 @@ public class StudentSkillService {
     private final StudentSkillRepository studentSkillRepository;
     private final SkillRepository skillRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final MessageProperties messages;
 
     @Transactional(readOnly = true)
     public List<StudentSkillResponse> getStudentSkills(Long studentId) {
@@ -50,13 +52,13 @@ public class StudentSkillService {
 
     @Transactional
     public void addSkillToStudent(Long id, AddSkillRequest form) {
-        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
+        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
-        Skill skill = skillRepository.findById(form.getId()).orElseThrow(() -> new EntityNotFoundException("Скилл отсутствует"));
+        Skill skill = skillRepository.findById(form.getId()).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSkillMissing()));
 
         StudentSkillId compositeKey = new StudentSkillId(studentProfile.getId(), skill.getId());
         if (studentSkillRepository.existsById(compositeKey)) {
-            throw new DuplicateEntityException("Этот навык уже добавлен в ваш профиль");
+            throw new DuplicateEntityException(messages.getSkill().getDuplicate());
         }
 
         StudentSkill studentSkill = StudentSkill.builder()

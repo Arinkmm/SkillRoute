@@ -43,6 +43,8 @@ mail:
   from: ${spring.mail.username}
   subject: Please verify your account
   content: "Dear user, please follow the link below to verify your account: <a href=$url>VERIFY</a>"
+  password-reset-subject: Reset your SkillRoute password
+  password-reset-content: "Dear user, please follow the link below to set a new password: <a href=$url>RESET PASSWORD</a>"
 
 redis:
   verification:
@@ -50,6 +52,76 @@ redis:
     ttl-minutes: 5
     resend-limit-prefix: "limit:resend:"
     resend-interval-minutes: 1
+    password-reset-prefix: "password-reset:token:"
+    password-reset-ttl-minutes: 15
+    password-reset-limit-prefix: "limit:password-reset:"
+    password-reset-interval-minutes: 1
 
 github:
   token: ${GITHUB_TOKEN}
+
+messages:
+  internal-server-error: "Произошла внутренняя ошибка сервера. Мы уже работаем над исправлением"
+  validation-error: "Ошибка валидации"
+  validation-success: "Данные корректны"
+  registration:
+    error-title: "Ошибка регистрации"
+    role-not-allowed: "Регистрация доступна только для студентов и компаний"
+    email-exists: "Пользователь с таким email уже существует"
+    password-mismatch: "Пароли не совпадают"
+    success: "Регистрация успешна! Проверьте почту для подтверждения"
+  password-reset:
+    error-title: "Ошибка сброса пароля"
+    token-invalid: "Ссылка восстановления недействительна или срок ее действия истек"
+    password-mismatch: "Новый пароль и подтверждение не совпадают"
+    too-many-requests: "Повторное письмо для восстановления пароля можно отправить только через %d мин."
+    email-sent: "Мы отправили письмо для восстановления пароля"
+    success: "Пароль обновлен. Теперь можно войти с новым паролем"
+  verification:
+    token-invalid: "Ссылка недействительна или срок ее действия истек"
+    too-many-requests: "Повторное письмо можно отправить только через %d мин."
+    account-not-found: "Аккаунт не найден"
+    already-verified: "Аккаунт уже подтвержден"
+    resend-success: "Регистрация успешна! Проверьте почту для подтверждения"
+  account:
+    not-found: "Аккаунт не найден"
+    current-password-invalid: "Текущий пароль введен неверно"
+    password-mismatch: "Новый пароль и подтверждение не совпадают"
+    same-password: "Новый пароль не может быть таким же, как старый"
+    password-update-error: "Ошибка изменения пароля"
+    password-updated: "Пароль успешно обновлён!"
+    profile-updated: "Профиль успешно обновлён!"
+  mail:
+    send-error: "Ошибка при отправке письма. Пожалуйста, попробуйте позже"
+  ui:
+    company-approved: "Компания подтверждена"
+    company-rejected: "Компания отклонена"
+    material-added: "Материал добавлен!"
+    vacancy-saved: "Изменения сохранены!"
+    vacancy-deleted: "Вакансия удалена"
+    roadmap-skill-added: "Навык добавлен!"
+    student-skill-added: "Навык успешно добавлен!"
+    vacancy-applied: "Отклик успешно отправлен!"
+    github-sync-success: "Синхронизация с GitHub прошла успешно! Ваши навыки обновлены"
+  entity:
+    account-not-found: "Аккаунт не найден"
+    student-not-found: "Студент не найден"
+    company-not-found: "Компания не найдена"
+    vacancy-not-found: "Вакансия не найдена"
+    skill-not-found: "Навык не найден"
+    skill-missing: "Скилл отсутствует"
+    specialization-not-found: "Специализация не найдена"
+    chat-not-found: "Чат не найден"
+    no-messages: "Нет сообщений"
+  skill:
+    duplicate: "Этот навык уже добавлен в ваш профиль"
+  vacancy:
+    duplicate-tracking: "Студент уже отслеживает эту вакансию"
+    edit-forbidden: "У вас нет прав на редактирование этой вакансии"
+    delete-forbidden: "У вас нет прав на удаление этой вакансии"
+  github:
+    url-required: "Для анализа навыков необходимо указать GitHub URL в профиле"
+    login-extract-failed: "Не удалось извлечь логин из некорректной ссылки GitHub: %s"
+    rate-limit-exceeded: "GitHub API лимит запросов исчерпан. Попробуйте позже"
+    api-error: "Ошибка обращения к GitHub API: %d"
+    network-error: "Сервис синхронизации временно недоступен из-за проблем с сетью"

@@ -1,6 +1,7 @@
 package com.skillroute.controller;
 
 import com.skillroute.dto.request.VacancyFilter;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.*;
 import jakarta.validation.Valid;
@@ -19,6 +20,7 @@ public class StudentVacancyController {
     private final RecommendationService recommendationService;
     private final StudentVacancyService studentVacancyService;
     private final RoadmapService roadmapService;
+    private final MessageProperties messages;
 
     @GetMapping
     public String vacanciesPage(@AuthenticationPrincipal CustomUserDetails user, @Valid @ModelAttribute VacancyFilter filter, Model model) {
@@ -44,7 +46,7 @@ public class StudentVacancyController {
     @PostMapping("/{id}/apply")
     public String applyToVacancy(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails user, RedirectAttributes redirectAttributes) {
         studentVacancyService.applyToVacancy(user.getId(), id);
-        redirectAttributes.addFlashAttribute("message", "Отклик успешно отправлен!");
+        redirectAttributes.addFlashAttribute("message", messages.getUi().getVacancyApplied());
         return "redirect:/student/vacancies/" + id;
     }
 }

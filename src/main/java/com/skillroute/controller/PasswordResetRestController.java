@@ -1,10 +1,10 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.request.RegistrationRequest;
+import com.skillroute.dto.request.ResetPasswordRequest;
 import com.skillroute.dto.response.ErrorResponse;
 import com.skillroute.dto.response.ValidationResponse;
 import com.skillroute.properties.MessageProperties;
-import com.skillroute.service.RegistrationService;
+import com.skillroute.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -20,16 +20,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/register")
+@RequestMapping("/password")
 @RequiredArgsConstructor
-@Tag(name = "Регистрация", description = "Эндпоинты для процесса регистрации и верификации аккаунта")
-public class RegisterRestController {
-    private final RegistrationService registrationService;
+@Tag(name = "Восстановление пароля", description = "Проверка формы восстановления пароля")
+public class PasswordResetRestController {
+    private final PasswordResetService passwordResetService;
     private final MessageProperties messages;
 
     @Operation(
-            summary = "Проверка полей",
-            description = "Валидирует данные формы регистрации без создания аккаунта. Используется для UI-подсказок."
+            summary = "Проверка полей сброса пароля",
+            description = "Валидирует данные формы без обновления пароля. Используется для UI-подсказок."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -48,7 +48,7 @@ public class RegisterRestController {
                             schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
                                     @ExampleObject(
-                                            value = "{\"message\": \"Ошибка регистрации\", \"errorCode\": 400, \"fields\": {\"email\": \"Пользователь с таким email уже существует\", \"confirmPassword\": \"Пароли не совпадают\"}}"
+                                            value = "{\"message\": \"Ошибка сброса пароля\", \"errorCode\": 400, \"fields\": {\"confirmNewPassword\": \"Новый пароль и подтверждение не совпадают\", \"token\": \"Ссылка восстановления недействительна или срок ее действия истек\"}}"
                                     )
                             }
                     )),
@@ -62,9 +62,9 @@ public class RegisterRestController {
                             )
                     ))
     })
-    @PostMapping("/check-field")
-    public ResponseEntity<ValidationResponse> checkField(@RequestBody RegistrationRequest fieldData) {
-        registrationService.validateRegistrationBusinessRules(fieldData);
+    @PostMapping("/reset/check-field")
+    public ResponseEntity<ValidationResponse> checkResetFields(@RequestBody ResetPasswordRequest fieldData) {
+        passwordResetService.validateResetPasswordBusinessRules(fieldData);
 
         return ResponseEntity.ok(ValidationResponse.builder().valid(true).message(messages.getValidationSuccess()).build());
     }

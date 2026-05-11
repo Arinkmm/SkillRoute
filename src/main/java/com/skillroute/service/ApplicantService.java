@@ -6,6 +6,7 @@ import com.skillroute.dto.response.StudentGapResponse;
 import com.skillroute.dto.response.StudentPreviewResponse;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.*;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.StudentProfileRepository;
 import com.skillroute.repository.StudentVacancyRepository;
 import com.skillroute.repository.VacancyProfileRepository;
@@ -27,10 +28,11 @@ public class ApplicantService {
     private final VacancyProfileRepository vacancyProfileRepository;
     private final MatchingService matchingService;
     private final VacancyRepository vacancyRepository;
+    private final MessageProperties messages;
 
     @Transactional(readOnly = true)
     public List<StudentPreviewResponse> getFilteredApplicants(Long vacancyId, ApplicantFilter filter) {
-        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
+        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
 
         List<StudentProfile> applicants = studentProfileRepository.findApplicantsByVacancyAndFilter(vacancyId, filter);
 

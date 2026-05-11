@@ -4,6 +4,7 @@ import com.skillroute.dto.request.MessageRequest;
 import com.skillroute.dto.response.*;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.*;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class ChatService {
     private final StudentProfileRepository studentRepository;
     private final CompanyProfileRepository companyRepository;
     private final AccountRepository accountRepository;
+    private final MessageProperties messages;
 
     @Transactional
     public Long getOrCreateChat(Long studentId, Long companyId) {
@@ -35,10 +37,10 @@ public class ChatService {
     @Transactional
     public MessageResponse sendMessage(Long chatId, Long senderId, MessageRequest request) {
         Chat chat = chatRepository.findById(chatId)
-                .orElseThrow(() -> new EntityNotFoundException("Чат не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getChatNotFound()));
 
         Account sender = accountRepository.findById(senderId)
-                .orElseThrow(() -> new EntityNotFoundException("Аккаунт не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getAccountNotFound()));
 
         Message message = Message.builder()
                 .chat(chat)
@@ -83,7 +85,7 @@ public class ChatService {
                             ? chat.getCompany().getCompanyName() : chat.getStudent().getFirstName();
                     return ChatPreviewResponse.builder()
                             .chatId(chat.getId()).opponentName(name)
-                            .lastMessage(last != null ? last.getText() : "Нет сообщений")
+                            .lastMessage(last != null ? last.getText() : messages.getEntity().getNoMessages())
                             .lastMessageTime(last != null ? last.getCreatedAt() : chat.getCreatedAt())
                             .build();
                 })

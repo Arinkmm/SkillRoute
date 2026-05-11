@@ -13,4 +13,8 @@ public class RedisProperties {
     private long ttlMinutes;
     private String resendLimitPrefix;
     private long resendIntervalMinutes;
+    private String passwordResetPrefix;
+    private long passwordResetTtlMinutes;
+    private String passwordResetLimitPrefix;
+    private long passwordResetIntervalMinutes;
 }

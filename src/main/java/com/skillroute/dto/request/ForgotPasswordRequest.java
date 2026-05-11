@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResendEmailRequest {
+public class ForgotPasswordRequest {
     @NotBlank(message = "Email обязателен")
-    @Email(message = "Неверный формат почты")
+    @Email(message = "Некорректный формат email")
     private String email;
 }

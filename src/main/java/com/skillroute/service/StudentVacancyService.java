@@ -7,6 +7,7 @@ import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.*;
 import com.skillroute.model.id.StudentVacancyId;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.StudentProfileRepository;
 import com.skillroute.repository.StudentVacancyRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +22,12 @@ import java.util.stream.Collectors;
 public class StudentVacancyService {
     private final StudentVacancyRepository studentVacancyRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final MessageProperties messages;
 
     @Transactional(readOnly = true)
     public List<VacancyResponse> getFollowedVacancies(Long studentId) {
         StudentProfile profile = studentProfileRepository.findById(studentId)
-                .orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
         return profile.getStudentVacancies().stream()
                 .map(StudentVacancy::getVacancy)
@@ -45,7 +47,7 @@ public class StudentVacancyService {
         StudentVacancyId id = new StudentVacancyId(studentId, vacancyId);
 
         if (studentVacancyRepository.existsById(id)) {
-            throw new DuplicateEntityException("Студент уже отслеживает эту вакансию");
+            throw new DuplicateEntityException(messages.getVacancy().getDuplicateTracking());
         }
 
         StudentVacancy application = StudentVacancy.builder()

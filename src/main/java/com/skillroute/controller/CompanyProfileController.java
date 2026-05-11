@@ -2,6 +2,7 @@ package com.skillroute.controller;
 
 import com.skillroute.dto.request.EditPasswordRequest;
 import com.skillroute.dto.request.UpdateCompanyRequest;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
 import com.skillroute.service.CompanyProfileService;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CompanyProfileController {
     private final CompanyProfileService companyProfileService;
     private final AccountService accountService;
+    private final MessageProperties messages;
 
     @GetMapping
     public String profilePage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
@@ -41,7 +43,7 @@ public class CompanyProfileController {
                                 @Valid @ModelAttribute UpdateCompanyRequest form,
                                 RedirectAttributes redirectAttributes) {
         companyProfileService.updateProfile(user.getId(), form);
-        redirectAttributes.addFlashAttribute("message", "Профиль успешно обновлён");
+        redirectAttributes.addFlashAttribute("message", messages.getAccount().getProfileUpdated());
         return "redirect:/company/profile";
     }
 
@@ -55,7 +57,7 @@ public class CompanyProfileController {
                                @Valid @ModelAttribute EditPasswordRequest form,
                                RedirectAttributes redirectAttributes) {
         accountService.editPassword(user.getId(), form);
-        redirectAttributes.addFlashAttribute("message", "Пароль успешно обновлён!");
+        redirectAttributes.addFlashAttribute("message", messages.getAccount().getPasswordUpdated());
         return "redirect:/company/profile";
     }
 }

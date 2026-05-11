@@ -17,14 +17,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor
-@Tag(name = "Мессенджер", description = "Операции по обмену сообщениями между пользователями")
+@Tag(name = "Чат", description = "Операции по обмену сообщениями между пользователями")
 public class ChatRestController {
     private final ChatService chatService;
 
@@ -35,21 +37,27 @@ public class ChatRestController {
                     description = "Сообщение отправлено",
                     content = @Content(
                             schema = @Schema(implementation = MessageResponse.class),
-                            examples = @ExampleObject(value = "{\"id\": 1, \"senderId\": 5, \"senderName\": \"Пользователь\", \"text\": \"Привет!\", \"createdAt\": \"2026-05-08T15:00:00\", \"isMine\": true}")
+                            examples = @ExampleObject(
+                                    value = "{\"id\": 1, \"senderId\": 5, \"senderName\": \"Пользователь\", \"text\": \"Привет!\", \"createdAt\": \"2026-05-08T15:00:00\", \"isMine\": true}"
+                            )
                     )),
             @ApiResponse(
                     responseCode = "400",
                     description = "Ошибка валидации",
                     content = @Content(
-                            schema = @Schema(implementation = Map.class),
-                            examples = @ExampleObject(value = "{\"text\": \"Сообщение не должно превышать 500 символов\"}")
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(
+                                    value = "{\"message\": \"Ошибка валидации\", \"errorCode\": 400, \"fields\": {\"text\": \"Сообщение не должно превышать 500 символов\"}}"
+                            )
                     )),
             @ApiResponse(
                     responseCode = "500",
                     description = "Внутренняя ошибка сервера",
                     content = @Content(
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = "{\"message\": \"Произошла непредвиденная ошибка при отправке сообщения\", \"errorCode\": 500}")
+                            examples = @ExampleObject(
+                                    value = "{\"message\": \"Произошла внутренняя ошибка сервера. Мы уже работаем над исправлением\", \"errorCode\": 500}"
+                            )
                     ))
     })
     @PostMapping("/{id}/send")

@@ -6,6 +6,7 @@ import com.skillroute.model.Resource;
 import com.skillroute.model.StudentSkill;
 import com.skillroute.model.Vacancy;
 import com.skillroute.model.VacancySkill;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.ResourceRepository;
 import com.skillroute.repository.StudentSkillRepository;
 import com.skillroute.repository.VacancyRepository;
@@ -24,11 +25,12 @@ public class RoadmapService {
     private final StudentSkillRepository studentSkillRepository;
     private final ResourceRepository resourceRepository;
     private final MatchingService matchingService;
+    private final MessageProperties messages;
 
     @Transactional(readOnly = true)
     public RoadmapResponse generateRoadmap(Long studentId, Long vacancyId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
 
         Map<Long, Integer> studentSkills = getStudentSkillsMap(studentId);
 

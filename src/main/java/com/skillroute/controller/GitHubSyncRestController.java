@@ -2,6 +2,7 @@ package com.skillroute.controller;
 
 import com.skillroute.dto.response.ErrorResponse;
 import com.skillroute.dto.response.SuccessResponse;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.GitHubSyncService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,9 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/student/skills/github-sync")
 @RequiredArgsConstructor
-@Tag(name = "Навыки: GitHub Sync", description = "Автоматизация обновления профиля через интеграцию с внешними API")
+@Tag(name = "Синхронизация навыков с GitHub", description = "Автоматизация обновления профиля через интеграцию с внешними API")
 public class GitHubSyncRestController {
     private final GitHubSyncService syncService;
+    private final MessageProperties messages;
 
     @Operation(
             summary = "Запуск синхронизации навыков",
@@ -31,7 +33,9 @@ public class GitHubSyncRestController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успех",
-                    content = @Content(examples = @ExampleObject(value = "{\"message\": \"Синхронизация с GitHub прошла успешно!\"}"))),
+                    content = @Content(
+                            schema = @Schema(implementation = SuccessResponse.class),
+                            examples = @ExampleObject(value = "{\"message\": \"Синхронизация с GitHub прошла успешно!\"}"))),
             @ApiResponse(responseCode = "404", description = "URL не найден",
                     content = @Content(
                             schema = @Schema(implementation = ErrorResponse.class),
@@ -56,7 +60,7 @@ public class GitHubSyncRestController {
     public ResponseEntity<SuccessResponse> triggerSync(@AuthenticationPrincipal CustomUserDetails user) {
         syncService.syncSkills(user.getId());
         return ResponseEntity.ok(SuccessResponse.builder()
-                .message("Синхронизация с GitHub прошла успешно! Ваши навыки обновлены")
+                .message(messages.getUi().getGithubSyncSuccess())
                 .build());
     }
 }

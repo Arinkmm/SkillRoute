@@ -2,6 +2,7 @@ package com.skillroute.controller;
 
 import com.skillroute.dto.request.CreateVacancyRequest;
 import com.skillroute.dto.request.UpdateVacancyRequest;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.SkillService;
 import com.skillroute.service.SpecializationService;
@@ -21,6 +22,7 @@ public class CompanyVacancyController {
     private final SpecializationService specializationService;
     private final VacancyService vacancyService;
     private final SkillService skillService;
+    private final MessageProperties messages;
 
     @GetMapping
     public String vacanciesPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
@@ -56,7 +58,7 @@ public class CompanyVacancyController {
                                 RedirectAttributes redirectAttributes) {
         vacancyService.updateVacancy(id, form, user.getId());
 
-        redirectAttributes.addFlashAttribute("message", "Изменения сохранены!");
+        redirectAttributes.addFlashAttribute("message", messages.getUi().getVacancySaved());
         return "redirect:/company/vacancies/" + id;
     }
 
@@ -66,7 +68,7 @@ public class CompanyVacancyController {
                                 RedirectAttributes redirectAttributes) {
         vacancyService.deleteVacancy(id, user.getId());
 
-        redirectAttributes.addFlashAttribute("message", "Вакансия удалена");
+        redirectAttributes.addFlashAttribute("message", messages.getUi().getVacancyDeleted());
         return "redirect:/company/vacancies";
     }
 }

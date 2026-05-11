@@ -2,6 +2,7 @@ package com.skillroute.controller;
 
 import com.skillroute.dto.request.EditPasswordRequest;
 import com.skillroute.dto.request.UpdateStudentRequest;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
 import com.skillroute.service.StudentProfileService;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class StudentProfileController {
     private final StudentProfileService studentProfileService;
     private final AccountService accountService;
+    private final MessageProperties messages;
 
     @GetMapping
     public String profilePage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
@@ -53,7 +55,7 @@ public class StudentProfileController {
                                @Valid @ModelAttribute EditPasswordRequest form,
                                RedirectAttributes redirectAttributes) {
         accountService.editPassword(user.getId(), form);
-        redirectAttributes.addFlashAttribute("message", "Пароль успешно обновлён!");
+        redirectAttributes.addFlashAttribute("message", messages.getAccount().getPasswordUpdated());
         return "redirect:/student/profile";
     }
 }

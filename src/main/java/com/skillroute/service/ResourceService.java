@@ -4,6 +4,7 @@ import com.skillroute.dto.request.AddResourceRequest;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.Resource;
 import com.skillroute.model.Skill;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.ResourceRepository;
 import com.skillroute.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ResourceService {
     private final SkillRepository skillRepository;
     private final ResourceRepository resourceRepository;
+    private final MessageProperties messages;
 
     @Transactional
     public void addResourceToSkill(Long skillId, AddResourceRequest form) {
-        Skill skill = skillRepository.findById(skillId).orElseThrow(() -> new EntityNotFoundException("Скилл не найден"));
+        Skill skill = skillRepository.findById(skillId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSkillNotFound()));
 
         Resource resource = Resource.builder()
                 .resource(form.getResource())

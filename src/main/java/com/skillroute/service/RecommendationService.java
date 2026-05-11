@@ -5,6 +5,7 @@ import com.skillroute.dto.response.VacancySkillResponse;
 import com.skillroute.dto.response.VacancyResponse;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.*;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.StudentProfileRepository;
 import com.skillroute.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,12 @@ import java.util.stream.Collectors;
 public class RecommendationService {
     private final VacancyRepository vacancyRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final MessageProperties messages;
 
     @Transactional(readOnly = true)
     public List<VacancyResponse> getRecommendedVacanciesForStudent(Long studentId, VacancyFilter filter) {
         StudentProfile profile = studentProfileRepository.findById(studentId)
-                .orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
         if (profile.getSpecialization() == null) return List.of();
 

@@ -3,6 +3,7 @@ package com.skillroute.controller;
 import com.skillroute.dto.response.RoadmapResponse;
 import com.skillroute.dto.response.RouteSkillResponse;
 import com.skillroute.dto.request.AddSkillRequest;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.*;
 import jakarta.validation.Valid;
@@ -22,6 +23,7 @@ public class RoadmapController {
     private final StudentSkillService studentSkillService;
     private final StudentVacancyService studentVacancyService;
     private final SkillService skillService;
+    private final MessageProperties messages;
 
     @GetMapping
     public String roadmapSelectionPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
@@ -64,7 +66,7 @@ public class RoadmapController {
                                RedirectAttributes redirectAttributes) {
         addDto.setId(skillId);
         studentSkillService.addSkillToStudent(user.getId(), addDto);
-        redirectAttributes.addFlashAttribute("success", "Навык добавлен!");
+        redirectAttributes.addFlashAttribute("success", messages.getUi().getRoadmapSkillAdded());
         return "redirect:/route/" + vacancyId;
     }
 }

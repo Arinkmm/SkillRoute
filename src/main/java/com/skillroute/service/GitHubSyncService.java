@@ -7,6 +7,7 @@ import com.skillroute.model.SkillDictionary;
 import com.skillroute.model.StudentProfile;
 import com.skillroute.model.StudentSkill;
 import com.skillroute.model.id.StudentSkillId;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.SkillDictionaryRepository;
 import com.skillroute.repository.SkillRepository;
 import com.skillroute.repository.StudentProfileRepository;
@@ -30,13 +31,14 @@ public class GitHubSyncService {
     private final SkillRepository skillRepository;
     private final StudentSkillRepository studentSkillRepository;
     private final GitHubSearchClient gitHubClient;
+    private final MessageProperties messages;
 
     private static final Pattern GITHUB_PATTERN = Pattern.compile("^(?:https?://)?(?:www\\.)?github\\.com/([a-zA-Z0-9-]+)(?:/.*|\\?.*|#.*)?$");
 
     @Transactional
     public void syncSkills(Long accountId) {
         StudentProfile student = profileRepository.findById(accountId)
-                .orElseThrow(() -> new EntityNotFoundException("Студент не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
         String username = extractUsernameFromUrl(student.getGithubUrl());
 
@@ -60,7 +62,7 @@ public class GitHubSyncService {
                 .orElseGet(() -> {
                     StudentSkill newSkill = new StudentSkill();
                     newSkill.setId(id);
-                    newSkill.setSkill(skillRepository.findById(skillId).orElseThrow(() -> new EntityNotFoundException("Навык не найден")));
+                    newSkill.setSkill(skillRepository.findById(skillId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSkillNotFound())));
                     return newSkill;
                 });
 
@@ -76,7 +78,7 @@ public class GitHubSyncService {
 
     private String extractUsernameFromUrl(String url) {
         if (url == null || url.isBlank()) {
-            throw new GithubUrlNotFoundException("Для анализа навыков необходимо указать GitHub URL в профиле");
+            throw new GithubUrlNotFoundException(messages.getGithub().getUrlRequired());
         }
 
         Matcher matcher = GITHUB_PATTERN.matcher(url.trim());
@@ -85,7 +87,7 @@ public class GitHubSyncService {
             return matcher.group(1);
         }
 
-        throw new DataMappingException("Не удалось извлечь логин из некорректной ссылки GitHub: " + url);
+        throw new DataMappingException(messages.getGithub().getLoginExtractFailed().formatted(url));
     }
 
     private int calculateLevel(int occurrences) {

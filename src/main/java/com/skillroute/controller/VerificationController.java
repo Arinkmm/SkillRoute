@@ -1,27 +1,31 @@
 package com.skillroute.controller;
 
-import com.skillroute.service.AccountService;
+import com.skillroute.dto.request.ResendEmailRequest;
+import com.skillroute.properties.MessageProperties;
+import com.skillroute.service.VerificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/verification")
 @RequiredArgsConstructor
 public class VerificationController {
-    private final AccountService accountService;
+    private final VerificationService verificationService;
+    private final MessageProperties messages;
 
     @GetMapping
-    public String verifyAccount(@RequestParam String token, RedirectAttributes redirectAttributes) {
-        boolean isVerified = accountService.verifyUser(token);
-        if (isVerified) {
-            return "verified";
-        } else {
-            redirectAttributes.addFlashAttribute("error", "Ссылка недействительна или срок её действия истек");
-            return "redirect:/login";
-        }
+    public String verificationPage(@RequestParam String token) {
+        verificationService.verifyUser(token);
+        return "verified";
+    }
+
+    @PostMapping("/resend")
+    public String resendVerification(@Valid @ModelAttribute ResendEmailRequest form, RedirectAttributes redirectAttributes) {
+        verificationService.resendVerificationEmail(form.getEmail());
+        redirectAttributes.addFlashAttribute("successMessage", messages.getVerification().getResendSuccess());
+        return "redirect:/login";
     }
 }

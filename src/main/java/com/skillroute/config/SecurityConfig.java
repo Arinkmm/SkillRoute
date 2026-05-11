@@ -33,8 +33,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/", "/login", "/register", "/verification", "/verification/**", "/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/register", "/register/check-field", "/register/resend-verification").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/verification", "/verification/**", "/password/forgot", "/password/reset", "/error").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/register", "/register/check-field", "/register/resend-verification", "/password/forgot", "/password/reset", "/password/reset/check-field").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/student/profile", "/student/profile/**").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.GET, "/student/**", "/route/**").hasRole("STUDENT")

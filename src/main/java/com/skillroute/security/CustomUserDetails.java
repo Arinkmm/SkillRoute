@@ -15,7 +15,15 @@ public class CustomUserDetails extends User {
     private final Account account;
 
     public CustomUserDetails(Account account) {
-        super(account.getEmail(), account.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_" + account.getRole().name())));
+        super(
+                account.getEmail(),
+                account.getPassword(),
+                account.isVerified(),
+                true,
+                true,
+                true,
+                List.of(new SimpleGrantedAuthority("ROLE_" + account.getRole().name()))
+        );
         this.id = account.getId();
         this.role = account.getRole();
         this.account = account;

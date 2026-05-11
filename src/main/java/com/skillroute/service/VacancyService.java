@@ -9,6 +9,7 @@ import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.ResourceOwnershipException;
 import com.skillroute.model.*;
 import com.skillroute.model.id.VacancySkillId;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class VacancyService {
     private final CompanyProfileRepository companyProfileRepository;
     private final SpecializationRepository specializationRepository;
     private final SkillRepository skillRepository;
+    private final MessageProperties messages;
 
     @Transactional(readOnly = true)
     public List<VacancyResponse> getAllActive() {
@@ -53,17 +55,17 @@ public class VacancyService {
     @Transactional(readOnly = true)
     public VacancyResponse getVacancyById(Long id) {
         Vacancy vacancy = vacancyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
         return mapToResponseDto(vacancy);
     }
 
     @Transactional
     public void createVacancy(CreateVacancyRequest dto, Long companyId) {
         CompanyProfile company = companyProfileRepository.findById(companyId)
-                .orElseThrow(() -> new EntityNotFoundException("Компания не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
 
         Specialization spec = specializationRepository.findById(dto.getSpecializationId())
-                .orElseThrow(() -> new EntityNotFoundException("Специализация не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSpecializationNotFound()));
 
         Vacancy vacancy = Vacancy.builder()
                 .name(dto.getName())
@@ -87,10 +89,10 @@ public class VacancyService {
     @Transactional
     public void updateVacancy(Long vacancyId, UpdateVacancyRequest dto, Long companyId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
 
         if (!vacancy.getCompany().getId().equals(companyId)) {
-            throw new ResourceOwnershipException("У вас нет прав на редактирование этой вакансии");
+            throw new ResourceOwnershipException(messages.getVacancy().getEditForbidden());
         }
 
         vacancy.setName(dto.getName());
@@ -107,10 +109,10 @@ public class VacancyService {
     @Transactional
     public void deleteVacancy(Long vacancyId, Long currentCompanyId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new EntityNotFoundException("Вакансия не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
 
         if (!vacancy.getCompany().getId().equals(currentCompanyId)) {
-            throw new ResourceOwnershipException("У вас нет прав на удаление этой вакансии");
+            throw new ResourceOwnershipException(messages.getVacancy().getDeleteForbidden());
         }
 
         vacancyRepository.delete(vacancy);
@@ -121,7 +123,7 @@ public class VacancyService {
 
         Set<VacancySkill> skills = skillDtos.stream().map(sDto -> {
             Skill skill = skillRepository.findById(sDto.getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Навык не найден"));
+                    .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSkillNotFound()));
 
             return VacancySkill.builder()
                     .id(new VacancySkillId(vacancy.getId(), skill.getId()))

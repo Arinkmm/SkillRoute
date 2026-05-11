@@ -6,6 +6,7 @@ import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.model.CompanyProfile;
 import com.skillroute.model.Role;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.CompanyProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompanyProfileService {
     private final CompanyProfileRepository companyProfileRepository;
+    private final MessageProperties messages;
 
     @EventListener
     public void handleAccountRegistration(AccountRegisteredEvent event) {
@@ -32,7 +34,7 @@ public class CompanyProfileService {
     public CompanyProfileResponse getCompanyById(Long accountId) {
         return companyProfileRepository.findById(accountId)
                 .map(this::mapToResponseDto)
-                .orElseThrow(() -> new EntityNotFoundException("Компания не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
     }
 
     @Transactional(readOnly = true)
@@ -42,9 +44,16 @@ public class CompanyProfileService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<CompanyProfileResponse> getConfirmedCompanies() {
+        return companyProfileRepository.findAllConfirmed().stream()
+                .map(this::mapToResponseDto)
+                .toList();
+    }
+
     @Transactional
     public void updateProfile(Long id, UpdateCompanyRequest form) {
-        CompanyProfile companyProfile = companyProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Компания не найдена"));
+        CompanyProfile companyProfile = companyProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
 
         companyProfile.setCompanyName(form.getCompanyName());
         companyProfile.setDescription(form.getDescription());
@@ -53,14 +62,14 @@ public class CompanyProfileService {
 
     @Transactional
     public void approveCompany(Long companyId) {
-        CompanyProfile companyProfile = companyProfileRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException("Компания не найдена"));
+        CompanyProfile companyProfile = companyProfileRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
 
         companyProfile.setConfirmed(true);
     }
 
     @Transactional
     public void rejectCompany(Long companyId) {
-        CompanyProfile companyProfile = companyProfileRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException("Компания не найдена"));
+        CompanyProfile companyProfile = companyProfileRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
 
         companyProfile.setConfirmed(false);
     }

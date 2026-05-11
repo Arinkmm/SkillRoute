@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/student/skills")
 @RequiredArgsConstructor
-@Tag(name = "Навыки: Поиск", description = "Операции по поиску и фильтрации навыков в словаре системы")
+@Tag(name = "Поиск навыков", description = "Операции по поиску и фильтрации навыков в словаре системы")
 public class StudentSkillRestController {
     private final StudentSkillService studentSkillService;
 

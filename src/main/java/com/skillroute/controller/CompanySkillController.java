@@ -1,6 +1,7 @@
 package com.skillroute.controller;
 
 import com.skillroute.dto.request.AddResourceRequest;
+import com.skillroute.properties.MessageProperties;
 import com.skillroute.service.ResourceService;
 import com.skillroute.service.SkillService;
 import jakarta.validation.Valid;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CompanySkillController {
     private final SkillService  skillService;
     private final ResourceService resourceService;
+    private final MessageProperties messages;
 
     @GetMapping
     public String skillsPage(Model model) {
@@ -41,7 +43,7 @@ public class CompanySkillController {
                               @Valid @ModelAttribute AddResourceRequest form,
                               RedirectAttributes redirectAttributes) {
         resourceService.addResourceToSkill(id, form);
-        redirectAttributes.addFlashAttribute("success", "Материал добавлен!");
+        redirectAttributes.addFlashAttribute("success", messages.getUi().getMaterialAdded());
         return "redirect:/company/skills/" + id;
     }
 }

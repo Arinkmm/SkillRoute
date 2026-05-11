@@ -18,7 +18,7 @@ public class IndexController {
 
     @ModelAttribute("companies")
     public List<CompanyProfileResponse> getCompanies() {
-        return companyProfileService.getAllCompanies();
+        return companyProfileService.getConfirmedCompanies();
     }
 
     @GetMapping

@@ -13,4 +13,6 @@ public class MailProperties {
     private String sender;
     private String subject;
     private String content;
+    private String passwordResetSubject;
+    private String passwordResetContent;
 }
