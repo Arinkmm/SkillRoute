@@ -5,6 +5,7 @@ import com.skillroute.dto.response.SpecializationResponse;
 import com.skillroute.dto.response.StudentProfileResponse;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.exception.FieldValidationException;
 import com.skillroute.model.Role;
 import com.skillroute.model.Specialization;
 import com.skillroute.model.StudentProfile;
@@ -15,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +45,8 @@ public class StudentProfileService {
     public void updateProfile(Long id, UpdateStudentRequest form) {
         StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
+        validateNameFields(form);
+
         studentProfile.setFirstName(form.getFirstName());
         studentProfile.setLastName(form.getLastName());
         studentProfile.setGithubUrl(form.getGitHubUrl());
@@ -61,6 +67,28 @@ public class StudentProfileService {
 
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private void validateNameFields(UpdateStudentRequest form) {
+        boolean hasFirstName = hasText(form.getFirstName());
+        boolean hasLastName = hasText(form.getLastName());
+
+        if (hasFirstName == hasLastName) {
+            return;
+        }
+
+        Map<String, String> errors = new LinkedHashMap<>();
+        String message = messages.getAccount().getProfileNamePairRequired();
+
+        if (!hasFirstName) {
+            errors.put("firstName", message);
+        }
+
+        if (!hasLastName) {
+            errors.put("lastName", message);
+        }
+
+        throw new FieldValidationException(messages.getValidationError(), errors);
     }
 
     private StudentProfileResponse mapToResponseDto(StudentProfile profile) {

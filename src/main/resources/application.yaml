@@ -91,6 +91,7 @@ messages:
     password-update-error: "Ошибка изменения пароля"
     password-updated: "Пароль успешно обновлён!"
     profile-updated: "Профиль успешно обновлён!"
+    profile-name-pair-required: "Имя и фамилию нужно заполнить вместе или оставить оба поля пустыми"
   mail:
     send-error: "Ошибка при отправке письма. Пожалуйста, попробуйте позже"
   ui:

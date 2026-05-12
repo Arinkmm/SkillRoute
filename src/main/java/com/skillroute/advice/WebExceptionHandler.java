@@ -31,7 +31,6 @@ public class WebExceptionHandler {
     public String handleFieldValidation(FieldValidationException e, RedirectAttributes redirectAttributes, HttpServletRequest req) {
         log.error("Ошибки бизнес-валидации формы: {}", e.getFields());
         redirectAttributes.addFlashAttribute("validationErrors", e.getFields());
-        redirectAttributes.addFlashAttribute("error", e.getMessage());
         String referer = req.getHeader("Referer");
         return "redirect:" + (referer != null ? referer : "/");
     }

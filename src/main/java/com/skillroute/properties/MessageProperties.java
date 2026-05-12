@@ -63,6 +63,7 @@ public class MessageProperties {
         private String passwordUpdateError;
         private String passwordUpdated;
         private String profileUpdated;
+        private String profileNamePairRequired;
     }
 
     @Getter
