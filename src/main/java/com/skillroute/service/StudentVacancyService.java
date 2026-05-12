@@ -11,6 +11,7 @@ import com.skillroute.model.id.StudentVacancyId;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.StudentProfileRepository;
 import com.skillroute.repository.StudentVacancyRepository;
+import com.skillroute.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class StudentVacancyService {
     private final StudentVacancyRepository studentVacancyRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final VacancyRepository vacancyRepository;
     private final MessageProperties messages;
 
     @Transactional(readOnly = true)
@@ -51,8 +53,13 @@ public class StudentVacancyService {
             throw new DuplicateEntityException(messages.getVacancy().getDuplicateTracking());
         }
 
+        StudentProfile student = studentProfileRepository.findById(studentId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
+        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
+
         StudentVacancy application = StudentVacancy.builder()
                 .id(id)
+                .student(student)
+                .vacancy(vacancy)
                 .build();
 
         studentVacancyRepository.save(application);

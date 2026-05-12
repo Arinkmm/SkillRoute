@@ -1,7 +1,7 @@
 package com.skillroute.controller;
 
 import com.skillroute.dto.response.ErrorResponse;
-import com.skillroute.dto.response.SuccessResponse;
+import com.skillroute.dto.response.GitHubSyncResponse;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.GitHubSyncService;
@@ -22,20 +22,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/student/skills/github-sync")
 @RequiredArgsConstructor
-@Tag(name = "Синхронизация навыков с GitHub", description = "Автоматизация обновления профиля через интеграцию с внешними API")
+@Tag(name = "Синхронизация навыков с GitHub", description = "Обновление навыков студента через анализ публичных репозиториев GitHub")
 public class GitHubSyncRestController {
     private final GitHubSyncService syncService;
     private final MessageProperties messages;
 
     @Operation(
             summary = "Запуск синхронизации навыков",
-            description = "Сканирует публичные репозитории пользователя на GitHub для обновления уровней владения технологиями"
+            description = "Сканирует публичные репозитории пользователя на GitHub и возвращает количество подтвержденных навыков"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успех",
                     content = @Content(
-                            schema = @Schema(implementation = SuccessResponse.class),
-                            examples = @ExampleObject(value = "{\"message\": \"Синхронизация с GitHub прошла успешно!\"}"))),
+                            schema = @Schema(implementation = GitHubSyncResponse.class),
+                            examples = @ExampleObject(value = "{\"message\": \"Синхронизация с GitHub прошла успешно!\", \"confirmedCount\": 3}"))),
             @ApiResponse(responseCode = "404", description = "URL не найден",
                     content = @Content(
                             schema = @Schema(implementation = ErrorResponse.class),
@@ -57,10 +57,13 @@ public class GitHubSyncRestController {
                     ))
     })
     @PostMapping
-    public ResponseEntity<SuccessResponse> triggerSync(@AuthenticationPrincipal CustomUserDetails user) {
-        syncService.syncSkills(user.getId());
-        return ResponseEntity.ok(SuccessResponse.builder()
-                .message(messages.getUi().getGithubSyncSuccess())
+    public ResponseEntity<GitHubSyncResponse> triggerSync(@AuthenticationPrincipal CustomUserDetails user) {
+        int confirmedCount = syncService.syncSkills(user.getId());
+        String message = confirmedCount > 0 ? messages.getUi().getGithubSyncSuccess() : messages.getUi().getGithubSyncFailed();
+
+        return ResponseEntity.ok(GitHubSyncResponse.builder()
+                .message(message)
+                .confirmedCount(confirmedCount)
                 .build());
     }
 }

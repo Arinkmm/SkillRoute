@@ -2,6 +2,7 @@ package com.skillroute.controller;
 
 import com.skillroute.dto.response.ErrorResponse;
 import com.skillroute.dto.response.StudentSkillResponse;
+import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.StudentSkillService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,8 +48,9 @@ public class StudentSkillRestController {
     })
     @GetMapping("/search")
     public ResponseEntity<List<StudentSkillResponse>> searchSkills(
+            @AuthenticationPrincipal CustomUserDetails user,
             @Parameter(description = "Название или часть названия навыка", example = "Java")
-            @RequestParam("name") String name) {
-        return ResponseEntity.ok(studentSkillService.getStudentsSkillsByName(name));
+            @RequestParam(value = "name", defaultValue = "") String name) {
+        return ResponseEntity.ok(studentSkillService.getStudentsSkillsByName(user.getId(), name));
     }
 }

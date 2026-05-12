@@ -27,8 +27,14 @@ public class CompanyVacancyController {
     @GetMapping
     public String vacanciesPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
         model.addAttribute("vacancies", vacancyService.getVacanciesByCompany(user.getId()));
-            return "company/vacancies";
-        }
+        return "company/vacancies";
+    }
+
+    @GetMapping("/{id}")
+    public String vacancyDetails(@PathVariable Long id, Model model) {
+        model.addAttribute("vacancy", vacancyService.getVacancyById(id));
+        return "company/vacancy-details";
+    }
 
     @GetMapping("/create")
     public String createVacancyForm(Model model) {
@@ -48,6 +54,7 @@ public class CompanyVacancyController {
     public String updateVacancyForm(@PathVariable Long id, Model model) {
         model.addAttribute("vacancy", vacancyService.getVacancyById(id));
         model.addAttribute("specializations", specializationService.getSpecializations());
+        model.addAttribute("skills", skillService.getSkills());
         return "company/update-vacancy";
     }
 

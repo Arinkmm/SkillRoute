@@ -84,6 +84,7 @@ public class MessageProperties {
         private String studentSkillAdded;
         private String vacancyApplied;
         private String githubSyncSuccess;
+        private String githubSyncFailed;
     }
 
     @Getter

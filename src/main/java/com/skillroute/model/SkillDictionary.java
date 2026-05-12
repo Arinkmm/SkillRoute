@@ -21,6 +21,9 @@ public class SkillDictionary {
     @Column(name = "import_pattern", nullable = false)
     private String importPattern;
 
+    @Column(name = "quick_signals")
+    private String quickSignals;
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

@@ -28,9 +28,11 @@ public class Vacancy {
     private VacancyProfile profile;
 
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<VacancySkill> vacancySkills = new HashSet<>();
 
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<StudentVacancy> studentVacancies = new HashSet<>();
 
     @Override

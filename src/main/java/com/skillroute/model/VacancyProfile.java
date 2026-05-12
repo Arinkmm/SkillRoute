@@ -38,6 +38,7 @@ public class VacancyProfile {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private VacancyStatus status = VacancyStatus.OPEN;
 
     @Override

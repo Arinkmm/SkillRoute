@@ -29,6 +29,7 @@ public class Message {
     private String text;
 
     @Column(name = "is_read")
+    @Builder.Default
     private boolean isRead = false;
 
     @Column(name = "created_at")

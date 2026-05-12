@@ -2,6 +2,7 @@ package com.skillroute.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddSkillRequest {
+    @NotNull(message = "Выберите навык")
     private Long skillId;
 
     @Min(value = 1, message = "Уровень не может быть ниже 1")

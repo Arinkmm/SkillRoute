@@ -37,6 +37,7 @@ public class Account {
     private Role role;
 
     @Column(name = "is_verified")
+    @Builder.Default
     private boolean isVerified = false;
 
     @Override

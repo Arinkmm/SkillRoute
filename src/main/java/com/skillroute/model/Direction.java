@@ -1,5 +1,11 @@
 package com.skillroute.model;
 
 public enum Direction {
-    BACKEND
+    BACKEND,
+    FRONTEND,
+    FULLSTACK,
+    MOBILE,
+    DATA,
+    DEVOPS,
+    QA
 }

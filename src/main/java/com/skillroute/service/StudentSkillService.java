@@ -40,10 +40,9 @@ public class StudentSkillService {
     }
 
     @Transactional(readOnly = true)
-    public List<StudentSkillResponse> getStudentsSkillsByName(String query) {
-        return studentSkillRepository.findByNameContainingIgnoreCase(query).stream()
-                .map(ss -> new StudentSkillResponse(ss.getSkill().getId(), ss.getSkill().getName(), ss.getLevel(), ss.isConfirmedByGitHub()))
-                .toList();
+    public List<StudentSkillResponse> getStudentsSkillsByName(Long studentId, String query) {
+        String normalizedQuery = query == null ? "" : query.trim();
+        return studentSkillRepository.findAllByStudentIdAndSkillNameContainingIgnoreCase(studentId, normalizedQuery).stream().map(ss -> new StudentSkillResponse(ss.getSkill().getId(), ss.getSkill().getName(), ss.getLevel(), ss.isConfirmedByGitHub())).toList();
     }
 
     @Transactional(readOnly = true)

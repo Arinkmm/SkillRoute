@@ -29,6 +29,7 @@ public class StudentVacancy {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private StudentVacancyStatus status = StudentVacancyStatus.SUBMITTED;
 
     @Override

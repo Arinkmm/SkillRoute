@@ -24,12 +24,15 @@ public class Skill {
     private String name;
 
     @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<StudentSkill> studentSkills = new HashSet<>();
 
     @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<VacancySkill> vacancySkills = new HashSet<>();
 
     @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Resource> resources = new HashSet<>();
 
     @Override

@@ -13,8 +13,8 @@ CREATE TABLE specialization (
     id BIGSERIAL PRIMARY KEY,
     direction VARCHAR(50) NOT NULL,
     language VARCHAR(100) NOT NULL,
-    CONSTRAINT check_direction CHECK (direction IN ('BACKEND')),
-    CONSTRAINT check_language CHECK (language IN ('JAVA'))
+    CONSTRAINT check_direction CHECK (direction IN ('BACKEND', 'FRONTEND', 'FULLSTACK', 'MOBILE', 'DATA', 'DEVOPS', 'QA')),
+    CONSTRAINT check_language CHECK (language IN ('JAVA', 'JAVASCRIPT', 'TYPESCRIPT', 'PYTHON', 'CSHARP', 'KOTLIN', 'SWIFT', 'GO', 'CPP', 'PHP', 'RUBY', 'RUST', 'SQL', 'CLOUD'))
 );
 
 CREATE TABLE student_profile (

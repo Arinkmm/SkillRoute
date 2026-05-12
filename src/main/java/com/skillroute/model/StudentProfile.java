@@ -41,12 +41,15 @@ public class StudentProfile {
     private String bio;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<StudentSkill> studentSkills = new HashSet<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<StudentVacancy> studentVacancies = new HashSet<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Chat> chats = new HashSet<>();
 
     @Override

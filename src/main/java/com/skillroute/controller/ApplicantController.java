@@ -57,6 +57,6 @@ public class ApplicantController {
     public String initiateChat(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long vacancyId, @PathVariable Long studentId) {
         Long chatId = chatService.getOrCreateChat(studentId, user.getId());
         applicantService.startInterviewing(studentId, vacancyId);
-        return "redirect:/chat/" + chatId;
+        return "redirect:/company/chat/" + chatId;
     }
 }

@@ -32,6 +32,7 @@ public class VacancySkill {
     @Min(value = 1, message = "Уровень не может быть ниже 1")
     @Max(value = 5, message = "Уровень не может быть выше 5")
     @Column(nullable = false)
+    @Builder.Default
     private Integer level = 1;
 
     @Override

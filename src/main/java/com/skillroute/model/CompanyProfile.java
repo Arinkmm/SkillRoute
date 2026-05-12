@@ -33,12 +33,15 @@ public class CompanyProfile {
     private String websiteUrl;
 
     @Column(name = "is_confirmed")
+    @Builder.Default
     private boolean isConfirmed =  false;
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<Vacancy> vacancies = new HashSet<>();
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    @Builder.Default
     private Set<Chat> chats = new HashSet<>();
 
     @Override

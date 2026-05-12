@@ -30,11 +30,13 @@ public class StudentSkill {
     private Skill skill;
 
     @Column(name = "is_confirmed_by_github")
+    @Builder.Default
     private boolean isConfirmedByGitHub = false;
 
     @Min(value = 1, message = "Уровень не может быть ниже 1")
     @Max(value = 5, message = "Уровень не может быть выше 5")
     @Column(nullable = false)
+    @Builder.Default
     private int level = 1;
 
     @Override
