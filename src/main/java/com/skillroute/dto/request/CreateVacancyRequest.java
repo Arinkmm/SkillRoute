@@ -1,6 +1,7 @@
 package com.skillroute.dto.request;
 
 import com.skillroute.model.WorkSchedule;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -25,5 +26,6 @@ public class CreateVacancyRequest {
 
     private WorkSchedule workSchedule;
 
+    @Valid
     private List<AddSkillRequest> skills;
 }

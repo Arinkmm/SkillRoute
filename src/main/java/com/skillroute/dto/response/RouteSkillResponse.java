@@ -1,6 +1,5 @@
 package com.skillroute.dto.response;
 
-import com.skillroute.dto.request.AddResourceRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +14,5 @@ import java.util.List;
 public class RouteSkillResponse {
     private Long skillId;
     private String name;
-    private List<AddResourceRequest> resources;
+    private List<ResourceResponse> resources;
 }

@@ -14,6 +14,6 @@ public class StudentProfileResponse {
     private String firstName;
     private String lastName;
     private String githubUrl;
-    private Long specializationId;
+    private SpecializationResponse specialization;
     private String bio;
 }

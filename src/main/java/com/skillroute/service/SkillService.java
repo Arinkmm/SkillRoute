@@ -1,6 +1,6 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.request.AddResourceRequest;
+import com.skillroute.dto.response.ResourceResponse;
 import com.skillroute.dto.response.RouteSkillResponse;
 import com.skillroute.dto.response.SkillResponse;
 import com.skillroute.exception.EntityNotFoundException;
@@ -44,7 +44,7 @@ public class SkillService {
                 .skillId(skill.getId())
                 .name(skill.getName())
                 .resources(skill.getResources().stream()
-                        .map(res -> AddResourceRequest.builder()
+                        .map(res -> ResourceResponse.builder()
                                 .resource(res.getResource())
                                 .build())
                         .toList())

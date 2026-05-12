@@ -3,6 +3,7 @@ package com.skillroute.service;
 import com.skillroute.dto.request.AddSkillRequest;
 import com.skillroute.dto.request.CreateVacancyRequest;
 import com.skillroute.dto.request.UpdateVacancyRequest;
+import com.skillroute.dto.response.SpecializationResponse;
 import com.skillroute.dto.response.VacancyResponse;
 import com.skillroute.dto.response.VacancySkillResponse;
 import com.skillroute.exception.EntityNotFoundException;
@@ -98,6 +99,10 @@ public class VacancyService {
         vacancy.setName(dto.getName());
 
         VacancyProfile profile = vacancy.getProfile();
+        if (dto.getSpecializationId() != null) {
+            Specialization spec = specializationRepository.findById(dto.getSpecializationId()).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSpecializationNotFound()));
+            profile.setSpecialization(spec);
+        }
         profile.setSalary(dto.getSalary());
         profile.setWorkSchedule(dto.getWorkSchedule());
         profile.setStatus(dto.getStatus());
@@ -122,7 +127,7 @@ public class VacancyService {
         if (skillDtos == null || skillDtos.isEmpty()) return;
 
         Set<VacancySkill> skills = skillDtos.stream().map(sDto -> {
-            Skill skill = skillRepository.findById(sDto.getId())
+            Skill skill = skillRepository.findById(sDto.getSkillId())
                     .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSkillNotFound()));
 
             return VacancySkill.builder()
@@ -147,14 +152,25 @@ public class VacancyService {
                 .salary(profile.getSalary())
                 .workSchedule(profile.getWorkSchedule())
                 .status(profile.getStatus())
-                .language(spec.getLanguage())
-                .direction(spec.getDirection())
+                .specialization(mapSpecialization(spec))
                 .skills(vacancy.getVacancySkills().stream()
                         .map(vs -> new VacancySkillResponse(
                                 vs.getSkill().getId(),
                                 vs.getSkill().getName(),
                                 vs.getLevel()))
                         .collect(Collectors.toList()))
+                .build();
+    }
+
+    private SpecializationResponse mapSpecialization(Specialization specialization) {
+        if (specialization == null) {
+            return null;
+        }
+
+        return SpecializationResponse.builder()
+                .id(specialization.getId())
+                .direction(specialization.getDirection())
+                .language(specialization.getLanguage())
                 .build();
     }
 }

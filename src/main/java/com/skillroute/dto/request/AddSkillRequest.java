@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddSkillRequest {
-    private Long id;
+    private Long skillId;
 
     @Min(value = 1, message = "Уровень не может быть ниже 1")
     @Max(value = 5, message = "Уровень не может быть выше 5")

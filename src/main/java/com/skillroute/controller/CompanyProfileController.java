@@ -2,6 +2,7 @@ package com.skillroute.controller;
 
 import com.skillroute.dto.request.EditPasswordRequest;
 import com.skillroute.dto.request.UpdateCompanyRequest;
+import com.skillroute.model.CompanyProfile;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
@@ -35,6 +36,7 @@ public class CompanyProfileController {
     public String updateProfilePage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
         model.addAttribute("account", user.getAccount());
         model.addAttribute("profile", user.getAccount().getCompanyProfile());
+        model.addAttribute("updateCompanyForm", buildCompanyForm(user.getAccount().getCompanyProfile()));
         return "company/update-profile";
     }
 
@@ -48,7 +50,9 @@ public class CompanyProfileController {
     }
 
     @GetMapping("/edit-password")
-    public String editPasswordPage() {
+    public String editPasswordPage(Model model) {
+        model.addAttribute("editPasswordForm", new EditPasswordRequest());
+        model.addAttribute("profilePath", "/company/profile");
         return "edit-password";
     }
 
@@ -59,5 +63,17 @@ public class CompanyProfileController {
         accountService.editPassword(user.getId(), form);
         redirectAttributes.addFlashAttribute("message", messages.getAccount().getPasswordUpdated());
         return "redirect:/company/profile";
+    }
+
+    private UpdateCompanyRequest buildCompanyForm(CompanyProfile profile) {
+        if (profile == null) {
+            return new UpdateCompanyRequest();
+        }
+
+        return UpdateCompanyRequest.builder()
+                .companyName(profile.getCompanyName())
+                .description(profile.getDescription())
+                .websiteUrl(profile.getWebsiteUrl())
+                .build();
     }
 }

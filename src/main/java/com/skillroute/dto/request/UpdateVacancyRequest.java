@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.skillroute.model.VacancyStatus;
 import com.skillroute.model.WorkSchedule;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,8 @@ import lombok.NoArgsConstructor;
 public class UpdateVacancyRequest {
     private String name;
 
+    private Long specializationId;
+
     @Positive(message = "Зарплата должна быть больше нуля")
     @Max(value = 100000000, message = "Слишком большая сумма, проверьте корректность")
     private Long salary;
@@ -26,5 +29,6 @@ public class UpdateVacancyRequest {
 
     private VacancyStatus status;
 
+    @Valid
     private List<AddSkillRequest> skills;
 }

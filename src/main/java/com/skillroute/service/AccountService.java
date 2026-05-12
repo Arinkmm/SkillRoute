@@ -21,8 +21,8 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final MessageProperties messages;
 
-    @Transactional
-    public void editPassword(Long id, EditPasswordRequest form) {
+    @Transactional(readOnly = true)
+    public void validateEditPasswordBusinessRules(Long id, EditPasswordRequest form) {
         MessageProperties.Account accountMessages = messages.getAccount();
         Account account = accountRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(accountMessages.getNotFound()));
 
@@ -43,6 +43,14 @@ public class AccountService {
         if (!errors.isEmpty()) {
             throw new FieldValidationException(accountMessages.getPasswordUpdateError(), errors);
         }
+    }
+
+    @Transactional
+    public void editPassword(Long id, EditPasswordRequest form) {
+        validateEditPasswordBusinessRules(id, form);
+
+        MessageProperties.Account accountMessages = messages.getAccount();
+        Account account = accountRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(accountMessages.getNotFound()));
 
         account.setPassword(passwordEncoder.encode(form.getNewPassword()));
         accountRepository.save(account);

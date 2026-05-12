@@ -31,6 +31,7 @@ public class StudentSkillService {
     public List<StudentSkillResponse> getStudentSkills(Long studentId) {
         return studentSkillRepository.findAllByStudentId(studentId).stream()
                 .map(ss -> StudentSkillResponse.builder()
+                        .skillId(ss.getSkill().getId())
                         .name(ss.getSkill().getName())
                         .level(ss.getLevel())
                         .isConfirmedByGitHub(ss.isConfirmedByGitHub())
@@ -54,7 +55,7 @@ public class StudentSkillService {
     public void addSkillToStudent(Long id, AddSkillRequest form) {
         StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
-        Skill skill = skillRepository.findById(form.getId()).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSkillMissing()));
+        Skill skill = skillRepository.findById(form.getSkillId()).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSkillMissing()));
 
         StudentSkillId compositeKey = new StudentSkillId(studentProfile.getId(), skill.getId());
         if (studentSkillRepository.existsById(compositeKey)) {

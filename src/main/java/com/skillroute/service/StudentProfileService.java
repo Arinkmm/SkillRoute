@@ -1,6 +1,7 @@
 package com.skillroute.service;
 
 import com.skillroute.dto.request.UpdateStudentRequest;
+import com.skillroute.dto.response.SpecializationResponse;
 import com.skillroute.dto.response.StudentProfileResponse;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
@@ -69,7 +70,19 @@ public class StudentProfileService {
                 .lastName(profile.getLastName())
                 .githubUrl(profile.getGithubUrl())
                 .bio(profile.getBio())
-                .specializationId(profile.getSpecialization() != null ? profile.getSpecialization().getId() : null)
+                .specialization(mapSpecialization(profile.getSpecialization()))
+                .build();
+    }
+
+    private SpecializationResponse mapSpecialization(Specialization specialization) {
+        if (specialization == null) {
+            return null;
+        }
+
+        return SpecializationResponse.builder()
+                .id(specialization.getId())
+                .direction(specialization.getDirection())
+                .language(specialization.getLanguage())
                 .build();
     }
 }

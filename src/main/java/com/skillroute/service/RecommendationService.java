@@ -1,6 +1,7 @@
 package com.skillroute.service;
 
 import com.skillroute.dto.request.VacancyFilter;
+import com.skillroute.dto.response.SpecializationResponse;
 import com.skillroute.dto.response.VacancySkillResponse;
 import com.skillroute.dto.response.VacancyResponse;
 import com.skillroute.exception.EntityNotFoundException;
@@ -46,14 +47,25 @@ public class RecommendationService {
                 .salary(profile.getSalary())
                 .workSchedule(profile.getWorkSchedule())
                 .status(profile.getStatus())
-                .language(spec.getLanguage())
-                .direction(spec.getDirection())
+                .specialization(mapSpecialization(spec))
                 .skills(vacancy.getVacancySkills().stream()
                         .map(vs -> new VacancySkillResponse(
                                 vs.getSkill().getId(),
                                 vs.getSkill().getName(),
                                 vs.getLevel()))
                         .collect(Collectors.toList()))
+                .build();
+    }
+
+    private SpecializationResponse mapSpecialization(Specialization specialization) {
+        if (specialization == null) {
+            return null;
+        }
+
+        return SpecializationResponse.builder()
+                .id(specialization.getId())
+                .direction(specialization.getDirection())
+                .language(specialization.getLanguage())
                 .build();
     }
 }

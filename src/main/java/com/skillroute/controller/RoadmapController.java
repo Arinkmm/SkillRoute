@@ -61,11 +61,11 @@ public class RoadmapController {
     @PostMapping("/{vacancyId}/skills/{skillId}/acquire")
     public String acquireSkill(@PathVariable Long vacancyId,
                                @PathVariable Long skillId,
-                               @Valid @ModelAttribute AddSkillRequest addDto,
+                               @Valid @ModelAttribute AddSkillRequest form,
                                @AuthenticationPrincipal CustomUserDetails user,
                                RedirectAttributes redirectAttributes) {
-        addDto.setId(skillId);
-        studentSkillService.addSkillToStudent(user.getId(), addDto);
+        form.setSkillId(skillId);
+        studentSkillService.addSkillToStudent(user.getId(), form);
         redirectAttributes.addFlashAttribute("success", messages.getUi().getRoadmapSkillAdded());
         return "redirect:/route/" + vacancyId;
     }

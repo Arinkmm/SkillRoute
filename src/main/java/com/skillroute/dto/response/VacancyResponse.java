@@ -1,7 +1,5 @@
 package com.skillroute.dto.response;
 
-import com.skillroute.model.Direction;
-import com.skillroute.model.Language;
 import com.skillroute.model.VacancyStatus;
 import com.skillroute.model.WorkSchedule;
 
@@ -23,7 +21,6 @@ public class VacancyResponse {
     private Long salary;
     private WorkSchedule workSchedule;
     private VacancyStatus status;
-    private Language language;
-    private Direction direction;
+    private SpecializationResponse specialization;
     private List<VacancySkillResponse> skills;
 }
