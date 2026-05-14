@@ -105,6 +105,8 @@ messages:
     vacancy-applied: "Отклик успешно отправлен!"
     github-sync-success: "Синхронизация с GitHub прошла успешно! Ваши навыки обновлены"
     github-sync-failed: "GitHub проверен, совпадений по навыкам не найдено"
+    github-sync-started: "Синхронизация GitHub запущена. Можно продолжать работу на сайте"
+    github-sync-error: "Не удалось завершить синхронизацию GitHub"
   entity:
     account-not-found: "Аккаунт не найден"
     student-not-found: "Студент не найден"

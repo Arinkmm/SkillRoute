@@ -17,4 +17,10 @@ public class GitHubSyncResponse {
 
     @Schema(description = "Количество навыков, подтвержденных по GitHub", example = "3")
     private int confirmedCount;
+
+    @Schema(description = "Статус фоновой синхронизации", example = "RUNNING")
+    private GitHubSyncStatus status;
+
+    @Schema(description = "Признак того, что синхронизация еще выполняется", example = "true")
+    private boolean running;
 }

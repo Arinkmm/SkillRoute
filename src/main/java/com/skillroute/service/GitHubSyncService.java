@@ -27,68 +27,67 @@ public class GitHubSyncService {
 
     @Transactional
     public int syncSkills(Long accountId) {
-        StudentProfile student = profileRepository.findById(accountId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
+        StudentProfile student = profileRepository.findById(accountId)
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
         String username = extractUsername(student.getGithubUrl());
-
         Map<String, Integer> profileSignals = gitHubClient.collectProfileSignals(username);
 
-        Map<Long, String> skillNames = skillRepository.findAll().stream().collect(Collectors.toMap(Skill::getId, Skill::getName));
+        Map<Long, String> skillNames = skillRepository.findAll().stream()
+                .collect(Collectors.toMap(Skill::getId, Skill::getName));
 
-        List<SkillDictionary> dictionary = dictionaryRepository.findAll();
-        int confirmedCount = 0;
-
-        for (SkillDictionary dict : dictionary) {
-            String name = skillNames.get(dict.getSkillId());
-
-            if (processSkillSync(student, username, profileSignals, dict, name)) {
-                confirmedCount++;
-            }
-        }
-
-        return confirmedCount;
+        return (int) dictionaryRepository.findAll().stream()
+                .filter(dict -> processSkillSync(student, username, profileSignals, dict, skillNames.get(dict.getSkillId())))
+                .count();
     }
 
     private boolean processSkillSync(StudentProfile student, String username, Map<String, Integer> signals, SkillDictionary dict, String name) {
-        String pattern = dict.getImportPattern();
+        int weight = calculateMetadataWeight(name, dict, signals);
 
-        Set<String> terms = buildTerms(name, pattern, dict.getQuickSignals());
-        int weight = signals.entrySet().stream()
-                .filter(e -> terms.stream().anyMatch(t -> e.getKey().contains(t)))
-                .mapToInt(Map.Entry::getValue).sum();
-
-        if (weight == 0 && pattern != null) {
-
-            if (gitHubClient.hasCodeMatch(username, pattern)) {
-                weight = 10;
-            }
-
-            sleep(7000);
+        if (weight == 0 && dict.getImportPattern() != null) {
+            weight = performDeepSearch(username, dict.getImportPattern());
         }
 
         if (weight > 0) {
-            upsertSkill(student, dict.getSkillId(), weight);
+            updateStudentSkill(student, dict.getSkillId(), weight);
             return true;
         }
         return false;
     }
 
-    private void upsertSkill(StudentProfile student, Long skillId, int weight) {
+    private int calculateMetadataWeight(String name, SkillDictionary dict, Map<String, Integer> signals) {
+        Set<String> terms = buildTerms(name, dict.getImportPattern(), dict.getQuickSignals());
+        return signals.entrySet().stream()
+                .filter(e -> terms.stream().anyMatch(t -> e.getKey().contains(t)))
+                .mapToInt(Map.Entry::getValue)
+                .sum();
+    }
+
+    private int performDeepSearch(String username, String pattern) {
+        boolean isMatch = gitHubClient.hasCodeMatch(username, pattern);
+        sleep(7000);
+        return isMatch ? 10 : 0;
+    }
+
+    private void updateStudentSkill(StudentProfile student, Long skillId, int weight) {
         StudentSkillId id = new StudentSkillId(student.getId(), skillId);
-        StudentSkill ss = studentSkillRepository.findById(id).orElseGet(() -> {
-            StudentSkill s = new StudentSkill();
-            s.setId(id);
-            s.setStudent(student);
-            s.setSkill(skillRepository.findById(skillId).orElseThrow());
-            s.setLevel(0);
-            return s;
-        });
+        StudentSkill ss = studentSkillRepository.findById(id).orElseGet(() -> createNewSkill(student, skillId, id));
 
         ss.setConfirmedByGitHub(true);
-        int level = calculateLevel(weight);
-        if (level > ss.getLevel()) ss.setLevel(level);
-
+        int newLevel = calculateLevel(weight);
+        if (newLevel > ss.getLevel()) {
+            ss.setLevel(newLevel);
+        }
         studentSkillRepository.save(ss);
+    }
+
+    private StudentSkill createNewSkill(StudentProfile student, Long skillId, StudentSkillId id) {
+        StudentSkill s = new StudentSkill();
+        s.setId(id);
+        s.setStudent(student);
+        s.setSkill(skillRepository.findById(skillId).orElseThrow());
+        s.setLevel(1);
+        return s;
     }
 
     private int calculateLevel(int weight) {
@@ -102,9 +101,13 @@ public class GitHubSyncService {
     private Set<String> buildTerms(String name, String pattern, String quickSignals) {
         Set<String> terms = new HashSet<>();
         terms.add(gitHubClient.normalize(name));
-        if (pattern != null && !pattern.contains(":")) terms.add(gitHubClient.normalize(pattern));
+        if (pattern != null && !pattern.contains(":")) {
+            terms.add(gitHubClient.normalize(pattern));
+        }
         if (quickSignals != null) {
-            Arrays.stream(quickSignals.split(",")).map(gitHubClient::normalize).forEach(terms::add);
+            Arrays.stream(quickSignals.split(","))
+                    .map(gitHubClient::normalize)
+                    .forEach(terms::add);
         }
         return terms;
     }
@@ -114,10 +117,7 @@ public class GitHubSyncService {
     }
 
     private void sleep(long ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException ignored) {
-            Thread.currentThread().interrupt();
-        }
+        try { Thread.sleep(ms); }
+        catch (InterruptedException e) { Thread.currentThread().interrupt(); }
     }
 }

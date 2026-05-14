@@ -6,7 +6,6 @@ import com.skillroute.exception.ServiceUnavailableException;
 import com.skillroute.properties.GithubProperties;
 import com.skillroute.properties.MessageProperties;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

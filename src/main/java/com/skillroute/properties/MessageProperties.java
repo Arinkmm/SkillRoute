@@ -85,6 +85,8 @@ public class MessageProperties {
         private String vacancyApplied;
         private String githubSyncSuccess;
         private String githubSyncFailed;
+        private String githubSyncStarted;
+        private String githubSyncError;
     }
 
     @Getter
