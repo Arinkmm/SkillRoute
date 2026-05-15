@@ -20,6 +20,7 @@ public class MessageProperties {
     private Entity entity = new Entity();
     private Skill skill = new Skill();
     private Vacancy vacancy = new Vacancy();
+    private Chat chat = new Chat();
     private Github github = new Github();
 
     @Getter
@@ -80,6 +81,7 @@ public class MessageProperties {
         private String materialAdded;
         private String vacancySaved;
         private String vacancyDeleted;
+        private String vacancyClosed;
         private String roadmapSkillAdded;
         private String studentSkillAdded;
         private String vacancyApplied;
@@ -115,6 +117,12 @@ public class MessageProperties {
         private String duplicateTracking;
         private String editForbidden;
         private String deleteForbidden;
+    }
+
+    @Getter
+    @Setter
+    public static class Chat {
+        private String accessForbidden;
     }
 
     @Getter

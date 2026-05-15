@@ -37,7 +37,7 @@ public class MainController {
         model.addAttribute("isConfirmed", isConfirmed);
 
         if (user.getRole() == Role.ADMIN) {
-            model.addAttribute("companies", companyProfileService.getAllCompanies());
+            model.addAttribute("companies", companyProfileService.getPendingCompanies());
         } else if (user.getRole() == Role.STUDENT && !isNewAccount) {
             model.addAttribute("followedVacancies", studentVacancyService.getFollowedVacancies(user.getId()));
         } else if (user.getRole() == Role.COMPANY && !isNewAccount && isConfirmed) {

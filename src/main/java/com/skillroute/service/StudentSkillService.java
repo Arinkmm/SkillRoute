@@ -50,6 +50,11 @@ public class StudentSkillService {
         return studentSkillRepository.existsByStudentIdAndSkillId(studentId, skillId);
     }
 
+    @Transactional(readOnly = true)
+    public int countConfirmedByGitHub(Long studentId) {
+        return Math.toIntExact(studentSkillRepository.countConfirmedByGitHub(studentId));
+    }
+
     @Transactional
     public void addSkillToStudent(Long id, AddSkillRequest form) {
         StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));

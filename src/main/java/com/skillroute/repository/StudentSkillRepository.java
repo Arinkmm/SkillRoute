@@ -21,4 +21,7 @@ public interface StudentSkillRepository extends JpaRepository<StudentSkill, Stud
     List<StudentSkill> findAllByStudentIdAndSkillNameContainingIgnoreCase(@Param("studentId") Long studentId, @Param("name") String name);
 
     boolean existsByStudentIdAndSkillId(Long studentId, Long skillId);
+
+    @Query("SELECT COUNT(ss) FROM StudentSkill ss WHERE ss.id.studentId = :studentId AND ss.isConfirmedByGitHub = true")
+    long countConfirmedByGitHub(@Param("studentId") Long studentId);
 }

@@ -2,7 +2,6 @@ package com.skillroute.controller;
 
 import com.skillroute.dto.request.EditPasswordRequest;
 import com.skillroute.dto.request.UpdateStudentRequest;
-import com.skillroute.model.StudentProfile;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.AccountService;
@@ -38,9 +37,8 @@ public class StudentProfileController {
     @GetMapping("/update")
     public String updateProfilePage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
         model.addAttribute("account", user.getAccount());
-        model.addAttribute("profile", user.getAccount().getStudentProfile());
         model.addAttribute("specializations", specializationService.getSpecializations());
-        model.addAttribute("updateStudentForm", buildStudentForm(user.getAccount().getStudentProfile()));
+        model.addAttribute("updateStudentForm", studentProfileService.getUpdateForm(user.getId()));
         return "student/update-profile";
     }
 
@@ -69,17 +67,4 @@ public class StudentProfileController {
         return "redirect:/student/profile";
     }
 
-    private UpdateStudentRequest buildStudentForm(StudentProfile profile) {
-        if (profile == null) {
-            return new UpdateStudentRequest();
-        }
-
-        return UpdateStudentRequest.builder()
-                .firstName(profile.getFirstName())
-                .lastName(profile.getLastName())
-                .gitHubUrl(profile.getGithubUrl())
-                .specializationId(profile.getSpecialization() != null ? profile.getSpecialization().getId() : null)
-                .bio(profile.getBio())
-                .build();
-    }
 }

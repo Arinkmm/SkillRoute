@@ -1,12 +1,10 @@
 package com.skillroute.dto.response;
 
+import com.skillroute.model.StudentVacancyStatus;
 import lombok.Builder;
 import lombok.Data;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -18,4 +16,5 @@ public class StudentPreviewResponse {
     private String lastName;
     private double matchPercentage;
     private int totalGapLevel;
+    private StudentVacancyStatus status;
 }

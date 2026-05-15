@@ -41,6 +41,20 @@ public class StudentProfileService {
         return studentProfileRepository.findById(id).map(this::mapToResponseDto).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
     }
 
+    @Transactional(readOnly = true)
+    public UpdateStudentRequest getUpdateForm(Long id) {
+        StudentProfile profile = studentProfileRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
+
+        return UpdateStudentRequest.builder()
+                .firstName(profile.getFirstName())
+                .lastName(profile.getLastName())
+                .gitHubUrl(profile.getGithubUrl())
+                .specializationId(profile.getSpecialization() != null ? profile.getSpecialization().getId() : null)
+                .bio(profile.getBio())
+                .build();
+    }
+
     @Transactional
     public void updateProfile(Long id, UpdateStudentRequest form) {
         StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));

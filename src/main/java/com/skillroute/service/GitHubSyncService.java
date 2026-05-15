@@ -2,16 +2,19 @@ package com.skillroute.service;
 
 import com.skillroute.model.*;
 import com.skillroute.model.id.StudentSkillId;
+import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.exception.GithubUrlNotFoundException;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.*;
 import com.skillroute.service.client.GitHubSearchClient;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
+import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,9 +27,14 @@ public class GitHubSyncService {
     private final StudentSkillRepository studentSkillRepository;
     private final GitHubSearchClient gitHubClient;
     private final MessageProperties messages;
+    private final TransactionTemplate transactionTemplate;
 
-    @Transactional
-    public int syncSkills(Long accountId) {
+    public void validateCanSync(Long accountId) {
+        StudentProfile student = profileRepository.findById(accountId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
+        extractUsername(student.getGithubUrl());
+    }
+
+    public int syncSkills(Long accountId, IntConsumer progressCallback) {
         StudentProfile student = profileRepository.findById(accountId)
                 .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
@@ -36,9 +44,21 @@ public class GitHubSyncService {
         Map<Long, String> skillNames = skillRepository.findAll().stream()
                 .collect(Collectors.toMap(Skill::getId, Skill::getName));
 
-        return (int) dictionaryRepository.findAll().stream()
-                .filter(dict -> processSkillSync(student, username, profileSignals, dict, skillNames.get(dict.getSkillId())))
-                .count();
+        int confirmedDuringRun = 0;
+
+        for (SkillDictionary dict : dictionaryRepository.findAll()) {
+            if (processSkillSync(student, username, profileSignals, dict, skillNames.get(dict.getSkillId()))) {
+                confirmedDuringRun++;
+                progressCallback.accept(countConfirmedByGitHub(accountId));
+            }
+        }
+
+        return confirmedDuringRun;
+    }
+
+    @Transactional(readOnly = true)
+    public int countConfirmedByGitHub(Long accountId) {
+        return Math.toIntExact(studentSkillRepository.countConfirmedByGitHub(accountId));
     }
 
     private boolean processSkillSync(StudentProfile student, String username, Map<String, Integer> signals, SkillDictionary dict, String name) {
@@ -70,18 +90,22 @@ public class GitHubSyncService {
     }
 
     private void updateStudentSkill(StudentProfile student, Long skillId, int weight) {
-        StudentSkillId id = new StudentSkillId(student.getId(), skillId);
-        StudentSkill ss = studentSkillRepository.findById(id).orElseGet(() -> createNewSkill(student, skillId, id));
+        transactionTemplate.executeWithoutResult(status -> {
+            Long studentId = student.getId();
+            StudentSkillId id = new StudentSkillId(studentId, skillId);
+            StudentSkill ss = studentSkillRepository.findById(id).orElseGet(() -> createNewSkill(studentId, skillId, id));
 
-        ss.setConfirmedByGitHub(true);
-        int newLevel = calculateLevel(weight);
-        if (newLevel > ss.getLevel()) {
-            ss.setLevel(newLevel);
-        }
-        studentSkillRepository.save(ss);
+            ss.setConfirmedByGitHub(true);
+            int newLevel = calculateLevel(weight);
+            if (newLevel > ss.getLevel()) {
+                ss.setLevel(newLevel);
+            }
+            studentSkillRepository.save(ss);
+        });
     }
 
-    private StudentSkill createNewSkill(StudentProfile student, Long skillId, StudentSkillId id) {
+    private StudentSkill createNewSkill(Long studentId, Long skillId, StudentSkillId id) {
+        StudentProfile student = profileRepository.findById(studentId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
         StudentSkill s = new StudentSkill();
         s.setId(id);
         s.setStudent(student);
@@ -113,6 +137,12 @@ public class GitHubSyncService {
     }
 
     private String extractUsername(String url) {
+        if (url == null || url.isBlank()) {
+            throw new GithubUrlNotFoundException(messages.getGithub().getUrlRequired());
+        }
+        if (!url.contains("/") || url.endsWith("/")) {
+            throw new GithubUrlNotFoundException(messages.getGithub().getLoginExtractFailed().formatted(url));
+        }
         return url.substring(url.lastIndexOf("/") + 1);
     }
 

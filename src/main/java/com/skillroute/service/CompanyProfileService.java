@@ -38,15 +38,27 @@ public class CompanyProfileService {
     }
 
     @Transactional(readOnly = true)
-    public List<CompanyProfileResponse> getAllCompanies() {
-        return companyProfileRepository.findAll().stream()
-                .map(this::mapToResponseDto)
-                .toList();
+    public UpdateCompanyRequest getUpdateForm(Long accountId) {
+        CompanyProfile profile = companyProfileRepository.findById(accountId)
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
+
+        return UpdateCompanyRequest.builder()
+                .companyName(profile.getCompanyName())
+                .description(profile.getDescription())
+                .websiteUrl(profile.getWebsiteUrl())
+                .build();
     }
 
     @Transactional(readOnly = true)
     public List<CompanyProfileResponse> getConfirmedCompanies() {
         return companyProfileRepository.findAllConfirmed().stream()
+                .map(this::mapToResponseDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CompanyProfileResponse> getPendingCompanies() {
+        return companyProfileRepository.findAllPending().stream()
                 .map(this::mapToResponseDto)
                 .toList();
     }

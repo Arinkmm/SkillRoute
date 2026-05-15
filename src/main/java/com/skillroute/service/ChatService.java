@@ -3,6 +3,7 @@ package com.skillroute.service;
 import com.skillroute.dto.request.MessageRequest;
 import com.skillroute.dto.response.*;
 import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.exception.ResourceOwnershipException;
 import com.skillroute.model.*;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.*;
@@ -38,6 +39,7 @@ public class ChatService {
     public MessageResponse sendMessage(Long chatId, Long senderId, MessageRequest request) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getChatNotFound()));
+        validateChatParticipant(chat, senderId);
 
         Account sender = accountRepository.findById(senderId)
                 .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getAccountNotFound()));
@@ -53,6 +55,7 @@ public class ChatService {
         return MessageResponse.builder()
                 .id(savedMessage.getId())
                 .senderId(senderId)
+                .senderName(resolveSenderName(sender))
                 .text(savedMessage.getText())
                 .createdAt(savedMessage.getCreatedAt())
                 .isMine(true)
@@ -61,7 +64,8 @@ public class ChatService {
 
     @Transactional
     public ChatResponse getChatResponse(Long chatId, Long currentUserId) {
-        Chat chat = chatRepository.findById(chatId).orElseThrow();
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getChatNotFound()));
+        validateChatParticipant(chat, currentUserId);
         messageRepository.markAsReadInChat(chatId, currentUserId);
 
         String opponentName = chat.getStudent().getId().equals(currentUserId)
@@ -69,7 +73,7 @@ public class ChatService {
 
         List<MessageResponse> messages = messageRepository.findAllByChatIdOrderByCreatedAtAsc(chatId).stream()
                 .map(m -> MessageResponse.builder()
-                        .id(m.getId()).senderId(m.getSender().getId()).text(m.getText())
+                        .id(m.getId()).senderId(m.getSender().getId()).senderName(resolveSenderName(m.getSender())).text(m.getText())
                         .createdAt(m.getCreatedAt()).isMine(m.getSender().getId().equals(currentUserId))
                         .build()).toList();
 
@@ -91,5 +95,26 @@ public class ChatService {
                 })
                 .sorted((a, b) -> b.getLastMessageTime().compareTo(a.getLastMessageTime()))
                 .toList();
+    }
+
+    private void validateChatParticipant(Chat chat, Long currentUserId) {
+        boolean isStudent = chat.getStudent() != null && chat.getStudent().getId().equals(currentUserId);
+        boolean isCompany = chat.getCompany() != null && chat.getCompany().getId().equals(currentUserId);
+
+        if (!isStudent && !isCompany) {
+            throw new ResourceOwnershipException(messages.getChat().getAccessForbidden());
+        }
+    }
+
+    private String resolveSenderName(Account sender) {
+        if (sender.getStudentProfile() != null) {
+            String firstName = sender.getStudentProfile().getFirstName();
+            String lastName = sender.getStudentProfile().getLastName();
+            return ((firstName == null ? "" : firstName) + " " + (lastName == null ? "" : lastName)).trim();
+        }
+        if (sender.getCompanyProfile() != null) {
+            return sender.getCompanyProfile().getCompanyName();
+        }
+        return sender.getEmail();
     }
 }

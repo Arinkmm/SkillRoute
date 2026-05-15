@@ -48,6 +48,9 @@ public class ApplicantService {
     public StudentGapResponse getStudentGap(Long studentId, Long vacancyId) {
         StudentProfile student = studentProfileRepository.findById(studentId).orElseThrow();
         Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow();
+        StudentVacancyStatus status = studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
+                .map(StudentVacancy::getStatus)
+                .orElse(StudentVacancyStatus.SUBMITTED);
 
         Map<Long, Integer> studentSkills = student.getStudentSkills().stream()
                 .collect(Collectors.toMap(ss -> ss.getSkill().getId(), StudentSkill::getLevel));
@@ -67,8 +70,11 @@ public class ApplicantService {
 
         return StudentGapResponse.builder()
                 .studentId(studentId)
+                .firstName(student.getFirstName())
+                .lastName(student.getLastName())
                 .matchPercentage(matchingService.calculateMatch(vacancy.getVacancySkills().size(), gaps.size()))
                 .totalGapLevel(gaps.stream().mapToInt(SkillGapResponse::getGapDepth).sum())
+                .status(status)
                 .gaps(gaps).build();
     }
 
@@ -108,6 +114,7 @@ public class ApplicantService {
                 .lastName(studentProfile.getLastName())
                 .matchPercentage(gap.getMatchPercentage())
                 .totalGapLevel(gap.getTotalGapLevel())
+                .status(gap.getStatus())
                 .build();
     }
 }

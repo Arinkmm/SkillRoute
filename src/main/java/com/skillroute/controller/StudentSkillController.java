@@ -24,6 +24,7 @@ public class StudentSkillController {
     @GetMapping
     public String skillsPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
         model.addAttribute("mySkills", studentSkillService.getStudentSkills(user.getId()));
+        model.addAttribute("githubConfirmedCount", studentSkillService.countConfirmedByGitHub(user.getId()));
         return "student/skills";
     }
 

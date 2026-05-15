@@ -78,4 +78,14 @@ public class CompanyVacancyController {
         redirectAttributes.addFlashAttribute("message", messages.getUi().getVacancyDeleted());
         return "redirect:/company/vacancies";
     }
+
+    @PostMapping("/{id}/close")
+    public String closeVacancy(@PathVariable Long id,
+                               @AuthenticationPrincipal CustomUserDetails user,
+                               RedirectAttributes redirectAttributes) {
+        vacancyService.closeVacancy(id, user.getId());
+
+        redirectAttributes.addFlashAttribute("message", messages.getUi().getVacancyClosed());
+        return "redirect:/company/vacancies/" + id;
+    }
 }

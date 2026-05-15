@@ -36,7 +36,7 @@ public class StudentSkillRestController {
                     description = "Список навыков успешно получен",
                     content = @Content(
                             schema = @Schema(implementation = StudentSkillResponse.class),
-                            examples = @ExampleObject(value = "[{\"skillId\": 1, \"name\": \"Java\", \"level\": 4, \"isConfirmedByGitHub\": true}]")
+                            examples = @ExampleObject(value = "[{\"skillId\": 1, \"name\": \"Java\", \"level\": 4, \"confirmedByGitHub\": true}]")
                     )),
             @ApiResponse(
                     responseCode = "500",

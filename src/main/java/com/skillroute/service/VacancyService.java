@@ -113,6 +113,18 @@ public class VacancyService {
     }
 
     @Transactional
+    public void closeVacancy(Long vacancyId, Long companyId) {
+        Vacancy vacancy = vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
+
+        if (!vacancy.getCompany().getId().equals(companyId)) {
+            throw new ResourceOwnershipException(messages.getVacancy().getEditForbidden());
+        }
+
+        vacancy.getProfile().setStatus(VacancyStatus.CLOSE);
+    }
+
+    @Transactional
     public void deleteVacancy(Long vacancyId, Long currentCompanyId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
                 .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));

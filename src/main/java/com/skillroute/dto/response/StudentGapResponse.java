@@ -1,8 +1,8 @@
 package com.skillroute.dto.response;
 
+import com.skillroute.model.StudentVacancyStatus;
 import lombok.Builder;
 import lombok.Data;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -19,4 +19,5 @@ public class StudentGapResponse {
     private double matchPercentage;
     private int totalGapLevel;
     private List<SkillGapResponse> gaps;
+    private StudentVacancyStatus status;
 }

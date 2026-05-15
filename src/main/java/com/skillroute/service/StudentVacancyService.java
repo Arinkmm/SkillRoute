@@ -65,6 +65,11 @@ public class StudentVacancyService {
         studentVacancyRepository.save(application);
     }
 
+    @Transactional(readOnly = true)
+    public boolean isTracked(Long studentId, Long vacancyId) {
+        return studentVacancyRepository.existsById(new StudentVacancyId(studentId, vacancyId));
+    }
+
     private VacancyResponse mapToResponseDto(Vacancy vacancy) {
         VacancyProfile profile = vacancy.getProfile();
         Specialization spec = profile.getSpecialization();

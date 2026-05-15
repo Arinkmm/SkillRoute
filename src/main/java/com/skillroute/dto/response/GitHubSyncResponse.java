@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "Результат синхронизации навыков с GitHub")
+@Schema(description = "Результат фоновой синхронизации навыков с GitHub")
 public class GitHubSyncResponse {
-    @Schema(description = "Текстовое сообщение о результате синхронизации", example = "Синхронизация с GitHub прошла успешно")
+    @Schema(description = "Сообщение для отображения пользователю", example = "Синхронизация GitHub запущена. Можно продолжать работу на сайте")
     private String message;
 
-    @Schema(description = "Количество навыков, подтвержденных по GitHub", example = "3")
+    @Schema(description = "Общее количество навыков, подтвержденных через GitHub", example = "5")
     private int confirmedCount;
 
     @Schema(description = "Статус фоновой синхронизации", example = "RUNNING")

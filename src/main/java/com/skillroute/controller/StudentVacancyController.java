@@ -39,6 +39,7 @@ public class StudentVacancyController {
                               Model model) {
         model.addAttribute("vacancy", vacancyService.getVacancyById(id));
         model.addAttribute("roadmap", roadmapService.generateRoadmap(user.getId(), id));
+        model.addAttribute("isTracked", studentVacancyService.isTracked(user.getId(), id));
 
         return "student/vacancy-details";
     }

@@ -13,5 +13,8 @@ public interface CompanyProfileRepository extends JpaRepository<CompanyProfile, 
     @Query("SELECT company from CompanyProfile company WHERE company.isConfirmed = true")
     List<CompanyProfile> findAllConfirmed();
 
+    @Query("SELECT company from CompanyProfile company WHERE company.isConfirmed = false")
+    List<CompanyProfile> findAllPending();
+
     Optional<CompanyProfile> findById(Long id);
 }

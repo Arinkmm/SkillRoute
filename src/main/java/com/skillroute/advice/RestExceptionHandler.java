@@ -48,6 +48,30 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.SERVICE_UNAVAILABLE.value()).build());
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException e) {
+        log.error("Сущность не найдена: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.NOT_FOUND.value()).build());
+    }
+
+    @ExceptionHandler(ResourceOwnershipException.class)
+    public ResponseEntity<ErrorResponse> handleResourceOwnership(ResourceOwnershipException e) {
+        log.error("Попытка доступа к чужому ресурсу: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.FORBIDDEN.value()).build());
+    }
+
+    @ExceptionHandler(DuplicateEntityException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicate(DuplicateEntityException e) {
+        log.error("Дубликат сущности: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.CONFLICT.value()).build());
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorResponse> handleTooManyRequests(TooManyRequestsException e) {
+        log.error("Слишком частый запрос формы: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ErrorResponse.builder().message(e.getMessage()).errorCode(HttpStatus.TOO_MANY_REQUESTS.value()).build());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
         Map<String, String> errors = e.getBindingResult().getFieldErrors().stream()

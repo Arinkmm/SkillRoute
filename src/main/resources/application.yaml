@@ -100,6 +100,7 @@ messages:
     material-added: "Материал добавлен!"
     vacancy-saved: "Изменения сохранены!"
     vacancy-deleted: "Вакансия удалена"
+    vacancy-closed: "Вакансия закрыта"
     roadmap-skill-added: "Навык добавлен!"
     student-skill-added: "Навык успешно добавлен!"
     vacancy-applied: "Отклик успешно отправлен!"
@@ -123,6 +124,8 @@ messages:
     duplicate-tracking: "Студент уже отслеживает эту вакансию"
     edit-forbidden: "У вас нет прав на редактирование этой вакансии"
     delete-forbidden: "У вас нет прав на удаление этой вакансии"
+  chat:
+    access-forbidden: "У вас нет доступа к этому чату"
   github:
     url-required: "Для анализа навыков необходимо указать GitHub URL в профиле"
     login-extract-failed: "Не удалось извлечь логин из некорректной ссылки GitHub: %s"
