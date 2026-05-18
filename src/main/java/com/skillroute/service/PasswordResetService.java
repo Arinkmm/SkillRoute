@@ -6,6 +6,7 @@ import com.skillroute.exception.FieldValidationException;
 import com.skillroute.exception.PasswordResetTokenException;
 import com.skillroute.exception.TooManyRequestsException;
 import com.skillroute.model.Account;
+import com.skillroute.openapi.model.ResetPasswordRequestApi;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.properties.RedisProperties;
 import com.skillroute.repository.AccountRepository;
@@ -66,14 +67,23 @@ public class PasswordResetService {
 
     @Transactional(readOnly = true)
     public void validateResetPasswordBusinessRules(ResetPasswordRequest form) {
+        validateResetPasswordBusinessRules(form.getToken(), form.getNewPassword(), form.getConfirmNewPassword());
+    }
+
+    @Transactional(readOnly = true)
+    public void validateResetPasswordBusinessRules(ResetPasswordRequestApi form) {
+        validateResetPasswordBusinessRules(form.getToken(), form.getNewPassword(), form.getConfirmNewPassword());
+    }
+
+    private void validateResetPasswordBusinessRules(String token, String newPassword, String confirmNewPassword) {
         Map<String, String> errors = new LinkedHashMap<>();
         MessageProperties.PasswordReset passwordResetMessages = messages.getPasswordReset();
 
-        if (!isPasswordResetTokenValid(form.getToken())) {
+        if (!isPasswordResetTokenValid(token)) {
             errors.putIfAbsent("token", passwordResetMessages.getTokenInvalid());
         }
 
-        if (form.getNewPassword() != null && form.getConfirmNewPassword() != null && !form.getNewPassword().equals(form.getConfirmNewPassword())) {
+        if (newPassword != null && confirmNewPassword != null && !newPassword.equals(confirmNewPassword)) {
             errors.putIfAbsent("confirmNewPassword", passwordResetMessages.getPasswordMismatch());
         }
 

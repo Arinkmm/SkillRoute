@@ -1,12 +1,14 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.request.MessageRequest;
-import com.skillroute.dto.response.*;
+import com.skillroute.dto.response.ChatPreviewResponse;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.FieldValidationException;
 import com.skillroute.exception.ResourceOwnershipException;
 import com.skillroute.mapper.ChatMapper;
 import com.skillroute.model.*;
+import com.skillroute.openapi.model.ChatResponseApi;
+import com.skillroute.openapi.model.MessageRequestApi;
+import com.skillroute.openapi.model.MessageResponseApi;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +45,7 @@ public class ChatService {
     }
 
     @Transactional
-    public MessageResponse sendMessage(Long chatId, Long senderId, MessageRequest request) {
+    public MessageResponseApi sendMessage(Long chatId, Long senderId, MessageRequestApi request) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getChatNotFound()));
         validateChatParticipant(chat, senderId);
@@ -66,12 +68,12 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatResponse getChatResponse(Long chatId, Long currentUserId) {
+    public ChatResponseApi getChatResponse(Long chatId, Long currentUserId) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getChatNotFound()));
         validateChatParticipant(chat, currentUserId);
         messageRepository.markAsReadInChat(chatId, currentUserId);
 
-        List<MessageResponse> messages = messageRepository.findAllByChatIdOrderByCreatedAtAsc(chatId).stream()
+        List<MessageResponseApi> messages = messageRepository.findAllByChatIdOrderByCreatedAtAsc(chatId).stream()
                 .map(message -> chatMapper.toMessageResponse(message, currentUserId))
                 .toList();
 

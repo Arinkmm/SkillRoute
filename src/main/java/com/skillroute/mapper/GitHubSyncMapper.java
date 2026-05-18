@@ -1,18 +1,18 @@
 package com.skillroute.mapper;
 
-import com.skillroute.dto.response.GitHubSyncResponse;
-import com.skillroute.dto.response.GitHubSyncStatus;
+import com.skillroute.openapi.model.GitHubSyncResponseApi;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GitHubSyncMapper {
+    private static final String RUNNING_STATUS = "RUNNING";
 
-    public GitHubSyncResponse toResponse(String message, int confirmedCount, GitHubSyncStatus status) {
-        return GitHubSyncResponse.builder()
-                .message(message)
-                .confirmedCount(confirmedCount)
-                .status(status)
-                .running(status == GitHubSyncStatus.RUNNING)
-                .build();
+    public GitHubSyncResponseApi toResponse(String message, int confirmedCount, String status) {
+        GitHubSyncResponseApi response = new GitHubSyncResponseApi();
+        response.setMessage(message);
+        response.setConfirmedCount(confirmedCount);
+        response.setStatus(status);
+        response.setRunning(RUNNING_STATUS.equals(status));
+        return response;
     }
 }

@@ -1,7 +1,6 @@
 package com.skillroute.service;
 
 import com.skillroute.dto.request.AddSkillRequest;
-import com.skillroute.dto.response.StudentSkillResponse;
 import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.mapper.StudentSkillMapper;
@@ -9,6 +8,7 @@ import com.skillroute.model.Skill;
 import com.skillroute.model.StudentProfile;
 import com.skillroute.model.StudentSkill;
 import com.skillroute.model.id.StudentSkillId;
+import com.skillroute.openapi.model.StudentSkillResponseApi;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.SkillRepository;
 import com.skillroute.repository.StudentProfileRepository;
@@ -29,14 +29,14 @@ public class StudentSkillService {
     private final StudentSkillMapper studentSkillMapper;
 
     @Transactional(readOnly = true)
-    public List<StudentSkillResponse> getStudentSkills(Long studentId) {
+    public List<StudentSkillResponseApi> getStudentSkills(Long studentId) {
         return studentSkillRepository.findAllByStudentId(studentId).stream()
                 .map(studentSkillMapper::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<StudentSkillResponse> getStudentsSkillsByName(Long studentId, String query) {
+    public List<StudentSkillResponseApi> getStudentsSkillsByName(Long studentId, String query) {
         String normalizedQuery = query == null ? "" : query.trim();
         return studentSkillRepository.findAllByStudentIdAndSkillNameContainingIgnoreCase(studentId, normalizedQuery).stream()
                 .map(studentSkillMapper::toResponse)

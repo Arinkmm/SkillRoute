@@ -6,6 +6,7 @@ import com.skillroute.exception.FieldValidationException;
 import com.skillroute.exception.TooManyRequestsException;
 import com.skillroute.model.Account;
 import com.skillroute.model.Role;
+import com.skillroute.openapi.model.RegistrationRequestApi;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.properties.RedisProperties;
 import com.skillroute.repository.AccountRepository;
@@ -63,19 +64,41 @@ public class RegistrationService {
 
     @Transactional(readOnly = true)
     public void validateRegistrationBusinessRules(RegistrationRequest form) {
+        validateRegistrationBusinessRules(form.getEmail(), form.getPassword(), form.getConfirmPassword(), form.getRole());
+    }
+
+    @Transactional(readOnly = true)
+    public void validateRegistrationBusinessRules(RegistrationRequestApi form) {
+        Role role = parseRole(form.getRole());
+        validateRegistrationBusinessRules(form.getEmail(), form.getPassword(), form.getConfirmPassword(), role);
+    }
+
+    private Role parseRole(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        try {
+            return Role.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private void validateRegistrationBusinessRules(String email, String password, String confirmPassword, Role role) {
         Map<String, String> errors = new LinkedHashMap<>();
 
         MessageProperties.Registration registrationMessages = messages.getRegistration();
 
-        if (form.getRole() != Role.STUDENT && form.getRole() != Role.COMPANY) {
+        if (role != Role.STUDENT && role != Role.COMPANY) {
             errors.put("role", registrationMessages.getRoleNotAllowed());
         }
 
-        if (accountRepository.existsByEmail(form.getEmail())) {
+        if (accountRepository.existsByEmail(email)) {
             errors.put("email", registrationMessages.getEmailExists());
         }
 
-        if (!form.getPassword().equals(form.getConfirmPassword())) {
+        if (!password.equals(confirmPassword)) {
             errors.put("confirmPassword", registrationMessages.getPasswordMismatch());
         }
 

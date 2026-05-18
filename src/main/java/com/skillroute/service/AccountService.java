@@ -4,6 +4,7 @@ import com.skillroute.dto.request.EditPasswordRequest;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.FieldValidationException;
 import com.skillroute.model.Account;
+import com.skillroute.openapi.model.EditPasswordRequestApi;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,20 +24,29 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public void validateEditPasswordBusinessRules(Long id, EditPasswordRequest form) {
+        validateEditPasswordBusinessRules(id, form.getOldPassword(), form.getNewPassword(), form.getConfirmNewPassword());
+    }
+
+    @Transactional(readOnly = true)
+    public void validateEditPasswordBusinessRules(Long id, EditPasswordRequestApi form) {
+        validateEditPasswordBusinessRules(id, form.getOldPassword(), form.getNewPassword(), form.getConfirmNewPassword());
+    }
+
+    private void validateEditPasswordBusinessRules(Long id, String oldPassword, String newPassword, String confirmNewPassword) {
         MessageProperties.Account accountMessages = messages.getAccount();
         Account account = accountRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(accountMessages.getNotFound()));
 
         Map<String, String> errors = new LinkedHashMap<>();
 
-        if (!passwordEncoder.matches(form.getOldPassword(), account.getPassword())) {
+        if (!passwordEncoder.matches(oldPassword, account.getPassword())) {
             errors.put("oldPassword", accountMessages.getCurrentPasswordInvalid());
         }
 
-        if (!form.getNewPassword().equals(form.getConfirmNewPassword())) {
+        if (!newPassword.equals(confirmNewPassword)) {
             errors.put("confirmNewPassword", accountMessages.getPasswordMismatch());
         }
 
-        if (passwordEncoder.matches(form.getNewPassword(), account.getPassword())) {
+        if (passwordEncoder.matches(newPassword, account.getPassword())) {
             errors.put("newPassword", accountMessages.getSamePassword());
         }
 

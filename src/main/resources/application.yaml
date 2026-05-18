@@ -37,8 +37,17 @@ server:
     include-message: always
     include-binding-errors: always
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    url: /openapi/skillroute-api.yaml
+    disable-swagger-default-url: true
+
 mail:
-  base-url: http://localhost:8080
+  base-url: ${MAIL_BASE_URL:http://localhost:8080}
   sender: SkillRoute
   from: ${spring.mail.username}
   subject: Подтвердите аккаунт SkillRoute
@@ -130,6 +139,11 @@ redis:
 
 github:
   token: ${GITHUB_TOKEN}
+  sync:
+    code-search-delay-millis: 7000
+    worker-delay-millis: 5000
+    default-rate-limit-wait-minutes: 5
+    running-timeout-minutes: 30
 
 vacancy:
   catalog:
@@ -185,6 +199,8 @@ messages:
     github-sync-success: "Синхронизация с GitHub прошла успешно! Ваши навыки обновлены"
     github-sync-failed: "GitHub проверен, совпадений по навыкам не найдено"
     github-sync-started: "Синхронизация GitHub запущена. Можно продолжать работу на сайте"
+    github-sync-queued: "Синхронизация поставлена в очередь. Можно продолжать работу на сайте"
+    github-sync-waiting: "GitHub временно ограничил запросы. Синхронизация продолжится автоматически после %s"
     github-sync-error: "Не удалось завершить синхронизацию GitHub"
   entity:
     account-not-found: "Аккаунт не найден"

@@ -91,6 +91,8 @@ public class MessageProperties {
         private String githubSyncSuccess;
         private String githubSyncFailed;
         private String githubSyncStarted;
+        private String githubSyncQueued;
+        private String githubSyncWaiting;
         private String githubSyncError;
     }
 

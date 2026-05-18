@@ -1,18 +1,11 @@
 package com.skillroute.controller;
 
-import com.skillroute.dto.request.ResetPasswordRequest;
-import com.skillroute.dto.response.ErrorResponse;
-import com.skillroute.dto.response.ValidationResponse;
+import com.skillroute.openapi.model.ResetPasswordRequestApi;
+import com.skillroute.openapi.model.ValidationResponseApi;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.service.PasswordResetService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,50 +15,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/password")
 @RequiredArgsConstructor
-@Tag(name = "Восстановление пароля", description = "Проверка формы восстановления пароля")
 public class PasswordResetRestController {
     private final PasswordResetService passwordResetService;
     private final MessageProperties messages;
 
-    @Operation(
-            summary = "Проверка полей сброса пароля",
-            description = "Валидирует данные формы без обновления пароля. Используется для UI-подсказок."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Данные валидны",
-                    content = @Content(
-                            schema = @Schema(implementation = ValidationResponse.class),
-                            examples = @ExampleObject(
-                                    value = "{\"valid\": true, \"message\": \"Данные корректны\"}"
-                            )
-                    )),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Ошибка бизнес-валидации",
-                    content = @Content(
-                            schema = @Schema(implementation = ErrorResponse.class),
-                            examples = {
-                                    @ExampleObject(
-                                            value = "{\"message\": \"Ошибка сброса пароля\", \"errorCode\": 400, \"fields\": {\"confirmNewPassword\": \"Новый пароль и подтверждение не совпадают\", \"token\": \"Ссылка восстановления недействительна или срок ее действия истек\"}}"
-                                    )
-                            }
-                    )),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Внутренняя ошибка сервера",
-                    content = @Content(
-                            schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(
-                                    value = "{\"message\": \"Произошла внутренняя ошибка сервера. Мы уже работаем над исправлением\", \"errorCode\": 500}"
-                            )
-                    ))
-    })
     @PostMapping("/reset/check-field")
-    public ResponseEntity<ValidationResponse> checkResetFields(@RequestBody ResetPasswordRequest fieldData) {
+    public ResponseEntity<ValidationResponseApi> checkResetFields(@Valid @RequestBody ResetPasswordRequestApi fieldData) {
         passwordResetService.validateResetPasswordBusinessRules(fieldData);
+        return ResponseEntity.ok(validationSuccess());
+    }
 
-        return ResponseEntity.ok(ValidationResponse.builder().valid(true).message(messages.getValidationSuccess()).build());
+    private ValidationResponseApi validationSuccess() {
+        ValidationResponseApi response = new ValidationResponseApi();
+        response.setValid(true);
+        response.setMessage(messages.getValidationSuccess());
+        return response;
     }
 }

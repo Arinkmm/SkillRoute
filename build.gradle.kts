@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.7"
+    id("org.openapi.generator") version "7.10.0"
 }
 
 group = "com.skillroute"
@@ -43,6 +44,51 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+}
+
+openApiGenerate {
+    generatorName.set("spring")
+    inputSpec.set("$rootDir/src/main/resources/static/openapi/skillroute-api.yaml")
+    outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.absolutePath)
+    modelPackage.set("com.skillroute.openapi.model")
+    modelNameSuffix.set("Api")
+    globalProperties.set(
+        mapOf(
+            "models" to "",
+            "modelDocs" to "false",
+            "modelTests" to "false",
+            "supportingFiles" to "false"
+        )
+    )
+    configOptions.set(
+        mapOf(
+            "dateLibrary" to "java8",
+            "openApiNullable" to "false",
+            "annotationLibrary" to "none",
+            "documentationProvider" to "none",
+            "useBeanValidation" to "true",
+            "useJakartaEe" to "true",
+            "useSpringBoot3" to "true"
+        )
+    )
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir(layout.buildDirectory.dir("generated/openapi/src/main/java"))
+        }
+    }
+}
+
+tasks.named("compileJava") {
+    dependsOn(tasks.named("openApiGenerate"))
+}
+
+tasks.named("openApiGenerate") {
+    doFirst {
+        delete(layout.buildDirectory.dir("generated/openapi"))
+    }
 }
 
 tasks.withType<Test> {

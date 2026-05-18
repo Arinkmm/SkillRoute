@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface StudentSkillRepository extends JpaRepository<StudentSkill, StudentSkillId> {
     @Query("SELECT ss FROM StudentSkill ss JOIN FETCH ss.skill WHERE ss.id.studentId = :studentId")
@@ -24,4 +25,7 @@ public interface StudentSkillRepository extends JpaRepository<StudentSkill, Stud
 
     @Query("SELECT COUNT(ss) FROM StudentSkill ss WHERE ss.id.studentId = :studentId AND ss.isConfirmedByGitHub = true")
     long countConfirmedByGitHub(@Param("studentId") Long studentId);
+
+    @Query("SELECT ss.id.skillId FROM StudentSkill ss WHERE ss.id.studentId = :studentId AND ss.isConfirmedByGitHub = true")
+    Set<Long> findConfirmedGitHubSkillIds(@Param("studentId") Long studentId);
 }

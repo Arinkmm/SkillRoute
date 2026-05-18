@@ -12,4 +12,5 @@
     <include relativeToChangelogFile="true" file="changelog/2026-04-25--04-create-resource-table.sql"/>
     <include relativeToChangelogFile="true" file="changelog/2026-05-03--05-create-chats-tables.sql"/>
     <include relativeToChangelogFile="true" file="changelog/2026-05-07--06-create-skill-dictionary.sql"/>
+    <include relativeToChangelogFile="true" file="changelog/2026-05-18--07-create-github-sync-job.sql"/>
 </databaseChangeLog>
