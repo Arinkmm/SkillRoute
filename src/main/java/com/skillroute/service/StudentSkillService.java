@@ -1,6 +1,7 @@
 package com.skillroute.service;
 
 import com.skillroute.dto.request.AddSkillRequest;
+import com.skillroute.dto.response.StudentSkillResponse;
 import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.mapper.StudentSkillMapper;
@@ -29,7 +30,7 @@ public class StudentSkillService {
     private final StudentSkillMapper studentSkillMapper;
 
     @Transactional(readOnly = true)
-    public List<StudentSkillResponseApi> getStudentSkills(Long studentId) {
+    public List<StudentSkillResponse> getStudentSkills(Long studentId) {
         return studentSkillRepository.findAllByStudentId(studentId).stream()
                 .map(studentSkillMapper::toResponse)
                 .toList();
@@ -39,7 +40,7 @@ public class StudentSkillService {
     public List<StudentSkillResponseApi> getStudentsSkillsByName(Long studentId, String query) {
         String normalizedQuery = query == null ? "" : query.trim();
         return studentSkillRepository.findAllByStudentIdAndSkillNameContainingIgnoreCase(studentId, normalizedQuery).stream()
-                .map(studentSkillMapper::toResponse)
+                .map(studentSkillMapper::toResponseApi)
                 .toList();
     }
 
