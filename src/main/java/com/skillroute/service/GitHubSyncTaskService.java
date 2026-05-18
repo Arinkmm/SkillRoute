@@ -2,6 +2,7 @@ package com.skillroute.service;
 
 import com.skillroute.dto.response.GitHubSyncResponse;
 import com.skillroute.dto.response.GitHubSyncStatus;
+import com.skillroute.mapper.GitHubSyncMapper;
 import com.skillroute.properties.MessageProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ public class GitHubSyncTaskService {
     private final GitHubSyncService syncService;
     private final MessageProperties messages;
     private final TaskExecutor taskExecutor;
+    private final GitHubSyncMapper gitHubSyncMapper;
     private final ConcurrentMap<Long, GitHubSyncResponse> statuses = new ConcurrentHashMap<>();
 
     public GitHubSyncResponse start(Long accountId) {
@@ -30,14 +32,14 @@ public class GitHubSyncTaskService {
         }
 
         int initialConfirmedCount = syncService.countConfirmedByGitHub(accountId);
-        GitHubSyncResponse started = mapToResponse(messages.getUi().getGithubSyncStarted(), initialConfirmedCount, GitHubSyncStatus.RUNNING);
+        GitHubSyncResponse started = gitHubSyncMapper.toResponse(messages.getUi().getGithubSyncStarted(), initialConfirmedCount, GitHubSyncStatus.RUNNING);
         statuses.put(accountId, started);
 
         CompletableFuture.supplyAsync(() -> syncService.syncSkills(accountId, count -> updateProgress(accountId, count)), taskExecutor::execute)
                 .thenAccept(count -> {
                     int confirmedCount = syncService.countConfirmedByGitHub(accountId);
                     String msg = confirmedCount > 0 ? messages.getUi().getGithubSyncSuccess() : messages.getUi().getGithubSyncFailed();
-                    statuses.put(accountId, mapToResponse(msg, confirmedCount, GitHubSyncStatus.SUCCESS));
+                    statuses.put(accountId, gitHubSyncMapper.toResponse(msg, confirmedCount, GitHubSyncStatus.SUCCESS));
                 })
                 .exceptionally(ex -> {
                     log.error("Ошибка синхронизации для аккаунта: {}", accountId, ex);
@@ -45,7 +47,7 @@ public class GitHubSyncTaskService {
                             ? ex.getCause().getMessage()
                             : messages.getUi().getGithubSyncError();
 
-                    statuses.put(accountId, mapToResponse(msg, syncService.countConfirmedByGitHub(accountId), GitHubSyncStatus.FAILED));
+                    statuses.put(accountId, gitHubSyncMapper.toResponse(msg, syncService.countConfirmedByGitHub(accountId), GitHubSyncStatus.FAILED));
                     return null;
                 });
 
@@ -53,19 +55,10 @@ public class GitHubSyncTaskService {
     }
 
     public GitHubSyncResponse getStatus(Long accountId) {
-        return statuses.getOrDefault(accountId, mapToResponse("", syncService.countConfirmedByGitHub(accountId), GitHubSyncStatus.IDLE));
+        return statuses.getOrDefault(accountId, gitHubSyncMapper.toResponse("", syncService.countConfirmedByGitHub(accountId), GitHubSyncStatus.IDLE));
     }
 
     private void updateProgress(Long accountId, int confirmedCount) {
-        statuses.put(accountId, mapToResponse(messages.getUi().getGithubSyncStarted(), confirmedCount, GitHubSyncStatus.RUNNING));
-    }
-
-    private GitHubSyncResponse mapToResponse(String message, int confirmedCount, GitHubSyncStatus status) {
-        return GitHubSyncResponse.builder()
-                .message(message)
-                .confirmedCount(confirmedCount)
-                .status(status)
-                .running(status == GitHubSyncStatus.RUNNING)
-                .build();
+        statuses.put(accountId, gitHubSyncMapper.toResponse(messages.getUi().getGithubSyncStarted(), confirmedCount, GitHubSyncStatus.RUNNING));
     }
 }

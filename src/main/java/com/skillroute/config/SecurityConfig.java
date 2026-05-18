@@ -25,6 +25,45 @@ import java.util.function.Supplier;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/",
+            "/login",
+            "/register",
+            "/verification",
+            "/password/forgot",
+            "/password/reset"
+    };
+
+    private static final String[] PUBLIC_POST_ENDPOINTS = {
+            "/register",
+            "/register/check-field",
+            "/verification/resend",
+            "/password/forgot",
+            "/password/reset",
+            "/password/reset/check-field"
+    };
+
+    private static final String[] API_DOC_ENDPOINTS = {
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
+    };
+
+    private static final String[] STUDENT_PROFILE_ENDPOINTS = {
+            "/student/profile",
+            "/student/profile/**"
+    };
+
+    private static final String[] STUDENT_WORKSPACE_ENDPOINTS = {
+            "/student/**",
+            "/route/**"
+    };
+
+    private static final String[] COMPANY_PROFILE_ENDPOINTS = {
+            "/company/profile",
+            "/company/profile/**"
+    };
+
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     private final CompanyProfileService companyProfileService;
     private final StudentProfileService studentProfileService;
@@ -33,19 +72,20 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/", "/login", "/register", "/verification", "/verification/**", "/password/forgot", "/password/reset", "/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/register", "/register/check-field", "/register/resend-verification", "/password/forgot", "/password/reset", "/password/reset/check-field").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/student/profile", "/student/profile/**").hasRole("STUDENT")
-                        .requestMatchers(HttpMethod.GET, "/student/**", "/route/**").hasRole("STUDENT")
-                        .requestMatchers("/student/**", "/route/**").access(this::hasCompletedStudentProfileAccess)
-                        .requestMatchers("/company/profile", "/company/profile/**").hasRole("COMPANY")
-                        .requestMatchers("/company/**").access(this::hasConfirmedCompanyAccess)
-                        .requestMatchers(HttpMethod.POST, "/main/companies/**").hasRole("ADMIN")
-                        .requestMatchers("/admin/**", "/companies/**").hasRole("ADMIN")
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers(API_DOC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                        .requestMatchers("/main").hasAnyRole(Role.STUDENT.name(), Role.COMPANY.name(), Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/main/companies/*/approve").hasRole(Role.ADMIN.name())
+                        .requestMatchers("/main/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers("/account/**").authenticated()
+                        .requestMatchers(COMPANY_PROFILE_ENDPOINTS).hasRole(Role.COMPANY.name())
+                        .requestMatchers("/company/**").access(this::hasReadyCompanyAccess)
+                        .requestMatchers(STUDENT_PROFILE_ENDPOINTS).hasRole(Role.STUDENT.name())
+                        .requestMatchers(HttpMethod.GET, STUDENT_WORKSPACE_ENDPOINTS).hasRole(Role.STUDENT.name())
+                        .requestMatchers(STUDENT_WORKSPACE_ENDPOINTS).access(this::hasCompletedStudentProfileAccess)
                         .requestMatchers("/chat/**").access(this::hasChatAccess)
-                        .requestMatchers("/main", "/logout").hasAnyRole("STUDENT", "COMPANY", "ADMIN")
-                        .requestMatchers("/main/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
@@ -62,44 +102,38 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private AuthorizationDecision hasConfirmedCompanyAccess(Supplier<Authentication> authentication,
-                                                            RequestAuthorizationContext context) {
-        return new AuthorizationDecision(isConfirmedCompany(authentication.get()));
+    private AuthorizationDecision hasReadyCompanyAccess(Supplier<Authentication> authentication,
+                                                        RequestAuthorizationContext context) {
+        return new AuthorizationDecision(isReadyCompany(authentication.get()));
     }
 
     private AuthorizationDecision hasChatAccess(Supplier<Authentication> authentication,
                                                 RequestAuthorizationContext context) {
         Authentication currentAuthentication = authentication.get();
-
-        if (!(currentAuthentication.getPrincipal() instanceof CustomUserDetails user)) {
-            return new AuthorizationDecision(false);
-        }
-
-        boolean hasAccess = (user.getRole() == Role.STUDENT && studentProfileService.isProfileComplete(user.getId())) ||
-                (user.getRole() == Role.COMPANY && companyProfileService.isConfirmed(user.getId()));
-
-        return new AuthorizationDecision(hasAccess);
+        return new AuthorizationDecision(isReadyStudent(currentAuthentication) || isReadyCompany(currentAuthentication));
     }
 
     private AuthorizationDecision hasCompletedStudentProfileAccess(Supplier<Authentication> authentication,
                                                                    RequestAuthorizationContext context) {
-        Authentication currentAuthentication = authentication.get();
-
-        if (!(currentAuthentication.getPrincipal() instanceof CustomUserDetails user)) {
-            return new AuthorizationDecision(false);
-        }
-
-        boolean hasAccess = user.getRole() == Role.STUDENT && studentProfileService.isProfileComplete(user.getId());
-
-        return new AuthorizationDecision(hasAccess);
+        return new AuthorizationDecision(isReadyStudent(authentication.get()));
     }
 
-    private boolean isConfirmedCompany(Authentication authentication) {
+    private boolean isReadyStudent(Authentication authentication) {
         if (!(authentication.getPrincipal() instanceof CustomUserDetails user)) {
             return false;
         }
 
-        return user.getRole() == Role.COMPANY && companyProfileService.isConfirmed(user.getId());
+        return user.getRole() == Role.STUDENT && studentProfileService.isProfileComplete(user.getId());
+    }
+
+    private boolean isReadyCompany(Authentication authentication) {
+        if (!(authentication.getPrincipal() instanceof CustomUserDetails user)) {
+            return false;
+        }
+
+        return user.getRole() == Role.COMPANY
+                && companyProfileService.isProfileComplete(user.getId())
+                && companyProfileService.isConfirmed(user.getId());
     }
 
     @Bean

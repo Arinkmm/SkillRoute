@@ -33,7 +33,7 @@ public class MailService {
     private void sendMail(String email, String subject, String contentTemplate, String url) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, "UTF-8");
 
             mimeMessageHelper.setFrom(mailProperties.getFrom(), mailProperties.getSender());
             mimeMessageHelper.setTo(email);

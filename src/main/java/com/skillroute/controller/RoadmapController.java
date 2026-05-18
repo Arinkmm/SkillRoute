@@ -20,14 +20,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class RoadmapController {
     private final RoadmapService roadmapService;
     private final VacancyService vacancyService;
+    private final StudentVacancyCatalogService studentVacancyCatalogService;
     private final StudentSkillService studentSkillService;
-    private final StudentVacancyService studentVacancyService;
     private final SkillService skillService;
     private final MessageProperties messages;
 
     @GetMapping
     public String roadmapSelectionPage(@AuthenticationPrincipal CustomUserDetails user, Model model) {
-        model.addAttribute("vacancies", studentVacancyService.getFollowedVacancies(user.getId()));
+        model.addAttribute("vacancies", studentVacancyCatalogService.getFollowedVacancies(user.getId()));
         return "student/roadmap-selection";
     }
 

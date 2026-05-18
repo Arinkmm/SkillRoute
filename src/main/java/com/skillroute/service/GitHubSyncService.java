@@ -109,7 +109,7 @@ public class GitHubSyncService {
         StudentSkill s = new StudentSkill();
         s.setId(id);
         s.setStudent(student);
-        s.setSkill(skillRepository.findById(skillId).orElseThrow());
+        s.setSkill(skillRepository.findById(skillId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSkillNotFound())));
         s.setLevel(1);
         return s;
     }

@@ -11,10 +11,13 @@ import org.springframework.stereotype.Component;
 public class RedisProperties {
     private String prefix;
     private long ttlMinutes;
+    private long retentionTtlMinutes;
     private String resendLimitPrefix;
     private long resendIntervalMinutes;
     private String passwordResetPrefix;
     private long passwordResetTtlMinutes;
     private String passwordResetLimitPrefix;
     private long passwordResetIntervalMinutes;
+    private String registrationLimitPrefix;
+    private long registrationIntervalSeconds;
 }

@@ -3,6 +3,7 @@ package com.skillroute.service;
 import com.skillroute.dto.request.RegistrationRequest;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.FieldValidationException;
+import com.skillroute.exception.TooManyRequestsException;
 import com.skillroute.model.Account;
 import com.skillroute.model.Role;
 import com.skillroute.properties.MessageProperties;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -28,12 +28,25 @@ public class RegistrationService {
     private final ApplicationEventPublisher eventPublisher;
     private final StringRedisTemplate redisTemplate;
     private final RedisProperties redisProperties;
-    private final MailService mailService;
+    private final VerificationService verificationService;
     private final MessageProperties messages;
 
     @Transactional
     public void register(RegistrationRequest form) {
         validateRegistrationBusinessRules(form);
+
+        String limitKey = redisProperties.getRegistrationLimitPrefix() + form.getEmail();
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(limitKey))) {
+            throw new TooManyRequestsException(messages.getRegistration().getTooManyRequests()
+                    .formatted(redisProperties.getRegistrationIntervalSeconds()));
+        }
+
+        redisTemplate.opsForValue().set(
+                limitKey,
+                "lock",
+                redisProperties.getRegistrationIntervalSeconds(),
+                TimeUnit.SECONDS
+        );
 
         Account account = Account.builder()
                 .email(form.getEmail())
@@ -43,16 +56,8 @@ public class RegistrationService {
                 .build();
 
         Account savedAccount = accountRepository.save(account);
-        String token = UUID.randomUUID().toString();
 
-        redisTemplate.opsForValue().set(
-                redisProperties.getPrefix() + token,
-                savedAccount.getEmail(),
-                redisProperties.getTtlMinutes(),
-                TimeUnit.MINUTES
-        );
-
-        mailService.sendVerificationMail(form.getEmail(), token);
+        verificationService.sendVerificationEmail(savedAccount.getEmail());
         eventPublisher.publishEvent(new AccountRegisteredEvent(savedAccount));
     }
 

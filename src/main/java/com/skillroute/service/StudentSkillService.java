@@ -4,6 +4,7 @@ import com.skillroute.dto.request.AddSkillRequest;
 import com.skillroute.dto.response.StudentSkillResponse;
 import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.mapper.StudentSkillMapper;
 import com.skillroute.model.Skill;
 import com.skillroute.model.StudentProfile;
 import com.skillroute.model.StudentSkill;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,23 +26,21 @@ public class StudentSkillService {
     private final SkillRepository skillRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final MessageProperties messages;
+    private final StudentSkillMapper studentSkillMapper;
 
     @Transactional(readOnly = true)
     public List<StudentSkillResponse> getStudentSkills(Long studentId) {
         return studentSkillRepository.findAllByStudentId(studentId).stream()
-                .map(ss -> StudentSkillResponse.builder()
-                        .skillId(ss.getSkill().getId())
-                        .name(ss.getSkill().getName())
-                        .level(ss.getLevel())
-                        .isConfirmedByGitHub(ss.isConfirmedByGitHub())
-                        .build())
-                .collect(Collectors.toList());
+                .map(studentSkillMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<StudentSkillResponse> getStudentsSkillsByName(Long studentId, String query) {
         String normalizedQuery = query == null ? "" : query.trim();
-        return studentSkillRepository.findAllByStudentIdAndSkillNameContainingIgnoreCase(studentId, normalizedQuery).stream().map(ss -> new StudentSkillResponse(ss.getSkill().getId(), ss.getSkill().getName(), ss.getLevel(), ss.isConfirmedByGitHub())).toList();
+        return studentSkillRepository.findAllByStudentIdAndSkillNameContainingIgnoreCase(studentId, normalizedQuery).stream()
+                .map(studentSkillMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)

@@ -17,18 +17,26 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class StudentVacancyController {
     private final VacancyService vacancyService;
-    private final RecommendationService recommendationService;
+    private final StudentVacancyCatalogService studentVacancyCatalogService;
     private final StudentVacancyService studentVacancyService;
     private final RoadmapService roadmapService;
     private final MessageProperties messages;
 
     @GetMapping
     public String vacanciesPage(@AuthenticationPrincipal CustomUserDetails user, @Valid @ModelAttribute VacancyFilter filter, Model model) {
-        model.addAttribute("recommendedVacancies", recommendationService.getRecommendedVacanciesForStudent(user.getId(), filter));
-        model.addAttribute("hotVacancies", vacancyService.getHighDemandVacancies(5));
-        model.addAttribute("allVacancies", vacancyService.getAllActive());
+        boolean filterApplied = studentVacancyCatalogService.isFilterApplied(filter);
+
+        if (filterApplied) {
+            model.addAttribute("filteredVacancies", studentVacancyCatalogService.getFilteredVacanciesForStudent(user.getId(), filter));
+        } else {
+            model.addAttribute("followedVacancies", studentVacancyCatalogService.getFollowedVacancies(user.getId()));
+            model.addAttribute("recommendedVacancies", studentVacancyCatalogService.getRecommendedVacanciesForStudent(user.getId(), filter));
+            model.addAttribute("hotVacancies", studentVacancyCatalogService.getHighDemandVacanciesForStudent(user.getId()));
+            model.addAttribute("allVacancies", studentVacancyCatalogService.getAllActiveForStudent(user.getId()));
+        }
 
         model.addAttribute("filter", filter);
+        model.addAttribute("filterApplied", filterApplied);
 
         return "student/vacancies";
     }

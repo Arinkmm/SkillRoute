@@ -1,5 +1,3 @@
---liquibase formatted sql
---changeset arinkmm:7
 INSERT INTO specialization (direction, language)
 VALUES
     ('BACKEND', 'JAVA'), ('BACKEND', 'PYTHON'), ('BACKEND', 'CSHARP'), ('BACKEND', 'KOTLIN'),

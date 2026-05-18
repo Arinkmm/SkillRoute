@@ -29,14 +29,20 @@ public class CompanyChatController {
     }
 
     @PostMapping("/chat/{chatId}/reject")
-    public String reject(@PathVariable Long chatId, @RequestParam Long studentId, @RequestParam Long vacancyId) {
-        applicantService.rejectStudent(studentId, vacancyId);
-        return "redirect:/company/chats";
+    public String reject(@AuthenticationPrincipal CustomUserDetails user,
+                         @PathVariable Long chatId,
+                         @RequestParam Long studentId,
+                         @RequestParam Long vacancyId) {
+        applicantService.rejectStudent(studentId, vacancyId, user.getId());
+        return "redirect:/company/chat/" + chatId;
     }
 
     @PostMapping("/chat/{chatId}/accept")
-    public String accept(@PathVariable Long chatId, @RequestParam Long studentId, @RequestParam Long vacancyId) {
-        applicantService.acceptStudent(studentId, vacancyId);
-        return "redirect:/company/chats";
+    public String accept(@AuthenticationPrincipal CustomUserDetails user,
+                         @PathVariable Long chatId,
+                         @RequestParam Long studentId,
+                         @RequestParam Long vacancyId) {
+        applicantService.acceptStudent(studentId, vacancyId, user.getId());
+        return "redirect:/company/chat/" + chatId;
     }
 }

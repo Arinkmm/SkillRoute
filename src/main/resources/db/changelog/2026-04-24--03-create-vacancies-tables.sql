@@ -3,7 +3,7 @@
 CREATE TABLE vacancy (
     id BIGSERIAL PRIMARY KEY,
     company_id BIGINT,
-    name VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
     CONSTRAINT fk_vacancy_company FOREIGN KEY (company_id) REFERENCES company_profile(account_id) ON DELETE CASCADE
 );
 

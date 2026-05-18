@@ -29,4 +29,11 @@ public class ResourceService {
 
         resourceRepository.save(resource);
     }
+
+    @Transactional
+    public void deleteResourceFromSkill(Long skillId, Long resourceId) {
+        Resource resource = resourceRepository.findByIdAndSkillId(resourceId, skillId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getResourceNotFound()));
+
+        resourceRepository.delete(resource);
+    }
 }

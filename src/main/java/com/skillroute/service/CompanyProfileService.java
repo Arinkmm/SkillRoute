@@ -4,6 +4,7 @@ import com.skillroute.dto.response.CompanyProfileResponse;
 import com.skillroute.dto.request.UpdateCompanyRequest;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.mapper.CompanyProfileMapper;
 import com.skillroute.model.CompanyProfile;
 import com.skillroute.model.Role;
 import com.skillroute.properties.MessageProperties;
@@ -20,6 +21,7 @@ import java.util.List;
 public class CompanyProfileService {
     private final CompanyProfileRepository companyProfileRepository;
     private final MessageProperties messages;
+    private final CompanyProfileMapper companyProfileMapper;
 
     @EventListener
     public void handleAccountRegistration(AccountRegisteredEvent event) {
@@ -33,7 +35,7 @@ public class CompanyProfileService {
     @Transactional(readOnly = true)
     public CompanyProfileResponse getCompanyById(Long accountId) {
         return companyProfileRepository.findById(accountId)
-                .map(this::mapToResponseDto)
+                .map(companyProfileMapper::toResponse)
                 .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
     }
 
@@ -42,24 +44,20 @@ public class CompanyProfileService {
         CompanyProfile profile = companyProfileRepository.findById(accountId)
                 .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
 
-        return UpdateCompanyRequest.builder()
-                .companyName(profile.getCompanyName())
-                .description(profile.getDescription())
-                .websiteUrl(profile.getWebsiteUrl())
-                .build();
+        return companyProfileMapper.toUpdateRequest(profile);
     }
 
     @Transactional(readOnly = true)
     public List<CompanyProfileResponse> getConfirmedCompanies() {
         return companyProfileRepository.findAllConfirmed().stream()
-                .map(this::mapToResponseDto)
+                .map(companyProfileMapper::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<CompanyProfileResponse> getPendingCompanies() {
         return companyProfileRepository.findAllPending().stream()
-                .map(this::mapToResponseDto)
+                .map(companyProfileMapper::toResponse)
                 .toList();
     }
 
@@ -67,9 +65,9 @@ public class CompanyProfileService {
     public void updateProfile(Long id, UpdateCompanyRequest form) {
         CompanyProfile companyProfile = companyProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
 
-        companyProfile.setCompanyName(form.getCompanyName());
-        companyProfile.setDescription(form.getDescription());
-        companyProfile.setWebsiteUrl(form.getWebsiteUrl());
+        companyProfile.setCompanyName(normalizeBlank(form.getCompanyName()));
+        companyProfile.setDescription(normalizeBlank(form.getDescription()));
+        companyProfile.setWebsiteUrl(normalizeBlank(form.getWebsiteUrl()));
     }
 
     @Transactional
@@ -77,13 +75,6 @@ public class CompanyProfileService {
         CompanyProfile companyProfile = companyProfileRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
 
         companyProfile.setConfirmed(true);
-    }
-
-    @Transactional
-    public void rejectCompany(Long companyId) {
-        CompanyProfile companyProfile = companyProfileRepository.findById(companyId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
-
-        companyProfile.setConfirmed(false);
     }
 
     @Transactional(readOnly = true)
@@ -104,15 +95,7 @@ public class CompanyProfileService {
         return value != null && !value.isBlank();
     }
 
-    private CompanyProfileResponse mapToResponseDto(CompanyProfile profile) {
-        return CompanyProfileResponse.builder()
-                .id(profile.getId())
-                .email(profile.getAccount().getEmail())
-                .companyName(profile.getCompanyName())
-                .description(profile.getDescription())
-                .websiteUrl(profile.getWebsiteUrl())
-                .confirmed(profile.isConfirmed())
-                .accountVerified(profile.getAccount().isVerified())
-                .build();
+    private String normalizeBlank(String value) {
+        return hasText(value) ? value.trim() : null;
     }
 }

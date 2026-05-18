@@ -5,6 +5,7 @@ import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
 import com.skillroute.service.CompanyProfileService;
 import com.skillroute.service.StudentProfileService;
+import com.skillroute.service.StudentVacancyCatalogService;
 import com.skillroute.service.StudentVacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class MainController {
     private final CompanyProfileService companyProfileService;
     private final StudentProfileService studentProfileService;
+    private final StudentVacancyCatalogService studentVacancyCatalogService;
     private final StudentVacancyService studentVacancyService;
     private final MessageProperties messages;
 
@@ -39,7 +41,7 @@ public class MainController {
         if (user.getRole() == Role.ADMIN) {
             model.addAttribute("companies", companyProfileService.getPendingCompanies());
         } else if (user.getRole() == Role.STUDENT && !isNewAccount) {
-            model.addAttribute("followedVacancies", studentVacancyService.getFollowedVacancies(user.getId()));
+            model.addAttribute("followedVacancies", studentVacancyCatalogService.getFollowedVacancies(user.getId()));
         } else if (user.getRole() == Role.COMPANY && !isNewAccount && isConfirmed) {
             model.addAttribute("trackedStudents", studentVacancyService.getTrackedStudentsForCompany(user.getId()));
         }
@@ -51,14 +53,6 @@ public class MainController {
     public String approveCompany(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         companyProfileService.approveCompany(id);
         redirectAttributes.addFlashAttribute("message", messages.getUi().getCompanyApproved());
-
-        return "redirect:/main";
-    }
-
-    @PostMapping("/companies/{id}/reject")
-    public String rejectCompany(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        companyProfileService.rejectCompany(id);
-        redirectAttributes.addFlashAttribute("message", messages.getUi().getCompanyRejected());
 
         return "redirect:/main";
     }

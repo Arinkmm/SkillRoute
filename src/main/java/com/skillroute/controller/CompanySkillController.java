@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/company/skills")
 @RequiredArgsConstructor
 public class CompanySkillController {
-    private final SkillService  skillService;
+    private final SkillService skillService;
     private final ResourceService resourceService;
     private final MessageProperties messages;
 
@@ -33,8 +33,8 @@ public class CompanySkillController {
 
     @GetMapping("/{id}/resources")
     public String addResourceForm(@PathVariable Long id, Model model) {
-        model.addAttribute("skillId", id);
-        model.addAttribute("addResourceForm", new AddResourceRequest());
+        model.addAttribute("skill", skillService.getSkillById(id));
+        model.addAttribute("addResourceRequest", new AddResourceRequest());
         return "company/add-resource";
     }
 
@@ -44,6 +44,15 @@ public class CompanySkillController {
                               RedirectAttributes redirectAttributes) {
         resourceService.addResourceToSkill(id, form);
         redirectAttributes.addFlashAttribute("success", messages.getUi().getMaterialAdded());
-        return "redirect:/company/skills/" + id;
+        return "redirect:/company/skills/" + id + "/resources";
+    }
+
+    @PostMapping("/{skillId}/resources/{resourceId}/delete")
+    public String deleteResource(@PathVariable Long skillId,
+                                 @PathVariable Long resourceId,
+                                 RedirectAttributes redirectAttributes) {
+        resourceService.deleteResourceFromSkill(skillId, resourceId);
+        redirectAttributes.addFlashAttribute("success", messages.getUi().getMaterialDeleted());
+        return "redirect:/company/skills/" + skillId + "/resources";
     }
 }

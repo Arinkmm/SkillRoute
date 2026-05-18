@@ -86,6 +86,6 @@ public class CompanyVacancyController {
         vacancyService.closeVacancy(id, user.getId());
 
         redirectAttributes.addFlashAttribute("message", messages.getUi().getVacancyClosed());
-        return "redirect:/company/vacancies/" + id;
+        return "redirect:/company/vacancies";
     }
 }

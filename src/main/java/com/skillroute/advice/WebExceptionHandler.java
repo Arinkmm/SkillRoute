@@ -43,10 +43,17 @@ public class WebExceptionHandler {
     }
 
     @ExceptionHandler(VerificationTokenException.class)
-    public String handleVerificationToken(VerificationTokenException e, RedirectAttributes redirectAttributes) {
+    public String handleVerificationToken(VerificationTokenException e, RedirectAttributes redirectAttributes, HttpServletRequest req) {
         log.error("Ошибка токена подтверждения аккаунта: {}", e.getMessage());
         redirectAttributes.addFlashAttribute("error", e.getMessage());
-        return "redirect:/register";
+        redirectAttributes.addFlashAttribute("verificationExpired", true);
+        String token = req.getParameter("token");
+        if (token != null && !token.isBlank()) {
+            String expiredToken = token.trim();
+            req.getSession().setAttribute("expiredVerificationToken", expiredToken);
+            redirectAttributes.addFlashAttribute("expiredVerificationToken", expiredToken);
+        }
+        return "redirect:/login";
     }
 
     @ExceptionHandler(PasswordResetTokenException.class)
@@ -115,6 +122,17 @@ public class WebExceptionHandler {
         return "redirect:" + (referer != null ? referer : "/");
     }
 
+    @ExceptionHandler(BindException.class)
+    public String handleBindValidation(BindException e, RedirectAttributes redirectAttributes, HttpServletRequest req) {
+        Map<String, String> errors = e.getBindingResult().getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (a, b) -> a));
+        log.error("Ошибки валидации формы : {}", errors);
+        redirectAttributes.addFlashAttribute("validationErrors", errors);
+        String attrName = Conventions.getVariableName(e.getBindingResult().getTarget());
+        redirectAttributes.addFlashAttribute(attrName, e.getBindingResult().getTarget());
+        String referer = req.getHeader("Referer");
+        return "redirect:" + (referer != null ? referer : "/");
+    }
+
     @ExceptionHandler(Exception.class)
     public String handleAll(Exception e, Model model) {
         log.error("Глобальная ошибка в Web-контроллере: ", e);
@@ -122,4 +140,5 @@ public class WebExceptionHandler {
         model.addAttribute("errorCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return "error";
     }
+
 }

@@ -16,21 +16,16 @@ public class VacancyCustomRepositoryImpl implements VacancyCustomRepository {
     private final EntityManager entityManager;
 
     @Override
-    public List<Vacancy> findRecommendedWithSubquery(Long studentId, VacancyFilter filter) {
+    public List<Vacancy> findFilteredActiveExcludingFollowed(Long studentId, VacancyFilter filter) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Vacancy> query = cb.createQuery(Vacancy.class);
         Root<Vacancy> root = query.from(Vacancy.class);
 
         Join<Vacancy, VacancyProfile> profileJoin = root.join("profile");
 
-        Subquery<Long> subquery = query.subquery(Long.class);
-        Root<StudentVacancy> subRoot = subquery.from(StudentVacancy.class);
-        subquery.select(subRoot.get("vacancy").get("id"))
-                .where(cb.equal(subRoot.get("student").get("id"), studentId));
-
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(profileJoin.get("status"), VacancyStatus.OPEN));
-        predicates.add(cb.not(root.get("id").in(subquery)));
+        predicates.add(cb.not(root.get("id").in(followedVacancySubquery(query, cb, studentId))));
 
         if (filter.getMinSalary() != null) {
             predicates.add(cb.ge(profileJoin.get("salary"), filter.getMinSalary()));
@@ -51,17 +46,64 @@ public class VacancyCustomRepositoryImpl implements VacancyCustomRepository {
     }
 
     @Override
-    public List<Vacancy> findHighDemandVacancies(int minSkillsCount) {
+    public List<Vacancy> findFollowedActiveByStudentId(Long studentId) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Vacancy> query = cb.createQuery(Vacancy.class);
         Root<Vacancy> root = query.from(Vacancy.class);
+        Join<Vacancy, VacancyProfile> profileJoin = root.join("profile");
+        Join<Vacancy, StudentVacancy> studentVacancyJoin = root.join("studentVacancies");
 
-        Expression<Long> skillsCount = cb.count(root.join("vacancySkills"));
-        
         query.select(root)
-             .groupBy(root.get("id"))
-             .having(cb.gt(skillsCount, (long) minSkillsCount));
+                .where(
+                        cb.equal(studentVacancyJoin.get("student").get("id"), studentId),
+                        cb.equal(profileJoin.get("status"), VacancyStatus.OPEN)
+                );
 
         return entityManager.createQuery(query).getResultList();
+    }
+
+    @Override
+    public List<Vacancy> findAllActiveExcludingFollowed(Long studentId) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Vacancy> query = cb.createQuery(Vacancy.class);
+        Root<Vacancy> root = query.from(Vacancy.class);
+        Join<Vacancy, VacancyProfile> profileJoin = root.join("profile");
+
+        query.select(root)
+                .where(
+                        cb.equal(profileJoin.get("status"), VacancyStatus.OPEN),
+                        cb.not(root.get("id").in(followedVacancySubquery(query, cb, studentId)))
+                );
+
+        return entityManager.createQuery(query).getResultList();
+    }
+
+    @Override
+    public List<Vacancy> findHighDemandVacanciesExcludingFollowed(Long studentId, int minSkillsCount) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Vacancy> query = cb.createQuery(Vacancy.class);
+        Root<Vacancy> root = query.from(Vacancy.class);
+        Join<Vacancy, VacancyProfile> profileJoin = root.join("profile");
+
+        Expression<Long> skillsCount = cb.count(root.join("vacancySkills"));
+
+        query.select(root)
+                .where(
+                        cb.equal(profileJoin.get("status"), VacancyStatus.OPEN),
+                        cb.not(root.get("id").in(followedVacancySubquery(query, cb, studentId)))
+                )
+                .groupBy(root.get("id"))
+                .having(cb.gt(skillsCount, (long) minSkillsCount));
+
+        return entityManager.createQuery(query).getResultList();
+    }
+
+    private Subquery<Long> followedVacancySubquery(CriteriaQuery<Vacancy> query, CriteriaBuilder cb, Long studentId) {
+        Subquery<Long> subquery = query.subquery(Long.class);
+        Root<StudentVacancy> subRoot = subquery.from(StudentVacancy.class);
+        subquery.select(subRoot.get("vacancy").get("id"))
+                .where(cb.equal(subRoot.get("student").get("id"), studentId));
+
+        return subquery;
     }
 }

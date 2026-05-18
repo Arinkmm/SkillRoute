@@ -1,11 +1,11 @@
 package com.skillroute.service;
 
 import com.skillroute.dto.request.UpdateStudentRequest;
-import com.skillroute.dto.response.SpecializationResponse;
 import com.skillroute.dto.response.StudentProfileResponse;
 import com.skillroute.event.AccountRegisteredEvent;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.FieldValidationException;
+import com.skillroute.mapper.StudentProfileMapper;
 import com.skillroute.model.Role;
 import com.skillroute.model.Specialization;
 import com.skillroute.model.StudentProfile;
@@ -26,6 +26,7 @@ public class StudentProfileService {
     private final StudentProfileRepository studentProfileRepository;
     private final SpecializationRepository specializationRepository;
     private final MessageProperties messages;
+    private final StudentProfileMapper studentProfileMapper;
 
     @EventListener
     public void handleAccountRegistration(AccountRegisteredEvent event) {
@@ -38,7 +39,9 @@ public class StudentProfileService {
 
     @Transactional(readOnly = true)
     public StudentProfileResponse getStudentById(Long id) {
-        return studentProfileRepository.findById(id).map(this::mapToResponseDto).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
+        return studentProfileRepository.findById(id)
+                .map(studentProfileMapper::toResponse)
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
     }
 
     @Transactional(readOnly = true)
@@ -46,13 +49,7 @@ public class StudentProfileService {
         StudentProfile profile = studentProfileRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
 
-        return UpdateStudentRequest.builder()
-                .firstName(profile.getFirstName())
-                .lastName(profile.getLastName())
-                .gitHubUrl(profile.getGithubUrl())
-                .specializationId(profile.getSpecialization() != null ? profile.getSpecialization().getId() : null)
-                .bio(profile.getBio())
-                .build();
+        return studentProfileMapper.toUpdateRequest(profile);
     }
 
     @Transactional
@@ -61,10 +58,10 @@ public class StudentProfileService {
 
         validateNameFields(form);
 
-        studentProfile.setFirstName(form.getFirstName());
-        studentProfile.setLastName(form.getLastName());
-        studentProfile.setGithubUrl(form.getGitHubUrl());
-        studentProfile.setBio(form.getBio());
+        studentProfile.setFirstName(normalizeBlank(form.getFirstName()));
+        studentProfile.setLastName(normalizeBlank(form.getLastName()));
+        studentProfile.setGithubUrl(normalizeBlank(form.getGitHubUrl()));
+        studentProfile.setBio(normalizeBlank(form.getBio()));
 
         if (form.getSpecializationId() != null) {
             Specialization specialization = specializationRepository.getReferenceById(form.getSpecializationId());
@@ -81,6 +78,10 @@ public class StudentProfileService {
 
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private String normalizeBlank(String value) {
+        return hasText(value) ? value.trim() : null;
     }
 
     private void validateNameFields(UpdateStudentRequest form) {
@@ -103,28 +104,5 @@ public class StudentProfileService {
         }
 
         throw new FieldValidationException(messages.getValidationError(), errors);
-    }
-
-    private StudentProfileResponse mapToResponseDto(StudentProfile profile) {
-        return StudentProfileResponse.builder()
-                .id(profile.getId())
-                .firstName(profile.getFirstName())
-                .lastName(profile.getLastName())
-                .githubUrl(profile.getGithubUrl())
-                .bio(profile.getBio())
-                .specialization(mapSpecialization(profile.getSpecialization()))
-                .build();
-    }
-
-    private SpecializationResponse mapSpecialization(Specialization specialization) {
-        if (specialization == null) {
-            return null;
-        }
-
-        return SpecializationResponse.builder()
-                .id(specialization.getId())
-                .direction(specialization.getDirection())
-                .language(specialization.getLanguage())
-                .build();
     }
 }

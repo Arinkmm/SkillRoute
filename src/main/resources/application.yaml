@@ -41,24 +41,99 @@ mail:
   base-url: http://localhost:8080
   sender: SkillRoute
   from: ${spring.mail.username}
-  subject: Please verify your account
-  content: "Dear user, please follow the link below to verify your account: <a href=$url>VERIFY</a>"
-  password-reset-subject: Reset your SkillRoute password
-  password-reset-content: "Dear user, please follow the link below to set a new password: <a href=$url>RESET PASSWORD</a>"
+  subject: Подтвердите аккаунт SkillRoute
+  content: |
+    <!doctype html>
+    <html lang="ru">
+      <head>
+        <meta charset="UTF-8">
+        <title>Подтверждение аккаунта SkillRoute</title>
+      </head>
+      <body style="margin:0;padding:0;background:#eef7f5;font-family:Arial,Helvetica,sans-serif;color:#10242f;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef7f5;padding:32px 16px;">
+          <tr>
+            <td align="center">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #d7ebe6;box-shadow:0 18px 45px rgba(16,36,47,0.08);">
+                <tr>
+                  <td style="padding:30px 34px;background:linear-gradient(135deg,#0f9f8a,#42b8e8);color:#ffffff;">
+                    <div style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">SkillRoute</div>
+                    <h1 style="margin:14px 0 0;font-size:28px;line-height:1.2;font-weight:800;">Подтвердите аккаунт</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:34px;">
+                    <p style="margin:0 0 16px;font-size:17px;line-height:1.6;">Здравствуйте!</p>
+                    <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#415865;">Чтобы завершить регистрацию в SkillRoute, подтвердите вашу почту. После этого вы сможете войти в аккаунт и продолжить настройку профиля.</p>
+                    <a href="$url" style="display:inline-block;padding:14px 22px;background:#0f9f8a;color:#ffffff;text-decoration:none;border-radius:12px;font-size:16px;font-weight:700;">Подтвердить аккаунт</a>
+                    <p style="margin:26px 0 0;font-size:13px;line-height:1.6;color:#6d7f87;">Если кнопка не открывается, скопируйте ссылку в браузер:<br><a href="$url" style="color:#0f8fbe;word-break:break-all;">$url</a></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:20px 34px;background:#f6fbfa;color:#6d7f87;font-size:13px;line-height:1.5;">Если вы не регистрировались в SkillRoute, просто проигнорируйте это письмо.</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  password-reset-subject: Восстановление пароля SkillRoute
+  password-reset-content: |
+    <!doctype html>
+    <html lang="ru">
+      <head>
+        <meta charset="UTF-8">
+        <title>Восстановление пароля SkillRoute</title>
+      </head>
+      <body style="margin:0;padding:0;background:#eef7f5;font-family:Arial,Helvetica,sans-serif;color:#10242f;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef7f5;padding:32px 16px;">
+          <tr>
+            <td align="center">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #d7ebe6;box-shadow:0 18px 45px rgba(16,36,47,0.08);">
+                <tr>
+                  <td style="padding:30px 34px;background:linear-gradient(135deg,#1976d2,#10a99a);color:#ffffff;">
+                    <div style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">SkillRoute</div>
+                    <h1 style="margin:14px 0 0;font-size:28px;line-height:1.2;font-weight:800;">Восстановление пароля</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:34px;">
+                    <p style="margin:0 0 16px;font-size:17px;line-height:1.6;">Здравствуйте!</p>
+                    <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#415865;">Мы получили запрос на смену пароля. Перейдите по ссылке ниже и задайте новый пароль для вашего аккаунта.</p>
+                    <a href="$url" style="display:inline-block;padding:14px 22px;background:#1976d2;color:#ffffff;text-decoration:none;border-radius:12px;font-size:16px;font-weight:700;">Сменить пароль</a>
+                    <p style="margin:26px 0 0;font-size:13px;line-height:1.6;color:#6d7f87;">Если кнопка не открывается, скопируйте ссылку в браузер:<br><a href="$url" style="color:#0f8fbe;word-break:break-all;">$url</a></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:20px 34px;background:#f6fbfa;color:#6d7f87;font-size:13px;line-height:1.5;">Если вы не запрашивали восстановление пароля, просто проигнорируйте это письмо.</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
 
 redis:
   verification:
     prefix: "verification:token:"
     ttl-minutes: 5
+    retention-ttl-minutes: 1440
     resend-limit-prefix: "limit:resend:"
     resend-interval-minutes: 1
     password-reset-prefix: "password-reset:token:"
     password-reset-ttl-minutes: 15
     password-reset-limit-prefix: "limit:password-reset:"
     password-reset-interval-minutes: 1
+    registration-limit-prefix: "limit:registration:"
+    registration-interval-seconds: 30
 
 github:
   token: ${GITHUB_TOKEN}
+
+vacancy:
+  catalog:
+    high-demand-limit: 5
 
 messages:
   internal-server-error: "Произошла внутренняя ошибка сервера. Мы уже работаем над исправлением"
@@ -69,7 +144,8 @@ messages:
     role-not-allowed: "Регистрация доступна только для студентов и компаний"
     email-exists: "Пользователь с таким email уже существует"
     password-mismatch: "Пароли не совпадают"
-    success: "Регистрация успешна! Проверьте почту для подтверждения"
+    too-many-requests: "Регистрация уже обрабатывается. Попробуйте снова через %d сек"
+    success: "Мы отправили письмо для подтверждения аккаунта. Проверьте почту и перейдите по ссылке"
   password-reset:
     error-title: "Ошибка сброса пароля"
     token-invalid: "Ссылка восстановления недействительна или срок ее действия истек"
@@ -82,7 +158,9 @@ messages:
     too-many-requests: "Повторное письмо можно отправить только через %d мин"
     account-not-found: "Аккаунт не найден"
     already-verified: "Аккаунт уже подтвержден"
-    resend-success: "Регистрация успешна! Проверьте почту для подтверждения"
+    resend-success: "Мы отправили новое письмо для подтверждения аккаунта. Проверьте почту и перейдите по ссылке"
+    email-required: "Введите email, на который нужно отправить письмо"
+    email-invalid: "Неверный формат почты"
   account:
     not-found: "Аккаунт не найден"
     current-password-invalid: "Текущий пароль введен неверно"
@@ -96,8 +174,8 @@ messages:
     send-error: "Ошибка при отправке письма. Пожалуйста, попробуйте позже"
   ui:
     company-approved: "Компания подтверждена"
-    company-rejected: "Компания отклонена"
     material-added: "Материал добавлен!"
+    material-deleted: "Материал удален"
     vacancy-saved: "Изменения сохранены!"
     vacancy-deleted: "Вакансия удалена"
     vacancy-closed: "Вакансия закрыта"
@@ -114,6 +192,7 @@ messages:
     company-not-found: "Компания не найдена"
     vacancy-not-found: "Вакансия не найдена"
     skill-not-found: "Навык не найден"
+    resource-not-found: "Материал не найден"
     skill-missing: "Скилл отсутствует"
     specialization-not-found: "Специализация не найдена"
     chat-not-found: "Чат не найден"
@@ -126,6 +205,7 @@ messages:
     delete-forbidden: "У вас нет прав на удаление этой вакансии"
   chat:
     access-forbidden: "У вас нет доступа к этому чату"
+    closed: "Диалог завершен. Отправка сообщений недоступна"
   github:
     url-required: "Для анализа навыков необходимо указать GitHub URL в профиле"
     login-extract-failed: "Не удалось извлечь логин из некорректной ссылки GitHub: %s"

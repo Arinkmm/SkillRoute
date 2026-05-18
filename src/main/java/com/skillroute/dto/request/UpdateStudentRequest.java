@@ -19,7 +19,7 @@ public class UpdateStudentRequest {
     private String lastName;
 
     @Pattern(
-            regexp = "^https?://(www\\.)?github\\.com/[a-zA-Z0-9-]+/?$",
+            regexp = "^\\s*$|^https?://(www\\.)?github\\.com/[a-zA-Z0-9-]+/?$",
             message = "Ссылка должна быть валидным URL профиля GitHub (например, https://github.com/username)"
     )
     private String gitHubUrl;

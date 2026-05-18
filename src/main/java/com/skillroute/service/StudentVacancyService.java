@@ -1,11 +1,9 @@
 package com.skillroute.service;
 
-import com.skillroute.dto.response.VacancySkillResponse;
-import com.skillroute.dto.response.SpecializationResponse;
 import com.skillroute.dto.response.TrackedStudentResponse;
-import com.skillroute.dto.response.VacancyResponse;
 import com.skillroute.exception.DuplicateEntityException;
 import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.mapper.StudentVacancyMapper;
 import com.skillroute.model.*;
 import com.skillroute.model.id.StudentVacancyId;
 import com.skillroute.properties.MessageProperties;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,22 +23,15 @@ public class StudentVacancyService {
     private final StudentProfileRepository studentProfileRepository;
     private final VacancyRepository vacancyRepository;
     private final MessageProperties messages;
-
-    @Transactional(readOnly = true)
-    public List<VacancyResponse> getFollowedVacancies(Long studentId) {
-        StudentProfile profile = studentProfileRepository.findById(studentId)
-                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
-
-        return profile.getStudentVacancies().stream()
-                .map(StudentVacancy::getVacancy)
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
-    }
+    private final StudentVacancyMapper studentVacancyMapper;
 
     @Transactional(readOnly = true)
     public List<TrackedStudentResponse> getTrackedStudentsForCompany(Long companyId) {
-        return studentVacancyRepository.findAllByCompanyId(companyId).stream()
-                .map(this::mapToTrackedStudentResponse)
+        return studentVacancyRepository.findAllByCompanyIdAndStatusIn(
+                        companyId,
+                        List.of(StudentVacancyStatus.REVIEWING, StudentVacancyStatus.INTERVIEW))
+                .stream()
+                .map(studentVacancyMapper::toTrackedStudentResponse)
                 .toList();
     }
 
@@ -68,52 +58,5 @@ public class StudentVacancyService {
     @Transactional(readOnly = true)
     public boolean isTracked(Long studentId, Long vacancyId) {
         return studentVacancyRepository.existsById(new StudentVacancyId(studentId, vacancyId));
-    }
-
-    private VacancyResponse mapToResponseDto(Vacancy vacancy) {
-        VacancyProfile profile = vacancy.getProfile();
-        Specialization spec = profile.getSpecialization();
-
-        return VacancyResponse.builder()
-                .id(vacancy.getId())
-                .name(vacancy.getName())
-                .companyId(vacancy.getCompany().getId())
-                .salary(profile.getSalary())
-                .workSchedule(profile.getWorkSchedule())
-                .status(profile.getStatus())
-                .specialization(mapSpecialization(spec))
-                .skills(vacancy.getVacancySkills().stream()
-                        .map(vs -> new VacancySkillResponse(
-                                vs.getSkill().getId(),
-                                vs.getSkill().getName(),
-                                vs.getLevel()))
-                        .collect(Collectors.toList()))
-                .build();
-    }
-
-    private TrackedStudentResponse mapToTrackedStudentResponse(StudentVacancy studentVacancy) {
-        StudentProfile student = studentVacancy.getStudent();
-        Vacancy vacancy = studentVacancy.getVacancy();
-
-        return TrackedStudentResponse.builder()
-                .studentId(student.getId())
-                .firstName(student.getFirstName())
-                .lastName(student.getLastName())
-                .vacancyId(vacancy.getId())
-                .vacancyName(vacancy.getName())
-                .status(studentVacancy.getStatus())
-                .build();
-    }
-
-    private SpecializationResponse mapSpecialization(Specialization specialization) {
-        if (specialization == null) {
-            return null;
-        }
-
-        return SpecializationResponse.builder()
-                .id(specialization.getId())
-                .direction(specialization.getDirection())
-                .language(specialization.getLanguage())
-                .build();
     }
 }

@@ -5,6 +5,8 @@ import com.skillroute.dto.response.SkillGapResponse;
 import com.skillroute.dto.response.StudentGapResponse;
 import com.skillroute.dto.response.StudentPreviewResponse;
 import com.skillroute.exception.EntityNotFoundException;
+import com.skillroute.exception.ResourceOwnershipException;
+import com.skillroute.mapper.ApplicantMapper;
 import com.skillroute.model.*;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.StudentProfileRepository;
@@ -29,6 +31,7 @@ public class ApplicantService {
     private final MatchingService matchingService;
     private final VacancyRepository vacancyRepository;
     private final MessageProperties messages;
+    private final ApplicantMapper applicantMapper;
 
     @Transactional(readOnly = true)
     public List<StudentPreviewResponse> getFilteredApplicants(Long vacancyId, ApplicantFilter filter) {
@@ -46,8 +49,10 @@ public class ApplicantService {
 
     @Transactional(readOnly = true)
     public StudentGapResponse getStudentGap(Long studentId, Long vacancyId) {
-        StudentProfile student = studentProfileRepository.findById(studentId).orElseThrow();
-        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow();
+        StudentProfile student = studentProfileRepository.findById(studentId)
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
+        Vacancy vacancy = vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
         StudentVacancyStatus status = studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
                 .map(StudentVacancy::getStatus)
                 .orElse(StudentVacancyStatus.SUBMITTED);
@@ -59,62 +64,70 @@ public class ApplicantService {
                 .filter(vs -> studentSkills.getOrDefault(vs.getSkill().getId(), 0) < vs.getLevel())
                 .map(vs -> {
                     int current = studentSkills.getOrDefault(vs.getSkill().getId(), 0);
-                    return SkillGapResponse.builder()
-                            .skillId(vs.getSkill().getId())
-                            .skillName(vs.getSkill().getName())
-                            .currentLevel(current)
-                            .targetLevel(vs.getLevel())
-                            .gapDepth(matchingService.calculateGapDepth(current, vs.getLevel()))
-                            .build();
+                    return applicantMapper.toSkillGapResponse(vs, current, matchingService.calculateGapDepth(current, vs.getLevel()));
                 }).toList();
 
-        return StudentGapResponse.builder()
-                .studentId(studentId)
-                .firstName(student.getFirstName())
-                .lastName(student.getLastName())
-                .matchPercentage(matchingService.calculateMatch(vacancy.getVacancySkills().size(), gaps.size()))
-                .totalGapLevel(gaps.stream().mapToInt(SkillGapResponse::getGapDepth).sum())
-                .status(status)
-                .gaps(gaps).build();
+        return applicantMapper.toStudentGapResponse(
+                student,
+                matchingService.calculateMatch(vacancy.getVacancySkills().size(), gaps.size()),
+                gaps.stream().mapToInt(SkillGapResponse::getGapDepth).sum(),
+                status,
+                gaps);
     }
 
     @Transactional
     public void startReviewing(Long studentId, Long vacancyId) {
-        studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
-                .ifPresent(rel -> rel.setStatus(StudentVacancyStatus.REVIEWING));
-        vacancyProfileRepository.findById(vacancyId)
-                .ifPresent(profile -> profile.setStatus(VacancyStatus.IN_PROGRESS));
+        boolean updated = studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
+                .filter(rel -> !isTerminal(rel.getStatus()))
+                .map(rel -> {
+                    rel.setStatus(StudentVacancyStatus.REVIEWING);
+                    return true;
+                })
+                .orElse(false);
+
+        if (updated) {
+            vacancyProfileRepository.findById(vacancyId)
+                    .ifPresent(profile -> profile.setStatus(VacancyStatus.IN_PROGRESS));
+        }
     }
 
     @Transactional
     public void startInterviewing(Long studentId, Long vacancyId) {
         studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
+                .filter(rel -> !isTerminal(rel.getStatus()))
                 .ifPresent(rel -> rel.setStatus(StudentVacancyStatus.INTERVIEW));
     }
 
     @Transactional
-    public void rejectStudent(Long studentId, Long vacancyId) {
+    public void rejectStudent(Long studentId, Long vacancyId, Long companyId) {
+        validateCompanyOwnsVacancy(vacancyId, companyId);
         studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
                 .ifPresent(rel -> rel.setStatus(StudentVacancyStatus.REJECTED));
     }
 
     @Transactional
-    public void acceptStudent(Long studentId, Long vacancyId) {
+    public void acceptStudent(Long studentId, Long vacancyId, Long companyId) {
+        validateCompanyOwnsVacancy(vacancyId, companyId);
         studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
                 .ifPresent(rel -> rel.setStatus(StudentVacancyStatus.ACCEPTED));
         vacancyProfileRepository.findById(vacancyId)
                 .ifPresent(profile -> profile.setStatus(VacancyStatus.CLOSE));
     }
 
+    private void validateCompanyOwnsVacancy(Long vacancyId, Long companyId) {
+        Vacancy vacancy = vacancyRepository.findById(vacancyId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
+
+        if (!vacancy.getCompany().getId().equals(companyId)) {
+            throw new ResourceOwnershipException(messages.getVacancy().getEditForbidden());
+        }
+    }
+
     private StudentPreviewResponse buildPreview(StudentProfile studentProfile, Vacancy vacancy) {
         StudentGapResponse gap = getStudentGap(studentProfile.getId(), vacancy.getId());
-        return StudentPreviewResponse.builder()
-                .studentId(studentProfile.getId())
-                .firstName(studentProfile.getFirstName())
-                .lastName(studentProfile.getLastName())
-                .matchPercentage(gap.getMatchPercentage())
-                .totalGapLevel(gap.getTotalGapLevel())
-                .status(gap.getStatus())
-                .build();
+        return applicantMapper.toStudentPreviewResponse(studentProfile, gap);
+    }
+
+    private boolean isTerminal(StudentVacancyStatus status) {
+        return status == StudentVacancyStatus.ACCEPTED || status == StudentVacancyStatus.REJECTED;
     }
 }

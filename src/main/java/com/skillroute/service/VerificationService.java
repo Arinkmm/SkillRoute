@@ -1,9 +1,6 @@
 package com.skillroute.service;
 
-import com.skillroute.exception.AccountAlreadyVerifiedException;
-import com.skillroute.exception.EntityNotFoundException;
-import com.skillroute.exception.TooManyRequestsException;
-import com.skillroute.exception.VerificationTokenException;
+import com.skillroute.exception.*;
 import com.skillroute.model.Account;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.properties.RedisProperties;
@@ -13,6 +10,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +29,12 @@ public class VerificationService {
     @Transactional
     public void verifyUser(String token) {
         String redisKey = redisProperties.getPrefix() + token;
-        String email = getEmailByToken(token);
+        TokenData tokenData = getTokenData(token);
+        if (Instant.now().isAfter(tokenData.expiresAt())) {
+            throw new VerificationTokenException(messages.getVerification().getTokenInvalid());
+        }
+
+        String email = tokenData.email();
         Account account = accountRepository.findByEmail(email).orElseThrow(() -> new VerificationTokenException(messages.getVerification().getTokenInvalid()));
 
         account.setVerified(true);
@@ -49,28 +55,50 @@ public class VerificationService {
             throw new AccountAlreadyVerifiedException(messages.getVerification().getAlreadyVerified());
         }
 
-        String newToken = UUID.randomUUID().toString();
-        redisTemplate.opsForValue().set(
-                redisProperties.getPrefix() + newToken,
-                email,
-                redisProperties.getTtlMinutes(),
-                TimeUnit.MINUTES
-        );
-
+        sendVerificationEmail(account.getEmail());
         redisTemplate.opsForValue().set(limitKey, "lock", redisProperties.getResendIntervalMinutes(), TimeUnit.MINUTES);
+    }
+
+    @Transactional
+    public void resendVerificationEmailByToken(String token) {
+        TokenData tokenData = getTokenData(token);
+        resendVerificationEmail(tokenData.email());
+        redisTemplate.delete(redisProperties.getPrefix() + token);
+    }
+
+    public void sendVerificationEmail(String email) {
+        String newToken = UUID.randomUUID().toString();
+        String redisKey = redisProperties.getPrefix() + newToken;
+        Instant expiresAt = Instant.now().plus(redisProperties.getTtlMinutes(), ChronoUnit.MINUTES);
+
+        redisTemplate.opsForHash().putAll(redisKey, Map.of(
+                "email", email,
+                "expiresAt", expiresAt.toString()
+        ));
+        redisTemplate.expire(redisKey, redisProperties.getRetentionTtlMinutes(), TimeUnit.MINUTES);
+
         mailService.sendVerificationMail(email, newToken);
     }
 
-    private String getEmailByToken(String token) {
+    private TokenData getTokenData(String token) {
         if (token == null || token.isBlank()) {
             throw new VerificationTokenException(messages.getVerification().getTokenInvalid());
         }
 
-        String email = redisTemplate.opsForValue().get(redisProperties.getPrefix() + token);
-        if (email == null) {
+        Map<Object, Object> tokenData = redisTemplate.opsForHash().entries(redisProperties.getPrefix() + token);
+        Object email = tokenData.get("email");
+        Object expiresAt = tokenData.get("expiresAt");
+
+        if (!(email instanceof String emailValue) || emailValue.isBlank() || !(expiresAt instanceof String expiresAtValue)) {
             throw new VerificationTokenException(messages.getVerification().getTokenInvalid());
         }
 
-        return email;
+        try {
+            return new TokenData(emailValue, Instant.parse(expiresAtValue));
+        } catch (DateTimeParseException e) {
+            throw new VerificationTokenException(messages.getVerification().getTokenInvalid());
+        }
     }
+
+    private record TokenData(String email, Instant expiresAt) {}
 }

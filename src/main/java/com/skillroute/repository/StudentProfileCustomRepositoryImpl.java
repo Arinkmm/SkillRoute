@@ -3,6 +3,7 @@ package com.skillroute.repository;
 import com.skillroute.dto.request.ApplicantFilter;
 import com.skillroute.model.StudentProfile;
 import com.skillroute.model.StudentVacancy;
+import com.skillroute.model.StudentVacancyStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
@@ -25,7 +26,10 @@ public class StudentProfileCustomRepositoryImpl implements StudentProfileCustomR
         Subquery<Long> subquery = query.subquery(Long.class);
         Root<StudentVacancy> subRoot = subquery.from(StudentVacancy.class);
         subquery.select(subRoot.get("student").get("id"))
-                .where(cb.equal(subRoot.get("vacancy").get("id"), vacancyId));
+                .where(
+                        cb.equal(subRoot.get("vacancy").get("id"), vacancyId),
+                        subRoot.get("status").in(StudentVacancyStatus.SUBMITTED, StudentVacancyStatus.REVIEWING, StudentVacancyStatus.INTERVIEW)
+                );
 
         List<Predicate> predicates = new ArrayList<>();
         

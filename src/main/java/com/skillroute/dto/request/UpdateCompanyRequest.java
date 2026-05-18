@@ -1,11 +1,11 @@
 package com.skillroute.dto.request;
 
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.URL;
 
 @Data
 @Builder
@@ -18,7 +18,7 @@ public class UpdateCompanyRequest {
     @Size(max = 500, message = "Информация о компании не должна превышать 500 символов")
     private String description;
 
-    @URL(message = "Должна быть корректная ссылка")
+    @Pattern(regexp = "^\\s*$|^https?://.+", message = "Должна быть корректная ссылка")
     @Size(max = 255)
     private String websiteUrl;
 }

@@ -30,6 +30,7 @@ public class MessageProperties {
         private String roleNotAllowed;
         private String emailExists;
         private String passwordMismatch;
+        private String tooManyRequests;
         private String success;
     }
 
@@ -52,6 +53,8 @@ public class MessageProperties {
         private String accountNotFound;
         private String alreadyVerified;
         private String resendSuccess;
+        private String emailRequired;
+        private String emailInvalid;
     }
 
     @Getter
@@ -77,8 +80,8 @@ public class MessageProperties {
     @Setter
     public static class Ui {
         private String companyApproved;
-        private String companyRejected;
         private String materialAdded;
+        private String materialDeleted;
         private String vacancySaved;
         private String vacancyDeleted;
         private String vacancyClosed;
@@ -99,6 +102,7 @@ public class MessageProperties {
         private String companyNotFound;
         private String vacancyNotFound;
         private String skillNotFound;
+        private String resourceNotFound;
         private String skillMissing;
         private String specializationNotFound;
         private String chatNotFound;
@@ -123,6 +127,7 @@ public class MessageProperties {
     @Setter
     public static class Chat {
         private String accessForbidden;
+        private String closed;
     }
 
     @Getter

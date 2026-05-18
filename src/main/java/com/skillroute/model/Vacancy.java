@@ -20,7 +20,7 @@ public class Vacancy {
     @JoinColumn(name = "company_id", nullable = false)
     private CompanyProfile company;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @OneToOne(mappedBy = "vacancy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -40,11 +40,11 @@ public class Vacancy {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Vacancy vacancy = (Vacancy) o;
-        return Objects.equals(name, vacancy.name);
+        return id != null && Objects.equals(id, vacancy.id);
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(name);
+        return getClass().hashCode();
     }
 }
