@@ -2,6 +2,7 @@ package com.skillroute.service.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.skillroute.exception.GitHubRateLimitException;
 import com.skillroute.exception.ServiceUnavailableException;
 import com.skillroute.properties.GithubProperties;
 import com.skillroute.properties.MessageProperties;
@@ -13,7 +14,11 @@ import okhttp3.Response;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Component
@@ -31,10 +36,13 @@ public class GitHubSearchClient {
         Request request = createRequest(url);
 
         try (Response response = httpClient.newCall(request).execute()) {
+            String body = readBody(response);
+            checkRateLimit(response, body);
+
             if (!response.isSuccessful()) {
                 throw new ServiceUnavailableException(messages.getGithub().getApiError().formatted(response.code()));
             }
-            JsonNode repos = objectMapper.readTree(response.body().string());
+            JsonNode repos = objectMapper.readTree(body);
             for (JsonNode repo : repos) {
                 addSignal(signals, repo.path("language").asText(), 10);
                 addSignal(signals, repo.path("name").asText(), 5);
@@ -57,15 +65,14 @@ public class GitHubSearchClient {
         Request request = createRequest(url);
 
         try (Response response = httpClient.newCall(request).execute()) {
-            if (response.code() == 403) {
-                throw new ServiceUnavailableException(messages.getGithub().getRateLimitExceeded());
-            }
+            String body = readBody(response);
+            checkRateLimit(response, body);
 
             if (!response.isSuccessful()) {
                 throw new ServiceUnavailableException(messages.getGithub().getApiError().formatted(response.code()));
             }
 
-            JsonNode root = objectMapper.readTree(response.body().string());
+            JsonNode root = objectMapper.readTree(body);
             int total = root.path("total_count").asInt();
             return total > 0;
         } catch (IOException e) {
@@ -74,12 +81,61 @@ public class GitHubSearchClient {
     }
 
     private Request createRequest(HttpUrl url) {
-        return new Request.Builder()
+        Request.Builder builder = new Request.Builder()
                 .url(url)
                 .addHeader("Accept", "application/vnd.github.v3+json")
-                .addHeader("Authorization", "Bearer " + githubProperties.getToken())
-                .addHeader("User-Agent", "SkillRoute-App")
-                .build();
+                .addHeader("X-GitHub-Api-Version", "2022-11-28")
+                .addHeader("User-Agent", "SkillRoute-App");
+
+        if (githubProperties.getToken() != null && !githubProperties.getToken().isBlank()) {
+            builder.addHeader("Authorization", "Bearer " + githubProperties.getToken());
+        }
+
+        return builder.build();
+    }
+
+    private String readBody(Response response) throws IOException {
+        return response.body() == null ? "" : response.body().string();
+    }
+
+    private void checkRateLimit(Response response, String body) {
+        if (!isRateLimited(response, body)) {
+            return;
+        }
+
+        throw new GitHubRateLimitException(messages.getGithub().getRateLimitExceeded(), resolveRetryAfter(response));
+    }
+
+    private boolean isRateLimited(Response response, String body) {
+        if (response.code() != 403 && response.code() != 429) {
+            return false;
+        }
+
+        String normalizedBody = body == null ? "" : body.toLowerCase(Locale.ROOT);
+        return response.header("Retry-After") != null
+                || "0".equals(response.header("X-RateLimit-Remaining"))
+                || "0".equals(response.header("x-ratelimit-remaining"))
+                || normalizedBody.contains("rate limit");
+    }
+
+    private LocalDateTime resolveRetryAfter(Response response) {
+        String retryAfter = response.header("Retry-After");
+        if (retryAfter != null && retryAfter.matches("\\d+")) {
+            return LocalDateTime.now().plusSeconds(Long.parseLong(retryAfter));
+        }
+
+        String reset = response.header("X-RateLimit-Reset");
+        if (reset == null) {
+            reset = response.header("x-ratelimit-reset");
+        }
+
+        if (reset != null && reset.matches("\\d+")) {
+            return Instant.ofEpochSecond(Long.parseLong(reset))
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+        }
+
+        return LocalDateTime.now().plusMinutes(githubProperties.getSync().getDefaultRateLimitWaitMinutes());
     }
 
     private void addSignal(Map<String, Integer> signals, String value, int weight) {

@@ -4,6 +4,7 @@ import com.skillroute.model.*;
 import com.skillroute.model.id.StudentSkillId;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.GithubUrlNotFoundException;
+import com.skillroute.properties.GithubProperties;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.*;
 import com.skillroute.service.client.GitHubSearchClient;
@@ -26,6 +27,7 @@ public class GitHubSyncService {
     private final SkillRepository skillRepository;
     private final StudentSkillRepository studentSkillRepository;
     private final GitHubSearchClient gitHubClient;
+    private final GithubProperties githubProperties;
     private final MessageProperties messages;
     private final TransactionTemplate transactionTemplate;
 
@@ -43,11 +45,17 @@ public class GitHubSyncService {
 
         Map<Long, String> skillNames = skillRepository.findAll().stream()
                 .collect(Collectors.toMap(Skill::getId, Skill::getName));
+        Set<Long> alreadyConfirmed = studentSkillRepository.findConfirmedGitHubSkillIds(accountId);
 
         int confirmedDuringRun = 0;
 
         for (SkillDictionary dict : dictionaryRepository.findAll()) {
+            if (alreadyConfirmed.contains(dict.getSkillId())) {
+                continue;
+            }
+
             if (processSkillSync(student, username, profileSignals, dict, skillNames.get(dict.getSkillId()))) {
+                alreadyConfirmed.add(dict.getSkillId());
                 confirmedDuringRun++;
                 progressCallback.accept(countConfirmedByGitHub(accountId));
             }
@@ -85,7 +93,7 @@ public class GitHubSyncService {
 
     private int performDeepSearch(String username, String pattern) {
         boolean isMatch = gitHubClient.hasCodeMatch(username, pattern);
-        sleep(7000);
+        sleep(githubProperties.getSync().getCodeSearchDelayMillis());
         return isMatch ? 10 : 0;
     }
 
