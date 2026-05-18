@@ -1,0 +1,15 @@
+.git
+.gradle
+.gradle-local
+.idea
+.vscode
+build
+out
+bin
+*.iml
+*.iws
+*.ipr
+.env
+.env.*
+docker-compose.override.yml
+README.md
