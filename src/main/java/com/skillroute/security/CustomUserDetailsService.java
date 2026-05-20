@@ -3,7 +3,6 @@ package com.skillroute.security;
 import com.skillroute.model.Account;
 import com.skillroute.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
