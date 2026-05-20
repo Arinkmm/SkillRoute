@@ -12,6 +12,12 @@ public final class TestMessageProperties {
         messages.setValidationError("Ошибка валидации");
         messages.setValidationSuccess("Данные корректны");
 
+        messages.getError().setBadRequest("Некорректный запрос");
+        messages.getError().setUnauthorized("Нужен вход");
+        messages.getError().setForbidden("Нет доступа");
+        messages.getError().setNotFound("Страница не найдена");
+        messages.getError().setMethodNotAllowed("Метод не поддерживается");
+
         messages.getRegistration().setErrorTitle("Ошибка регистрации");
         messages.getRegistration().setRoleNotAllowed("Недопустимая роль");
         messages.getRegistration().setEmailExists("Пользователь с такой почтой уже существует");
@@ -24,6 +30,7 @@ public final class TestMessageProperties {
         messages.getPasswordReset().setTooManyRequests("Повторный запрос восстановления пароля доступен через %d минут");
 
         messages.getAccount().setNotFound("Аккаунт не найден");
+        messages.getAccount().setLoginNotFound("Пользователь с таким email не найден");
         messages.getAccount().setCurrentPasswordInvalid("Текущий пароль указан неверно");
         messages.getAccount().setPasswordMismatch("Пароли не совпадают");
         messages.getAccount().setSamePassword("Новый пароль должен отличаться от текущего");

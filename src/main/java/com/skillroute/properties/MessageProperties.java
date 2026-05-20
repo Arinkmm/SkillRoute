@@ -11,6 +11,7 @@ public class MessageProperties {
     private String internalServerError;
     private String validationError;
     private String validationSuccess;
+    private Error error = new Error();
     private Registration registration = new Registration();
     private PasswordReset passwordReset = new PasswordReset();
     private Verification verification = new Verification();
@@ -22,6 +23,16 @@ public class MessageProperties {
     private Vacancy vacancy = new Vacancy();
     private Chat chat = new Chat();
     private Github github = new Github();
+
+    @Getter
+    @Setter
+    public static class Error {
+        private String badRequest;
+        private String unauthorized;
+        private String forbidden;
+        private String notFound;
+        private String methodNotAllowed;
+    }
 
     @Getter
     @Setter
@@ -61,6 +72,7 @@ public class MessageProperties {
     @Setter
     public static class Account {
         private String notFound;
+        private String loginNotFound;
         private String currentPasswordInvalid;
         private String passwordMismatch;
         private String samePassword;

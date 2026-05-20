@@ -44,11 +44,11 @@ public class AppErrorController implements ErrorController {
 
     private String resolveMessage(int statusCode) {
         return switch (statusCode) {
-            case 400 -> "Некорректный запрос. Проверьте данные и попробуйте еще раз";
-            case 401 -> "Войдите в аккаунт, чтобы открыть эту страницу";
-            case 403 -> "У вас нет доступа к этой странице";
-            case 404 -> "Страница не найдена";
-            case 405 -> "Этот способ обращения к странице не поддерживается";
+            case 400 -> messages.getError().getBadRequest();
+            case 401 -> messages.getError().getUnauthorized();
+            case 403 -> messages.getError().getForbidden();
+            case 404 -> messages.getError().getNotFound();
+            case 405 -> messages.getError().getMethodNotAllowed();
             default -> messages.getInternalServerError();
         };
     }
