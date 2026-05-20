@@ -1,0 +1,114 @@
+@host =
+@csrfToken =
+@studentEmail =
+@companyEmail =
+@studentPassword =
+@companyPassword =
+@resetToken =
+@vacancyId =
+@studentId =
+
+### Главная публичная страница
+GET {{host}}/
+
+### Страница регистрации
+GET {{host}}/register
+
+### Зарегистрировать тестового студента
+POST {{host}}/register
+Content-Type: application/x-www-form-urlencoded
+
+email={{studentEmail}}&password={{studentPassword}}&confirmPassword={{studentPassword}}&role=STUDENT&_csrf={{csrfToken}}
+
+### Зарегистрировать тестовую компанию
+POST {{host}}/register
+Content-Type: application/x-www-form-urlencoded
+
+email={{companyEmail}}&password={{companyPassword}}&confirmPassword={{companyPassword}}&role=COMPANY&_csrf={{csrfToken}}
+
+### Страница восстановления пароля
+GET {{host}}/password/forgot
+
+### Запросить сброс пароля
+POST {{host}}/password/forgot
+Content-Type: application/x-www-form-urlencoded
+
+email={{studentEmail}}&_csrf={{csrfToken}}
+
+### Страница сброса пароля
+GET {{host}}/password/reset?token={{resetToken}}
+
+### Сменить пароль по токену
+POST {{host}}/password/reset
+Content-Type: application/x-www-form-urlencoded
+
+token={{resetToken}}&newPassword=NewStrongPass123&confirmNewPassword=NewStrongPass123&_csrf={{csrfToken}}
+
+### Страница логина
+GET {{host}}/login
+
+### Войти студентом
+POST {{host}}/login
+Content-Type: application/x-www-form-urlencoded
+
+username={{studentEmail}}&password={{studentPassword}}&_csrf={{csrfToken}}
+
+### Кабинет после входа студентом
+GET {{host}}/main
+
+### Страница вакансий студента
+GET {{host}}/student/vacancies
+
+### Фильтр вакансий студента
+GET {{host}}/student/vacancies?minSalary=80000&schedule=REMOTE
+
+### Детали вакансии для студента
+GET {{host}}/student/vacancies/{{vacancyId}}
+
+### Отслеживать вакансию
+POST {{host}}/student/vacancies/{{vacancyId}}/apply
+Content-Type: application/x-www-form-urlencoded
+
+_csrf={{csrfToken}}
+
+### Выйти из аккаунта студента
+POST {{host}}/logout
+Content-Type: application/x-www-form-urlencoded
+
+_csrf={{csrfToken}}
+
+### Страница логина для компании
+GET {{host}}/login
+
+### Войти компанией
+POST {{host}}/login
+Content-Type: application/x-www-form-urlencoded
+
+username={{companyEmail}}&password={{companyPassword}}&_csrf={{csrfToken}}
+
+### Кабинет после входа компанией
+GET {{host}}/main
+
+### Вакансии компании
+GET {{host}}/company/vacancies
+
+### Кандидаты по вакансии
+GET {{host}}/company/vacancies/{{vacancyId}}/applicants
+
+### Взять студента в работу
+POST {{host}}/company/vacancies/{{vacancyId}}/applicants/{{studentId}}/track
+Content-Type: application/x-www-form-urlencoded
+
+_csrf={{csrfToken}}
+
+### Начать чат по вакансии
+POST {{host}}/company/vacancies/{{vacancyId}}/applicants/{{studentId}}/chat
+Content-Type: application/x-www-form-urlencoded
+
+_csrf={{csrfToken}}
+
+### Страница всех студентов компании
+GET {{host}}/company/students
+
+### Профиль студента для компании
+GET {{host}}/company/students/{{studentId}}

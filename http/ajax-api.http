@@ -1,0 +1,62 @@
+@host =
+@csrfToken =
+@registrationEmail =
+@registrationPassword =
+@chatId =
+@resetToken =
+
+### AJAX: проверка поля регистрации
+POST {{host}}/register/check-field
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{
+  "email": "{{registrationEmail}}",
+  "password": "{{registrationPassword}}",
+  "confirmPassword": "{{registrationPassword}}",
+  "role": "STUDENT"
+}
+
+### AJAX: проверка формы сброса пароля
+POST {{host}}/password/reset/check-field
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{
+  "token": "{{resetToken}}",
+  "newPassword": "NewStrongPass123",
+  "confirmNewPassword": "NewStrongPass123"
+}
+
+### AJAX: смена пароля в профиле
+POST {{host}}/account/password/check-field
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{
+  "oldPassword": "{{registrationPassword}}",
+  "newPassword": "NewStrongPass123",
+  "confirmNewPassword": "NewStrongPass123"
+}
+
+### AJAX: поиск навыков студента
+GET {{host}}/student/skills/search?name=java
+
+### AJAX: запустить GitHub-синхронизацию навыков
+POST {{host}}/student/skills/github-sync
+X-CSRF-TOKEN: {{csrfToken}}
+
+### AJAX: статус GitHub-синхронизации
+GET {{host}}/student/skills/github-sync/status
+
+### AJAX: получить сообщения чата
+GET {{host}}/chat/{{chatId}}/messages
+
+### AJAX: отправить сообщение в чат
+POST {{host}}/chat/{{chatId}}/send
+Content-Type: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{
+  "text": "Здравствуйте! Готова обсудить вакансию"
+}
