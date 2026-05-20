@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.openapi.generator") version "7.10.0"
@@ -93,4 +94,71 @@ tasks.named("openApiGenerate") {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+val jacocoExclusions = listOf(
+    "**/SkillRouteApplication.class",
+    "**/advice/**",
+    "**/config/**",
+    "**/controller/**",
+    "**/converter/**",
+    "**/dto/**",
+    "**/event/**",
+    "**/exception/**",
+    "**/model/**",
+    "**/openapi/**",
+    "**/properties/**",
+    "**/repository/**",
+    "**/security/**",
+    "**/service/GitHubSync*",
+    "**/service/MailService*",
+    "**/service/client/**"
+)
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(jacocoExclusions)
+            }
+        })
+    )
+
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true)
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(jacocoExclusions)
+            }
+        })
+    )
+
+    violationRules {
+        rule {
+            limit {
+                counter = "INSTRUCTION"
+                minimum = "0.80".toBigDecimal()
+            }
+            limit {
+                counter = "LINE"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
 }
