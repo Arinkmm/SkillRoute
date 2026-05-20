@@ -28,6 +28,10 @@ public class Chat {
     @JoinColumn(name = "company_id", referencedColumnName = "account_id")
     private CompanyProfile company;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vacancy_id", referencedColumnName = "id")
+    private Vacancy vacancy;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

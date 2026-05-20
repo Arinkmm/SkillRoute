@@ -15,9 +15,6 @@ public class LoginController {
         moveSessionAttributeToModel(request, model, "loginError", "error");
 
         String unverifiedEmail = resolveUnverifiedEmail(request, model);
-        if (StringUtils.hasText(unverifiedEmail)) {
-            model.addAttribute("unverifiedEmail", unverifiedEmail.trim());
-        }
 
         String expiredVerificationToken = resolveExpiredVerificationToken(request, model);
         if (StringUtils.hasText(expiredVerificationToken)) {
@@ -52,8 +49,7 @@ public class LoginController {
             return email.trim();
         }
 
-        Object pendingEmail = request.getSession().getAttribute("pendingVerificationEmail");
-        return pendingEmail instanceof String email ? email : null;
+        return null;
     }
 
     private String resolveExpiredVerificationToken(HttpServletRequest request, Model model) {

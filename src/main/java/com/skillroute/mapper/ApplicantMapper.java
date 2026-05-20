@@ -3,6 +3,7 @@ package com.skillroute.mapper;
 import com.skillroute.dto.response.SkillGapResponse;
 import com.skillroute.dto.response.StudentGapResponse;
 import com.skillroute.dto.response.StudentPreviewResponse;
+import com.skillroute.dto.response.StudentSkillResponse;
 import com.skillroute.model.StudentProfile;
 import com.skillroute.model.StudentVacancyStatus;
 import com.skillroute.model.VacancySkill;
@@ -27,7 +28,8 @@ public class ApplicantMapper {
                                                    double matchPercentage,
                                                    int totalGapLevel,
                                                    StudentVacancyStatus status,
-                                                   List<SkillGapResponse> gaps) {
+                                                   List<SkillGapResponse> gaps,
+                                                   List<StudentSkillResponse> skills) {
         return StudentGapResponse.builder()
                 .studentId(student.getId())
                 .firstName(student.getFirstName())
@@ -36,6 +38,7 @@ public class ApplicantMapper {
                 .totalGapLevel(totalGapLevel)
                 .status(status)
                 .gaps(gaps)
+                .skills(skills)
                 .build();
     }
 

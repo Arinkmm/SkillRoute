@@ -14,6 +14,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     Optional<Message> findFirstByChatIdOrderByCreatedAtDesc(Long chatId);
 
+    boolean existsByChatIdAndSenderId(Long chatId, Long senderId);
+
     @Modifying
     @Query("UPDATE Message m SET m.isRead = true WHERE m.chat.id = :chatId AND m.sender.id <> :userId")
     void markAsReadInChat(@Param("chatId") Long chatId, @Param("userId") Long userId);

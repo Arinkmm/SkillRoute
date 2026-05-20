@@ -55,7 +55,7 @@ public class ApplicantController {
 
     @PostMapping("/{vacancyId}/applicants/{studentId}/chat")
     public String initiateChat(@AuthenticationPrincipal CustomUserDetails user, @PathVariable Long vacancyId, @PathVariable Long studentId) {
-        Long chatId = chatService.getOrCreateChat(studentId, user.getId());
+        Long chatId = chatService.getOrCreateChat(studentId, user.getId(), vacancyId);
         applicantService.startInterviewing(studentId, vacancyId);
         return "redirect:/company/chat/" + chatId;
     }

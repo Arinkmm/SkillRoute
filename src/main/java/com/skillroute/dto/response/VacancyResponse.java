@@ -18,6 +18,7 @@ public class VacancyResponse {
     private Long id;
     private String name;
     private Long companyId;
+    private String companyName;
     private Long salary;
     private WorkSchedule workSchedule;
     private VacancyStatus status;

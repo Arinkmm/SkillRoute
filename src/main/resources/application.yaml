@@ -222,6 +222,7 @@ messages:
   chat:
     access-forbidden: "У вас нет доступа к этому чату"
     closed: "Диалог завершен. Отправка сообщений недоступна"
+    student-start-forbidden: "Компания начнет диалог первой"
   github:
     url-required: "Для анализа навыков необходимо указать GitHub URL в профиле"
     login-extract-failed: "Не удалось извлечь логин из некорректной ссылки GitHub: %s"

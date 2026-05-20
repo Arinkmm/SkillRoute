@@ -47,6 +47,7 @@ public class ChatMapper {
         return ChatPreviewResponse.builder()
                 .chatId(chat.getId())
                 .opponentName(resolveOpponentName(chat, currentUserId))
+                .vacancyName(chat.getVacancy() != null ? chat.getVacancy().getName() : null)
                 .lastMessage(lastMessage != null ? lastMessage.getText() : emptyMessage)
                 .lastMessageTime(lastMessage != null ? lastMessage.getCreatedAt() : chat.getCreatedAt())
                 .build();

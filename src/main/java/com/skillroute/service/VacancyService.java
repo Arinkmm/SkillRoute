@@ -26,12 +26,13 @@ public class VacancyService {
     private final CompanyProfileRepository companyProfileRepository;
     private final SpecializationRepository specializationRepository;
     private final SkillRepository skillRepository;
+    private final StudentVacancyRepository studentVacancyRepository;
     private final MessageProperties messages;
     private final VacancyMapper vacancyMapper;
 
     @Transactional(readOnly = true)
     public List<VacancyResponse> getVacanciesByCompany(Long companyId) {
-        return vacancyRepository.findAllByCompanyIdAndProfileStatus(companyId, VacancyStatus.OPEN)
+        return vacancyRepository.findAllByCompanyIdAndProfileStatusIn(companyId, List.of(VacancyStatus.OPEN, VacancyStatus.IN_PROGRESS))
                 .stream()
                 .map(vacancyMapper::toResponse)
                 .toList();
@@ -105,6 +106,7 @@ public class VacancyService {
         }
 
         vacancy.getProfile().setStatus(VacancyStatus.CLOSE);
+        rejectOpenApplications(vacancyId);
     }
 
     @Transactional
@@ -137,4 +139,13 @@ public class VacancyService {
         vacancy.getVacancySkills().addAll(skills);
     }
 
+    private void rejectOpenApplications(Long vacancyId) {
+        studentVacancyRepository.findAllByVacancyId(vacancyId).stream()
+                .filter(application -> !isTerminal(application.getStatus()))
+                .forEach(application -> application.setStatus(StudentVacancyStatus.REJECTED));
+    }
+
+    private boolean isTerminal(StudentVacancyStatus status) {
+        return status == StudentVacancyStatus.ACCEPTED || status == StudentVacancyStatus.REJECTED;
+    }
 }

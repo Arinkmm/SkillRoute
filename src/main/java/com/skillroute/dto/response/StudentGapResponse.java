@@ -19,5 +19,6 @@ public class StudentGapResponse {
     private double matchPercentage;
     private int totalGapLevel;
     private List<SkillGapResponse> gaps;
+    private List<StudentSkillResponse> skills;
     private StudentVacancyStatus status;
 }

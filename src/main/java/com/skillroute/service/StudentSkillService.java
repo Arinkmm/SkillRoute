@@ -45,8 +45,10 @@ public class StudentSkillService {
     }
 
     @Transactional(readOnly = true)
-    public boolean hasSkill(Long studentId, Long skillId) {
-        return studentSkillRepository.existsByStudentIdAndSkillId(studentId, skillId);
+    public StudentSkillResponse getStudentSkill(Long studentId, Long skillId) {
+        return studentSkillRepository.findById(new StudentSkillId(studentId, skillId))
+                .map(studentSkillMapper::toResponse)
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)
@@ -72,6 +74,24 @@ public class StudentSkillService {
                 .level(form.getLevel())
                 .build();
 
+        studentSkillRepository.save(studentSkill);
+    }
+
+    @Transactional
+    public void addOrUpdateSkillFromRoadmap(Long id, AddSkillRequest form) {
+        StudentProfile studentProfile = studentProfileRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
+        Skill skill = skillRepository.findById(form.getSkillId()).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getSkillMissing()));
+        StudentSkillId compositeKey = new StudentSkillId(studentProfile.getId(), skill.getId());
+
+        StudentSkill studentSkill = studentSkillRepository.findById(compositeKey)
+                .orElseGet(() -> StudentSkill.builder()
+                        .id(compositeKey)
+                        .student(studentProfile)
+                        .skill(skill)
+                        .build());
+
+        studentSkill.setLevel(form.getLevel());
+        studentSkill.setConfirmedByGitHub(false);
         studentSkillRepository.save(studentSkill);
     }
 }

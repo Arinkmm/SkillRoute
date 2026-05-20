@@ -19,7 +19,6 @@ public class StudentVacancyController {
     private final VacancyService vacancyService;
     private final StudentVacancyCatalogService studentVacancyCatalogService;
     private final StudentVacancyService studentVacancyService;
-    private final RoadmapService roadmapService;
     private final MessageProperties messages;
 
     @GetMapping
@@ -46,7 +45,6 @@ public class StudentVacancyController {
                               @AuthenticationPrincipal CustomUserDetails user,
                               Model model) {
         model.addAttribute("vacancy", vacancyService.getVacancyById(id));
-        model.addAttribute("roadmap", roadmapService.generateRoadmap(user.getId(), id));
         model.addAttribute("isTracked", studentVacancyService.isTracked(user.getId(), id));
 
         return "student/vacancy-details";

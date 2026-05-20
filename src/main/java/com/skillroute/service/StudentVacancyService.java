@@ -39,8 +39,18 @@ public class StudentVacancyService {
     public void applyToVacancy(Long studentId, Long vacancyId) {
         StudentVacancyId id = new StudentVacancyId(studentId, vacancyId);
 
-        if (studentVacancyRepository.existsById(id)) {
-            throw new DuplicateEntityException(messages.getVacancy().getDuplicateTracking());
+        StudentVacancy existingApplication = studentVacancyRepository.findById(id).orElse(null);
+        if (existingApplication != null) {
+            if (List.of(
+                    StudentVacancyStatus.SUBMITTED,
+                    StudentVacancyStatus.REVIEWING,
+                    StudentVacancyStatus.INTERVIEW
+            ).contains(existingApplication.getStatus())) {
+                throw new DuplicateEntityException(messages.getVacancy().getDuplicateTracking());
+            }
+
+            existingApplication.setStatus(StudentVacancyStatus.SUBMITTED);
+            return;
         }
 
         StudentProfile student = studentProfileRepository.findById(studentId).orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
@@ -57,6 +67,12 @@ public class StudentVacancyService {
 
     @Transactional(readOnly = true)
     public boolean isTracked(Long studentId, Long vacancyId) {
-        return studentVacancyRepository.existsById(new StudentVacancyId(studentId, vacancyId));
+        return studentVacancyRepository.findById(new StudentVacancyId(studentId, vacancyId))
+                .map(application -> List.of(
+                        StudentVacancyStatus.SUBMITTED,
+                        StudentVacancyStatus.REVIEWING,
+                        StudentVacancyStatus.INTERVIEW
+                ).contains(application.getStatus()))
+                .orElse(false);
     }
 }

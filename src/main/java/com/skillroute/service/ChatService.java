@@ -26,20 +26,32 @@ public class ChatService {
     private final StudentProfileRepository studentRepository;
     private final CompanyProfileRepository companyRepository;
     private final AccountRepository accountRepository;
+    private final VacancyRepository vacancyRepository;
     private final StudentVacancyRepository studentVacancyRepository;
     private final MessageProperties messages;
     private final ChatMapper chatMapper;
 
     @Transactional
-    public Long getOrCreateChat(Long studentId, Long companyId) {
-        return chatRepository.findByStudentAccountIdAndCompanyAccountId(studentId, companyId)
+    public Long getOrCreateChat(Long studentId, Long companyId, Long vacancyId) {
+        return chatRepository.findByStudentAccountIdAndCompanyAccountIdAndVacancyId(studentId, companyId, vacancyId)
                 .map(Chat::getId)
                 .orElseGet(() -> {
                     StudentProfile student = studentRepository.findById(studentId)
                             .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getStudentNotFound()));
                     CompanyProfile company = companyRepository.findById(companyId)
                             .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getCompanyNotFound()));
-                    Chat chat = Chat.builder().student(student).company(company).build();
+                    Vacancy vacancy = vacancyRepository.findById(vacancyId)
+                            .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getVacancyNotFound()));
+
+                    if (!vacancy.getCompany().getId().equals(companyId)) {
+                        throw new ResourceOwnershipException(messages.getVacancy().getEditForbidden());
+                    }
+
+                    Chat chat = Chat.builder()
+                            .student(student)
+                            .company(company)
+                            .vacancy(vacancy)
+                            .build();
                     return chatRepository.save(chat).getId();
                 });
     }
@@ -49,8 +61,12 @@ public class ChatService {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException(messages.getEntity().getChatNotFound()));
         validateChatParticipant(chat, senderId);
-        if (isClosed(chat)) {
-            throw new FieldValidationException(messages.getChat().getClosed(), Map.of("text", messages.getChat().getClosed()));
+        StudentVacancy application = findChatApplication(chat);
+        if (!canSendMessages(chat, senderId, application)) {
+            String message = isStudent(chat, senderId)
+                    ? messages.getChat().getStudentStartForbidden()
+                    : messages.getChat().getClosed();
+            throw new FieldValidationException(message, Map.of("text", message));
         }
 
         Account sender = accountRepository.findById(senderId)
@@ -77,15 +93,26 @@ public class ChatService {
                 .map(message -> chatMapper.toMessageResponse(message, currentUserId))
                 .toList();
 
-        StudentVacancy activeApplication = findActiveApplication(chat);
-        boolean closed = activeApplication != null && isTerminal(activeApplication.getStatus());
+        StudentVacancy activeApplication = findChatApplication(chat);
+        boolean closed = !canSendMessages(chat, currentUserId, activeApplication);
 
         return chatMapper.toChatResponse(chat, currentUserId, activeApplication, messages, closed);
     }
 
-    private StudentVacancy findActiveApplication(Chat chat) {
+    private StudentVacancy findChatApplication(Chat chat) {
+        if (chat.getVacancy() != null) {
+            return studentVacancyRepository.findByStudentIdAndVacancyId(chat.getStudent().getId(), chat.getVacancy().getId())
+                    .orElse(null);
+        }
+
         return studentVacancyRepository.findAllByStudentIdAndCompanyId(chat.getStudent().getId(), chat.getCompany().getId()).stream()
-                .max((left, right) -> Integer.compare(statusPriority(left.getStatus()), statusPriority(right.getStatus())))
+                .max((left, right) -> {
+                    int priority = Integer.compare(statusPriority(left.getStatus()), statusPriority(right.getStatus()));
+                    if (priority != 0) {
+                        return priority;
+                    }
+                    return Long.compare(left.getVacancy().getId(), right.getVacancy().getId());
+                })
                 .orElse(null);
     }
 
@@ -93,15 +120,15 @@ public class ChatService {
         return switch (status) {
             case INTERVIEW -> 5;
             case REVIEWING -> 4;
-            case SUBMITTED -> 3;
-            case ACCEPTED -> 2;
-            case REJECTED -> 1;
+            case ACCEPTED, REJECTED -> 3;
+            case SUBMITTED -> 1;
         };
     }
 
     @Transactional(readOnly = true)
     public List<ChatPreviewResponse> getPreviews(Long userId) {
         return chatRepository.findAllById(userId).stream()
+                .filter(chat -> isCompany(chat, userId) || hasCompanyMessage(chat))
                 .map(chat -> {
                     Message last = messageRepository.findFirstByChatIdOrderByCreatedAtDesc(chat.getId()).orElse(null);
                     return chatMapper.toPreviewResponse(chat, last, userId, messages.getEntity().getNoMessages());
@@ -110,21 +137,38 @@ public class ChatService {
                 .toList();
     }
 
-    private boolean isClosed(Chat chat) {
-        StudentVacancy activeApplication = findActiveApplication(chat);
-        return activeApplication != null && isTerminal(activeApplication.getStatus());
+    private boolean canSendMessages(Chat chat, Long currentUserId, StudentVacancy application) {
+        if (!isOpenForMessaging(application)) {
+            return false;
+        }
+
+        return isCompany(chat, currentUserId) || hasCompanyMessage(chat);
     }
 
-    private boolean isTerminal(StudentVacancyStatus status) {
-        return status == StudentVacancyStatus.ACCEPTED || status == StudentVacancyStatus.REJECTED;
+    private boolean isOpenForMessaging(StudentVacancy application) {
+        return application != null
+                && (application.getStatus() == StudentVacancyStatus.REVIEWING
+                || application.getStatus() == StudentVacancyStatus.INTERVIEW);
+    }
+
+    private boolean hasCompanyMessage(Chat chat) {
+        return messageRepository.existsByChatIdAndSenderId(chat.getId(), chat.getCompany().getId());
     }
 
     private void validateChatParticipant(Chat chat, Long currentUserId) {
-        boolean isStudent = chat.getStudent() != null && chat.getStudent().getId().equals(currentUserId);
-        boolean isCompany = chat.getCompany() != null && chat.getCompany().getId().equals(currentUserId);
+        boolean isStudent = isStudent(chat, currentUserId);
+        boolean isCompany = isCompany(chat, currentUserId);
 
         if (!isStudent && !isCompany) {
             throw new ResourceOwnershipException(messages.getChat().getAccessForbidden());
         }
+    }
+
+    private boolean isStudent(Chat chat, Long currentUserId) {
+        return chat.getStudent() != null && chat.getStudent().getId().equals(currentUserId);
+    }
+
+    private boolean isCompany(Chat chat, Long currentUserId) {
+        return chat.getCompany() != null && chat.getCompany().getId().equals(currentUserId);
     }
 }

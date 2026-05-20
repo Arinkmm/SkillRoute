@@ -6,6 +6,7 @@ import com.skillroute.properties.MessageProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -72,6 +75,14 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error(e.getMessage(), HttpStatus.TOO_MANY_REQUESTS));
     }
 
+    @ExceptionHandler(GitHubRateLimitException.class)
+    public ResponseEntity<ErrorResponseApi> handleGitHubRateLimit(GitHubRateLimitException e) {
+        log.error("Превышен лимит GitHub API: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSeconds(e)))
+                .body(error(e.getMessage(), HttpStatus.TOO_MANY_REQUESTS));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseApi> handleValidation(MethodArgumentNotValidException e) {
         Map<String, String> errors = e.getBindingResult().getFieldErrors().stream()
@@ -89,6 +100,15 @@ public class RestExceptionHandler {
 
     private ErrorResponseApi error(String message, HttpStatus status) {
         return error(message, status, null);
+    }
+
+    private long retryAfterSeconds(GitHubRateLimitException e) {
+        LocalDateTime retryAfter = e.getRetryAfter();
+        if (retryAfter == null) {
+            return 1;
+        }
+
+        return Math.max(1, Duration.between(LocalDateTime.now(), retryAfter).toSeconds());
     }
 
     private ErrorResponseApi error(String message, HttpStatus status, Map<String, String> fields) {

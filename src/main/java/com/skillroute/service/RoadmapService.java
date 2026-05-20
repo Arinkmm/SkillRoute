@@ -58,6 +58,14 @@ public class RoadmapService {
                 matchingService.calculateMatch(vacancy.getVacancySkills().size(), steps.size()));
     }
 
+    @Transactional(readOnly = true)
+    public RoadmapStepResponse getRoadmapStep(Long studentId, Long vacancyId, Long skillId) {
+        return generateRoadmap(studentId, vacancyId).getSteps().stream()
+                .filter(step -> step.getSkillId().equals(skillId))
+                .findFirst()
+                .orElse(null);
+    }
+
     private RoadmapStepResponse buildStep(VacancySkill vs, int currentLevel, Map<Long, List<ResourceResponse>> resourcesMap) {
         Long skillId = vs.getSkill().getId();
         int targetLevel = vs.getLevel();

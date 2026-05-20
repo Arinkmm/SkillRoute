@@ -103,9 +103,9 @@ public class GitHubSyncService {
             StudentSkillId id = new StudentSkillId(studentId, skillId);
             StudentSkill ss = studentSkillRepository.findById(id).orElseGet(() -> createNewSkill(studentId, skillId, id));
 
-            ss.setConfirmedByGitHub(true);
             int newLevel = calculateLevel(weight);
-            if (newLevel > ss.getLevel()) {
+            if (newLevel >= ss.getLevel()) {
+                ss.setConfirmedByGitHub(true);
                 ss.setLevel(newLevel);
             }
             studentSkillRepository.save(ss);

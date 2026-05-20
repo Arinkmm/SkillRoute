@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class ChatPreviewResponse {
     private Long chatId;
     private String opponentName;
+    private String vacancyName;
     private String lastMessage;
     private LocalDateTime lastMessageTime;
 }

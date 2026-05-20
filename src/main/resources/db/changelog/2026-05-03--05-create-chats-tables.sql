@@ -4,14 +4,16 @@ CREATE TABLE chat (
     id BIGSERIAL PRIMARY KEY,
     student_id BIGINT NOT NULL,
     company_id BIGINT NOT NULL,
+    vacancy_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_chat_student FOREIGN KEY (student_id) REFERENCES student_profile(account_id) ON DELETE CASCADE,
     CONSTRAINT fk_chat_company FOREIGN KEY (company_id) REFERENCES company_profile(account_id) ON DELETE CASCADE,
-    CONSTRAINT uq_chat_participants UNIQUE (student_id, company_id)
+    CONSTRAINT fk_chat_vacancy FOREIGN KEY (vacancy_id) REFERENCES vacancy(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_chat_student ON chat(student_id);
 CREATE INDEX idx_chat_company ON chat(company_id);
+CREATE INDEX idx_chat_vacancy ON chat(vacancy_id);
 
 CREATE TABLE message (
     id BIGSERIAL PRIMARY KEY,

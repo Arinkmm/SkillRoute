@@ -130,6 +130,7 @@ public class MessageProperties {
     public static class Chat {
         private String accessForbidden;
         private String closed;
+        private String studentStartForbidden;
     }
 
     @Getter

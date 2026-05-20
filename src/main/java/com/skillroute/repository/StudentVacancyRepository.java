@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface StudentVacancyRepository extends JpaRepository<StudentVacancy, StudentVacancyId> {
     Optional<StudentVacancy> findByStudentIdAndVacancyId(Long studentId, Long vacancyId);
 
+    List<StudentVacancy> findAllByVacancyId(Long vacancyId);
+
     @Query("SELECT sv FROM StudentVacancy sv JOIN FETCH sv.student JOIN FETCH sv.vacancy v WHERE v.company.id = :companyId AND sv.status IN :statuses")
     List<StudentVacancy> findAllByCompanyIdAndStatusIn(@Param("companyId") Long companyId,
                                                        @Param("statuses") List<StudentVacancyStatus> statuses);

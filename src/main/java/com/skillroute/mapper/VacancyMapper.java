@@ -20,6 +20,7 @@ public class VacancyMapper {
                 .id(vacancy.getId())
                 .name(vacancy.getName())
                 .companyId(vacancy.getCompany().getId())
+                .companyName(vacancy.getCompany().getCompanyName())
                 .salary(profile.getSalary())
                 .workSchedule(profile.getWorkSchedule())
                 .status(profile.getStatus())

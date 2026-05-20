@@ -1,7 +1,9 @@
 package com.skillroute.controller;
 
 import com.skillroute.dto.response.RoadmapResponse;
+import com.skillroute.dto.response.RoadmapStepResponse;
 import com.skillroute.dto.response.RouteSkillResponse;
+import com.skillroute.dto.response.StudentSkillResponse;
 import com.skillroute.dto.request.AddSkillRequest;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.security.CustomUserDetails;
@@ -48,12 +50,16 @@ public class RoadmapController {
                                        @AuthenticationPrincipal CustomUserDetails user,
                                        Model model) {
         RouteSkillResponse skill = skillService.getRouteSkillById(skillId);
+        RoadmapStepResponse step = roadmapService.getRoadmapStep(user.getId(), vacancyId, skillId);
 
         model.addAttribute("vacancy", vacancyService.getVacancyById(vacancyId));
         model.addAttribute("skill", skill);
+        model.addAttribute("step", step);
 
-        boolean isAlreadyAcquired = studentSkillService.hasSkill(user.getId(), skillId);
-        model.addAttribute("isAcquired", isAlreadyAcquired);
+        StudentSkillResponse studentSkill = studentSkillService.getStudentSkill(user.getId(), skillId);
+        if (studentSkill != null) {
+            model.addAttribute("studentSkill", studentSkill);
+        }
 
         return "student/roadmap-skill-step";
     }
@@ -65,7 +71,7 @@ public class RoadmapController {
                                @AuthenticationPrincipal CustomUserDetails user,
                                RedirectAttributes redirectAttributes) {
         form.setSkillId(skillId);
-        studentSkillService.addSkillToStudent(user.getId(), form);
+        studentSkillService.addOrUpdateSkillFromRoadmap(user.getId(), form);
         redirectAttributes.addFlashAttribute("success", messages.getUi().getRoadmapSkillAdded());
         return "redirect:/route/" + vacancyId;
     }

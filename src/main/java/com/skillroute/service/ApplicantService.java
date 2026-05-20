@@ -7,6 +7,7 @@ import com.skillroute.dto.response.StudentPreviewResponse;
 import com.skillroute.exception.EntityNotFoundException;
 import com.skillroute.exception.ResourceOwnershipException;
 import com.skillroute.mapper.ApplicantMapper;
+import com.skillroute.mapper.StudentSkillMapper;
 import com.skillroute.model.*;
 import com.skillroute.properties.MessageProperties;
 import com.skillroute.repository.StudentProfileRepository;
@@ -32,6 +33,7 @@ public class ApplicantService {
     private final VacancyRepository vacancyRepository;
     private final MessageProperties messages;
     private final ApplicantMapper applicantMapper;
+    private final StudentSkillMapper studentSkillMapper;
 
     @Transactional(readOnly = true)
     public List<StudentPreviewResponse> getFilteredApplicants(Long vacancyId, ApplicantFilter filter) {
@@ -72,7 +74,10 @@ public class ApplicantService {
                 matchingService.calculateMatch(vacancy.getVacancySkills().size(), gaps.size()),
                 gaps.stream().mapToInt(SkillGapResponse::getGapDepth).sum(),
                 status,
-                gaps);
+                gaps,
+                student.getStudentSkills().stream()
+                        .map(studentSkillMapper::toResponse)
+                        .toList());
     }
 
     @Transactional
@@ -110,6 +115,7 @@ public class ApplicantService {
         validateCompanyOwnsVacancy(vacancyId, companyId);
         studentVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId)
                 .ifPresent(rel -> rel.setStatus(StudentVacancyStatus.ACCEPTED));
+        rejectOtherOpenApplications(studentId, vacancyId);
         vacancyProfileRepository.findById(vacancyId)
                 .ifPresent(profile -> profile.setStatus(VacancyStatus.CLOSE));
     }
@@ -129,5 +135,12 @@ public class ApplicantService {
 
     private boolean isTerminal(StudentVacancyStatus status) {
         return status == StudentVacancyStatus.ACCEPTED || status == StudentVacancyStatus.REJECTED;
+    }
+
+    private void rejectOtherOpenApplications(Long acceptedStudentId, Long vacancyId) {
+        studentVacancyRepository.findAllByVacancyId(vacancyId).stream()
+                .filter(rel -> !rel.getStudent().getId().equals(acceptedStudentId))
+                .filter(rel -> !isTerminal(rel.getStatus()))
+                .forEach(rel -> rel.setStatus(StudentVacancyStatus.REJECTED));
     }
 }
