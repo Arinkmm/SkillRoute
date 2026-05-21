@@ -3,9 +3,6 @@ package com.skillroute.mapper;
 import com.skillroute.dto.response.CompanyStudentDetailsResponse;
 import com.skillroute.dto.response.CompanyStudentResponse;
 import com.skillroute.dto.response.StudentSkillResponse;
-import com.skillroute.model.Direction;
-import com.skillroute.model.Language;
-import com.skillroute.model.Specialization;
 import com.skillroute.model.StudentProfile;
 import com.skillroute.model.StudentSkill;
 import com.skillroute.model.StudentVacancy;
@@ -18,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompanyStudentMapper {
     private final StudentSkillMapper studentSkillMapper;
+    private final SpecializationMapper specializationMapper;
 
     public CompanyStudentResponse toTrackedResponse(StudentVacancy studentVacancy) {
         StudentProfile student = studentVacancy.getStudent();
@@ -38,7 +36,7 @@ public class CompanyStudentMapper {
                 .studentId(student.getId())
                 .firstName(student.getFirstName())
                 .lastName(student.getLastName())
-                .specializationName(getSpecializationName(student))
+                .specialization(specializationMapper.toResponse(student.getSpecialization()))
                 .githubUrl(student.getGithubUrl())
                 .bio(student.getBio())
                 .skills(skills)
@@ -54,7 +52,7 @@ public class CompanyStudentMapper {
                 .studentId(student.getId())
                 .firstName(student.getFirstName())
                 .lastName(student.getLastName())
-                .specializationName(getSpecializationName(student))
+                .specialization(specializationMapper.toResponse(student.getSpecialization()))
                 .skillCount(student.getStudentSkills().size())
                 .confirmedSkillCount(countConfirmedSkills(student));
     }
@@ -63,63 +61,5 @@ public class CompanyStudentMapper {
         return Math.toIntExact(student.getStudentSkills().stream()
                 .filter(StudentSkill::isConfirmedByGitHub)
                 .count());
-    }
-
-    private String getSpecializationName(StudentProfile student) {
-        Specialization specialization = student.getSpecialization();
-        if (specialization == null) {
-            return null;
-        }
-
-        String direction = formatDirection(specialization.getDirection());
-        String language = formatLanguage(specialization.getLanguage());
-
-        if (direction == null) {
-            return language;
-        }
-        if (language == null) {
-            return direction;
-        }
-
-        return direction + " / " + language;
-    }
-
-    private String formatDirection(Direction direction) {
-        if (direction == null) {
-            return null;
-        }
-
-        return switch (direction) {
-            case BACKEND -> "Backend";
-            case FRONTEND -> "Frontend";
-            case FULLSTACK -> "Fullstack";
-            case MOBILE -> "Mobile";
-            case DATA -> "Data";
-            case DEVOPS -> "DevOps";
-            case QA -> "QA";
-        };
-    }
-
-    private String formatLanguage(Language language) {
-        if (language == null) {
-            return null;
-        }
-
-        return switch (language) {
-            case JAVA -> "Java";
-            case JAVASCRIPT -> "JavaScript";
-            case TYPESCRIPT -> "TypeScript";
-            case PYTHON -> "Python";
-            case CSHARP -> "C#";
-            case KOTLIN -> "Kotlin";
-            case SWIFT -> "Swift";
-            case GO -> "Go";
-            case CPP -> "C++";
-            case PHP -> "PHP";
-            case RUBY -> "Ruby";
-            case RUST -> "Rust";
-            case SQL -> "SQL";
-            case CLOUD -> "Cloud";
-        };
     }
 }

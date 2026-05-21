@@ -21,7 +21,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CompanyStudentMapperTest {
-    private final CompanyStudentMapper mapper = new CompanyStudentMapper(new StudentSkillMapper());
+    private final CompanyStudentMapper mapper = new CompanyStudentMapper(new StudentSkillMapper(), new SpecializationMapper());
 
     @Test
     void toTrackedResponseMapsStudentSummaryStatusAndCounts() {
@@ -36,7 +36,8 @@ class CompanyStudentMapperTest {
 
         assertThat(response.getStudentId()).isEqualTo(1L);
         assertThat(response.getFirstName()).isEqualTo("Maria");
-        assertThat(response.getSpecializationName()).isEqualTo("Frontend / TypeScript");
+        assertThat(response.getSpecialization().getDirection()).isEqualTo(Direction.FRONTEND);
+        assertThat(response.getSpecialization().getLanguage()).isEqualTo(Language.TYPESCRIPT);
         assertThat(response.getVacancyId()).isEqualTo(100L);
         assertThat(response.getVacancyName()).isEqualTo("Backend");
         assertThat(response.getStatus()).isEqualTo(StudentVacancyStatus.INTERVIEW);
@@ -63,37 +64,13 @@ class CompanyStudentMapperTest {
     }
 
     @Test
-    void formatsAllSpecializationDirectionsAndLanguages() {
-        for (Direction direction : Direction.values()) {
-            StudentProfile student = StudentProfile.builder()
-                    .id(1L)
-                    .firstName("Maria")
-                    .lastName("Ivanova")
-                    .specialization(Specialization.builder().direction(direction).build())
-                    .studentSkills(Set.of())
-                    .build();
-
-            assertThat(mapper.toCatalogResponse(student).getSpecializationName()).isNotBlank();
-        }
-
-        for (Language language : Language.values()) {
-            StudentProfile student = StudentProfile.builder()
-                    .id(1L)
-                    .firstName("Maria")
-                    .lastName("Ivanova")
-                    .specialization(Specialization.builder().language(language).build())
-                    .studentSkills(Set.of())
-                    .build();
-
-            assertThat(mapper.toCatalogResponse(student).getSpecializationName()).isNotBlank();
-        }
-
+    void mapsSpecializationObjectAndKeepsNullWhenMissing() {
         assertThat(mapper.toCatalogResponse(StudentProfile.builder()
                 .id(1L)
                 .firstName("Maria")
                 .lastName("Ivanova")
                 .studentSkills(Set.of())
-                .build()).getSpecializationName()).isNull();
+                .build()).getSpecialization()).isNull();
     }
 
     private StudentProfile student() {

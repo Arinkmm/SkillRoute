@@ -24,7 +24,7 @@
                     <article class="work-card">
                         <div class="work-card-main">
                             <h3>${skill.name!"Навык"}</h3>
-                            <p>Материалы можно добавить на странице навыка.</p>
+                            <p>Подберите материалы, которые помогут студентам изучить навык.</p>
                         </div>
                         <a class="button button-ghost" href="/company/skills/${skill.id}">Открыть</a>
                     </article>

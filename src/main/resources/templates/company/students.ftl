@@ -32,7 +32,7 @@
                             <div class="student-avatar">${firstInitial}</div>
                             <div>
                                 <h3>${student.firstName!"Студент"} ${student.lastName!""}</h3>
-                                <p><#if student.specializationName?? && student.specializationName?has_content>${student.specializationName}<#else>Специализация не указана</#if></p>
+                                <p><#if student.specialization??>${labels.specialization(student.specialization)}<#else>Специализация не указана</#if></p>
                             </div>
                         </div>
                         <div class="student-card-footer">
@@ -71,7 +71,7 @@
                             <div class="student-avatar">${firstInitial}</div>
                             <div>
                                 <h3>${student.firstName!"Студент"} ${student.lastName!""}</h3>
-                                <p><#if student.specializationName?? && student.specializationName?has_content>${student.specializationName}<#else>Специализация не указана</#if></p>
+                                <p><#if student.specialization??>${labels.specialization(student.specialization)}<#else>Специализация не указана</#if></p>
                             </div>
                         </div>
                         <div class="student-card-footer">

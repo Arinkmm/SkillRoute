@@ -76,7 +76,6 @@
 
                     <div class="form-actions">
                         <button class="button button-primary" type="submit">Добавить</button>
-                        <a class="button button-ghost" href="/company/skills/${skill.id}">Отмена</a>
                     </div>
                 </form>
             </article>

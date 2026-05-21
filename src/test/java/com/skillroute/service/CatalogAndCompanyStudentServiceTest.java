@@ -62,7 +62,7 @@ class CatalogAndCompanyStudentServiceTest {
         companyStudentService = new CompanyStudentService(
                 studentProfileRepository,
                 studentVacancyRepository,
-                new CompanyStudentMapper(new StudentSkillMapper()),
+                new CompanyStudentMapper(new StudentSkillMapper(), new SpecializationMapper()),
                 TestMessageProperties.create());
     }
 

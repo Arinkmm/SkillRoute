@@ -1,4 +1,5 @@
 <#import "/layouts/base.ftl" as layout>
+<#import "/fragments/labels.ftl" as labels>
 
 <#assign firstInitial = "С">
 <#if student.firstName?? && student.firstName?has_content>
@@ -12,7 +13,7 @@
             <div>
                 <p class="eyebrow">Профиль студента</p>
                 <h1>${fullName}</h1>
-                <p><#if student.specializationName?? && student.specializationName?has_content>${student.specializationName}<#else>Специализация не указана</#if></p>
+                <p><#if student.specialization??>${labels.specialization(student.specialization)}<#else>Специализация не указана</#if></p>
             </div>
             <div class="profile-hero-actions">
                 <a class="button button-light" href="/company/students">К студентам</a>
@@ -30,8 +31,8 @@
                     <span class="status-pill">
                         <#if student.skills??>${student.skills?size}<#else>0</#if> навыков
                     </span>
-                    <#if student.specializationName?? && student.specializationName?has_content>
-                        <span class="status-pill status-muted">${student.specializationName}</span>
+                    <#if student.specialization??>
+                        <span class="status-pill status-muted">${labels.specialization(student.specialization)}</span>
                     </#if>
                 </div>
                 <#if !(student.githubUrl?? && student.githubUrl?has_content)>
@@ -50,7 +51,7 @@
                     <dl class="profile-details compact-details">
                         <div>
                             <dt>Специализация</dt>
-                            <dd><#if student.specializationName?? && student.specializationName?has_content>${student.specializationName}<#else>Не указана</#if></dd>
+                            <dd><#if student.specialization??>${labels.specialization(student.specialization)}<#else>Не указана</#if></dd>
                         </div>
                         <div>
                             <dt>GitHub</dt>

@@ -4,7 +4,7 @@
         <#case "FRONTEND"><#return "Frontend">
         <#case "FULLSTACK"><#return "Fullstack">
         <#case "MOBILE"><#return "Мобильная разработка">
-        <#case "DATA"><#return "Data / аналитика">
+        <#case "DATA"><#return "Data">
         <#case "DEVOPS"><#return "DevOps">
         <#case "QA"><#return "QA">
         <#default><#return value?string>

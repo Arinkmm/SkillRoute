@@ -14,7 +14,7 @@ public class CompanyStudentResponse {
     private Long studentId;
     private String firstName;
     private String lastName;
-    private String specializationName;
+    private SpecializationResponse specialization;
     private Long vacancyId;
     private String vacancyName;
     private StudentVacancyStatus status;

@@ -15,7 +15,7 @@ public class CompanyStudentDetailsResponse {
     private Long studentId;
     private String firstName;
     private String lastName;
-    private String specializationName;
+    private SpecializationResponse specialization;
     private String githubUrl;
     private String bio;
     private List<StudentSkillResponse> skills;
