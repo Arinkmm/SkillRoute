@@ -37,7 +37,7 @@
                     <div class="skill-list resource-list">
                         <#list skill.resources as resource>
                             <div class="skill-row resource-row">
-                                <span>${resource.resource}</span>
+                                <a class="text-link" href="${resource.resource}" target="_blank" rel="noreferrer">${resource.resource}</a>
                                 <form action="/company/skills/${skill.id}/resources/${resource.id}/delete" method="post">
                                     <#if _csrf??>
                                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">

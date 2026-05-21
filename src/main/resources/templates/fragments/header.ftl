@@ -37,7 +37,6 @@
                     <a class="nav-link" href="#companies">Работодатели</a>
                     <a class="nav-link" href="#reviews">Отзывы</a>
                 <#elseif isStudentArea>
-                    <a class="nav-link <#if currentPage == 'main'>is-active</#if>" href="/main">Главная</a>
                     <a class="nav-link <#if currentPage == 'skills'>is-active</#if>" href="/student/skills">Навыки</a>
                     <a class="nav-link <#if currentPage == 'vacancies'>is-active</#if>" href="/student/vacancies">Вакансии</a>
                     <a class="nav-link <#if currentPage == 'route'>is-active</#if>" href="/route">Маршрут</a>

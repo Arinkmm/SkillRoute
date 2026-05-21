@@ -19,7 +19,7 @@
                     <div class="skill-list">
                         <#list skill.resources as resource>
                             <div class="skill-row">
-                                <span>${resource.resource}</span>
+                                <a class="text-link" href="${resource.resource}" target="_blank" rel="noreferrer">${resource.resource}</a>
                             </div>
                         </#list>
                     </div>
