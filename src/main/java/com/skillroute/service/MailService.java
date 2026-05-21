@@ -6,7 +6,7 @@ import com.skillroute.properties.MessageProperties;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.MailSendException;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class MailService {
             mimeMessageHelper.setText(content, true);
 
             javaMailSender.send(mimeMessage);
-        } catch (MailSendException | MessagingException | UnsupportedEncodingException e) {
+        } catch (MailException | MessagingException | UnsupportedEncodingException e) {
             throw new ServiceUnavailableException(messages.getMail().getSendError());
         }
     }
