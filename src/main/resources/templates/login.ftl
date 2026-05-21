@@ -19,7 +19,6 @@
                 <div class="auth-card-header">
                     <p class="eyebrow">Вход</p>
                     <h2>Войти в аккаунт</h2>
-                    <p>Используйте почту и пароль, указанные при регистрации.</p>
                 </div>
 
                 <#if successMessage??>

@@ -16,6 +16,10 @@
 <#assign selectedSpecializationId = (form.specializationId)!((vacancy.specialization.id)!-1)>
 <#assign selectedWorkSchedule = (form.workSchedule)!((vacancy.workSchedule)!'')>
 <#assign selectedStatus = (form.status)!((vacancy.status)!'OPEN')>
+<#assign salaryValue = "">
+<#if form.salary??>
+    <#assign salaryValue = form.salary?c>
+</#if>
 <#assign isUpdateForm = vacancy?? && vacancy.id??>
 
 <article class="profile-form-panel wide-form-panel">
@@ -51,7 +55,7 @@
 
             <label class="form-field" for="salary">
                 <span>Зарплата</span>
-                <input id="salary" type="number" min="1" name="salary" value="${(form.salary)!''}" class="<#if salaryError?has_content>is-invalid</#if>">
+                <input id="salary" type="number" min="1" name="salary" value="${salaryValue}" class="<#if salaryError?has_content>is-invalid</#if>">
                 <small class="field-message <#if salaryError?has_content>field-message-error</#if>">${salaryError}</small>
             </label>
         </div>

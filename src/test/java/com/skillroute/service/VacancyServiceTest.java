@@ -17,8 +17,10 @@ import com.skillroute.model.StudentVacancy;
 import com.skillroute.model.StudentVacancyStatus;
 import com.skillroute.model.Vacancy;
 import com.skillroute.model.VacancyProfile;
+import com.skillroute.model.VacancySkill;
 import com.skillroute.model.VacancyStatus;
 import com.skillroute.model.WorkSchedule;
+import com.skillroute.model.id.VacancySkillId;
 import com.skillroute.repository.CompanyProfileRepository;
 import com.skillroute.repository.SkillRepository;
 import com.skillroute.repository.SpecializationRepository;
@@ -138,6 +140,36 @@ class VacancyServiceTest {
         assertThat(vacancy.getName()).isEqualTo("Spring Developer");
         assertThat(vacancy.getProfile().getStatus()).isEqualTo(VacancyStatus.IN_PROGRESS);
         assertThat(vacancy.getVacancySkills()).hasSize(1);
+    }
+
+    @Test
+    void updateVacancyUpdatesExistingSkillLevelWithoutRecreatingDuplicateEntity() {
+        CompanyProfile company = company(1L);
+        Vacancy vacancy = vacancy(10L, company, VacancyStatus.OPEN);
+        Skill java = Skill.builder().id(100L).name("Java").build();
+        vacancy.getVacancySkills().add(VacancySkill.builder()
+                .id(new VacancySkillId(10L, 100L))
+                .vacancy(vacancy)
+                .skill(java)
+                .level(2)
+                .build());
+        Specialization specialization = specialization(6L);
+        UpdateVacancyRequest request = UpdateVacancyRequest.builder()
+                .name("Java Developer")
+                .specializationId(6L)
+                .salary(140000L)
+                .workSchedule(WorkSchedule.REMOTE)
+                .status(VacancyStatus.OPEN)
+                .skills(List.of(AddSkillRequest.builder().skillId(100L).level(5).build()))
+                .build();
+
+        when(vacancyRepository.findById(10L)).thenReturn(Optional.of(vacancy));
+        when(specializationRepository.findById(6L)).thenReturn(Optional.of(specialization));
+
+        service.updateVacancy(10L, request, 1L);
+
+        assertThat(vacancy.getVacancySkills()).hasSize(1);
+        assertThat(vacancy.getVacancySkills().iterator().next().getLevel()).isEqualTo(5);
     }
 
     @Test

@@ -42,4 +42,8 @@ if (vacancyForm) {
     });
 
     vacancyForm.addEventListener("submit", reindexSelectedSkills);
+
+    vacancyForm.querySelectorAll('input[type="number"]').forEach((field) => {
+        field.addEventListener("wheel", () => field.blur());
+    });
 }
