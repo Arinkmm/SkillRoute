@@ -92,7 +92,7 @@ class VerificationServiceTest {
 
         assertThatThrownBy(() -> service.verifyUser("token"))
                 .isInstanceOf(AccountAlreadyVerifiedException.class)
-                .hasMessage("РђРєРєР°СѓРЅС‚ СѓР¶Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅ");
+                .hasMessage("Аккаунт уже подтвержден");
     }
 
     @Test
