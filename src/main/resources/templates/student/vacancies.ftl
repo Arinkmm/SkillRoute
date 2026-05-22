@@ -1,5 +1,13 @@
 <#import "/layouts/base.ftl" as layout>
 <#import "/fragments/labels.ftl" as labels>
+<#assign minSalaryValue = "">
+<#if filter.minSalary??>
+    <#assign minSalaryValue = filter.minSalary?c>
+</#if>
+<#assign maxSalaryValue = "">
+<#if filter.maxSalary??>
+    <#assign maxSalaryValue = filter.maxSalary?c>
+</#if>
 
 <@layout.page title="Вакансии - SkillRoute" currentPage="vacancies">
     <section class="work-page">
@@ -22,11 +30,11 @@
         <form class="filter-panel" action="/student/vacancies" method="get">
             <label class="form-field" for="minSalary">
                 <span>Зарплата от</span>
-                <input id="minSalary" type="number" min="0" name="minSalary" value="${(filter.minSalary)!''}">
+                <input id="minSalary" type="number" min="0" name="minSalary" value="${minSalaryValue}">
             </label>
             <label class="form-field" for="maxSalary">
                 <span>Зарплата до</span>
-                <input id="maxSalary" type="number" min="0" name="maxSalary" value="${(filter.maxSalary)!''}">
+                <input id="maxSalary" type="number" min="0" name="maxSalary" value="${maxSalaryValue}">
             </label>
             <label class="form-field" for="schedule">
                 <span>Формат</span>

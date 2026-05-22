@@ -28,18 +28,21 @@ public class VerificationService {
 
     @Transactional
     public void verifyUser(String token) {
-        String redisKey = redisProperties.getPrefix() + token;
         TokenData tokenData = getTokenData(token);
-        if (Instant.now().isAfter(tokenData.expiresAt())) {
-            throw new VerificationTokenException(messages.getVerification().getTokenInvalid());
-        }
 
         String email = tokenData.email();
         Account account = accountRepository.findByEmail(email).orElseThrow(() -> new VerificationTokenException(messages.getVerification().getTokenInvalid()));
 
+        if (account.isVerified()) {
+            throw new AccountAlreadyVerifiedException(messages.getVerification().getAlreadyVerified());
+        }
+
+        if (Instant.now().isAfter(tokenData.expiresAt())) {
+            throw new VerificationTokenException(messages.getVerification().getTokenInvalid());
+        }
+
         account.setVerified(true);
         accountRepository.save(account);
-        redisTemplate.delete(redisKey);
     }
 
     @Transactional

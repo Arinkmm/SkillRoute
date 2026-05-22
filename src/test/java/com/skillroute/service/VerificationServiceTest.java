@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,7 +66,7 @@ class VerificationServiceTest {
     }
 
     @Test
-    void verifyUserMarksAccountVerifiedAndDeletesToken() {
+    void verifyUserMarksAccountVerifiedAndKeepsTokenForRepeatClick() {
         Account account = Account.builder().email("student@example.com").isVerified(false).build();
         when(redisTemplate.opsForHash()).thenReturn(hashOperations);
         when(hashOperations.entries("verification:token:token")).thenReturn(Map.of(
@@ -77,7 +78,21 @@ class VerificationServiceTest {
 
         assertThat(account.isVerified()).isTrue();
         verify(accountRepository).save(account);
-        verify(redisTemplate).delete("verification:token:token");
+        verify(redisTemplate, never()).delete("verification:token:token");
+    }
+
+    @Test
+    void verifyUserRejectsAlreadyVerifiedAccountWithoutResendState() {
+        Account account = Account.builder().email("student@example.com").isVerified(true).build();
+        when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+        when(hashOperations.entries("verification:token:token")).thenReturn(Map.of(
+                "email", "student@example.com",
+                "expiresAt", Instant.now().minus(10, ChronoUnit.MINUTES).toString()));
+        when(accountRepository.findByEmail("student@example.com")).thenReturn(Optional.of(account));
+
+        assertThatThrownBy(() -> service.verifyUser("token"))
+                .isInstanceOf(AccountAlreadyVerifiedException.class)
+                .hasMessage("РђРєРєР°СѓРЅС‚ СѓР¶Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅ");
     }
 
     @Test
@@ -86,6 +101,8 @@ class VerificationServiceTest {
         when(hashOperations.entries("verification:token:expired")).thenReturn(Map.of(
                 "email", "student@example.com",
                 "expiresAt", Instant.now().minus(1, ChronoUnit.MINUTES).toString()));
+        when(accountRepository.findByEmail("student@example.com"))
+                .thenReturn(Optional.of(Account.builder().email("student@example.com").isVerified(false).build()));
 
         assertThatThrownBy(() -> service.verifyUser("expired"))
                 .isInstanceOf(VerificationTokenException.class)

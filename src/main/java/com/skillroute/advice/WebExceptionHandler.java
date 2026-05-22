@@ -38,6 +38,9 @@ public class WebExceptionHandler {
     @ExceptionHandler(AccountAlreadyVerifiedException.class)
     public String handleAccountAlreadyVerified(AccountAlreadyVerifiedException e, RedirectAttributes redirectAttributes, HttpServletRequest req) {
         log.error("Аккаунт уже подтверждён: {}",  e.getMessage());
+        req.getSession().removeAttribute("expiredVerificationToken");
+        req.getSession().removeAttribute("pendingVerificationEmail");
+        req.getSession().removeAttribute("unverifiedEmail");
         redirectAttributes.addFlashAttribute("error", e.getMessage());
         return "redirect:/login";
     }
