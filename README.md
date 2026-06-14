@@ -1,35 +1,35 @@
 # SkillRoute
 
-SkillRoute - это веб-платформа для студентов и компаний, которая помогает связывать навыки кандидата с требованиями вакансий. Студент собирает профиль, добавляет навыки, подтверждает их через GitHub и получает маршруты развития под выбранные вакансии. Компания публикует вакансии, смотрит подходящих студентов, ведет отклики и общается с кандидатами в чате.
+SkillRoute is a web platform for students and companies that helps match candidate skills with job requirements. Students build a profile, add skills, verify them via GitHub, and get development roadmaps for selected vacancies. Companies post vacancies, browse matching students, manage applications, and communicate with candidates via chat.
 
-Проект сделан как монолитное Spring Boot-приложение: серверная часть отвечает за веб-страницы, AJAX API, регистрацию, безопасность, бизнес-логику, работу с PostgreSQL/Redis, отправку писем и фоновую синхронизацию навыков с GitHub. Интерфейс построен на FreeMarker-шаблонах, CSS и небольших JavaScript-модулях для форм, чата и асинхронных действий.
+The project is a monolithic Spring Boot application: the server handles web pages, AJAX API, registration, security, business logic, PostgreSQL/Redis integration, email delivery, and background GitHub skill synchronization. The UI is built with FreeMarker templates, CSS, and small JavaScript modules for forms, chat, and async actions.
 
-## Возможности
+## Features
 
-- Регистрация студентов и компаний с подтверждением email.
-- Вход через Spring Security, роли `STUDENT`, `COMPANY`, `ADMIN`.
-- Восстановление и изменение пароля через email-токены в Redis.
-- Личные кабинеты студента и компании.
-- Профиль студента: имя, фамилия, специализация, GitHub, описание.
-- Профиль компании: название, описание, сайт и админское подтверждение компании.
-- Каталог навыков и специализаций с seed-данными при первом запуске.
-- Навыки студента с уровнем владения от 1 до 5.
-- Синхронизация навыков с GitHub: анализ репозиториев, языков, topics, описаний и code search.
-- Фоновая очередь GitHub-синхронизации с обработкой rate limit и повторными попытками.
-- Вакансии компаний со специализацией, зарплатой, графиком, статусом и требуемыми навыками.
-- Каталог вакансий для студента: рекомендации, популярные вакансии, фильтрация и отслеживаемые вакансии.
-- Отклики студентов на вакансии и статусы `SUBMITTED`, `REVIEWING`, `INTERVIEW`, `REJECTED`, `ACCEPTED`.
-- Roadmap по вакансии: расчет совпадения, недостающие навыки, глубина разрыва и учебные материалы.
-- Материалы по навыкам, которыми управляет компания.
-- Чаты между компанией и студентом по вакансии.
-- OpenAPI-описание AJAX API и Swagger UI.
-- Docker Compose окружение с приложением, PostgreSQL и Redis.
+- Student and company registration with email confirmation.
+- Login via Spring Security with roles `STUDENT`, `COMPANY`, `ADMIN`.
+- Password recovery and change via email tokens stored in Redis.
+- Personal dashboards for students and companies.
+- Student profile: first name, last name, specialization, GitHub, bio.
+- Company profile: name, description, website, and admin approval.
+- Skill and specialization catalog with seed data on first run.
+- Student skills with proficiency levels from 1 to 5.
+- GitHub skill synchronization: analysis of repositories, languages, topics, descriptions, and code search.
+- Background GitHub sync queue with rate limit handling and retries.
+- Company vacancies with specialization, salary, schedule, status, and required skills.
+- Student vacancy catalog: recommendations, popular vacancies, filtering, and tracked vacancies.
+- Student applications with statuses `SUBMITTED`, `REVIEWING`, `INTERVIEW`, `REJECTED`, `ACCEPTED`.
+- Vacancy roadmap: match percentage calculation, missing skills, gap depth, and learning resources.
+- Skill learning resources managed by companies.
+- Chats between companies and students per vacancy.
+- OpenAPI description of the AJAX API and Swagger UI.
+- Docker Compose environment with the application, PostgreSQL, and Redis.
 
-## Архитектура
+## Architecture
 
 ```mermaid
 flowchart LR
-    user["Пользователь"] --> web["FreeMarker web UI"]
+    user["User"] --> web["FreeMarker web UI"]
     web --> app["SkillRoute Spring Boot"]
 
     app --> security["Spring Security"]
@@ -41,43 +41,43 @@ flowchart LR
     app --> templates["FTL templates"]
     app --> openapi["OpenAPI / Swagger UI"]
 
-    student["Студент"] --> app
-    company["Компания"] --> app
-    admin["Администратор"] --> app
+    student["Student"] --> app
+    company["Company"] --> app
+    admin["Administrator"] --> app
 ```
 
-### Слои проекта
+### Project Layers
 
-| Путь | Назначение |
+| Path | Purpose |
 | --- | --- |
-| `src/main/java/com/skillroute/controller` | MVC-страницы и REST-контроллеры для AJAX API |
-| `src/main/java/com/skillroute/service` | Бизнес-логика регистрации, профилей, вакансий, roadmap, чатов и GitHub-синхронизации |
-| `src/main/java/com/skillroute/repository` | Spring Data JPA репозитории и кастомные запросы |
-| `src/main/java/com/skillroute/model` | JPA-сущности и enum-статусы |
-| `src/main/java/com/skillroute/dto` | DTO запросов и ответов для страниц и API |
-| `src/main/java/com/skillroute/mapper` | Маппинг сущностей в DTO |
-| `src/main/resources/templates` | FreeMarker-шаблоны страниц |
-| `src/main/resources/static` | CSS, JavaScript и OpenAPI YAML |
-| `src/main/resources/db` | Liquibase changelog и seed-данные |
-| `http` | HTTP-запросы для ручной проверки страниц и AJAX API |
+| `src/main/java/com/skillroute/controller` | MVC pages and REST controllers for the AJAX API |
+| `src/main/java/com/skillroute/service` | Business logic for registration, profiles, vacancies, roadmap, chats, and GitHub sync |
+| `src/main/java/com/skillroute/repository` | Spring Data JPA repositories and custom queries |
+| `src/main/java/com/skillroute/model` | JPA entities and enum statuses |
+| `src/main/java/com/skillroute/dto` | Request and response DTOs for pages and API |
+| `src/main/java/com/skillroute/mapper` | Entity-to-DTO mapping |
+| `src/main/resources/templates` | FreeMarker page templates |
+| `src/main/resources/static` | CSS, JavaScript, and OpenAPI YAML |
+| `src/main/resources/db` | Liquibase changelog and seed data |
+| `http` | HTTP requests for manual testing of pages and the AJAX API |
 
-### Основные сущности
+### Core Entities
 
-| Сущность | Назначение |
+| Entity | Purpose |
 | --- | --- |
-| `account` | Учетная запись, email, пароль, роль, флаг подтверждения |
-| `student_profile` | Профиль студента, GitHub URL, специализация, описание |
-| `company_profile` | Профиль компании и флаг админского подтверждения |
-| `specialization` | Направление и язык: backend, frontend, data, devops и другие |
-| `skill`, `student_skill` | Справочник навыков и навыки студента с уровнем |
-| `skill_dictionary` | Правила поиска навыков в GitHub |
-| `vacancy`, `vacancy_profile`, `vacancy_skill` | Вакансия, профиль вакансии и требуемые навыки |
-| `student_vacancy` | Отклик или отслеживание вакансии студентом |
-| `resource` | Учебные материалы по навыкам |
-| `chat`, `message` | Диалоги и сообщения |
-| `github_sync_job` | Очередь фоновой синхронизации GitHub |
+| `account` | Account, email, password, role, confirmation flag |
+| `student_profile` | Student profile, GitHub URL, specialization, bio |
+| `company_profile` | Company profile and admin approval flag |
+| `specialization` | Direction and language: backend, frontend, data, devops, and others |
+| `skill`, `student_skill` | Skill catalog and student skills with proficiency level |
+| `skill_dictionary` | Rules for finding skills in GitHub |
+| `vacancy`, `vacancy_profile`, `vacancy_skill` | Vacancy, vacancy profile, and required skills |
+| `student_vacancy` | Student application or tracked vacancy |
+| `resource` | Learning resources for skills |
+| `chat`, `message` | Dialogs and messages |
+| `github_sync_job` | Background GitHub sync queue |
 
-## Стек
+## Stack
 
 - Java 23
 - Spring Boot 3.4.3
@@ -93,33 +93,33 @@ flowchart LR
 - Springdoc OpenAPI + Swagger UI
 - OpenAPI Generator 7.10.0
 - Lombok
-- Docker и Docker Compose
+- Docker and Docker Compose
 - JUnit 5, Spring Security Test, JaCoCo
 
-## Быстрый старт
+## Quick Start
 
-### Требования
+### Requirements
 
 - JDK 23
-- Docker и Docker Compose
-- GitHub token для анализа репозиториев
-- SMTP-аккаунт для отправки писем. Для Gmail обычно нужен app password.
+- Docker and Docker Compose
+- GitHub token for repository analysis
+- SMTP account for sending emails. Gmail usually requires an app password.
 
-### Запуск через Docker Compose
+### Running with Docker Compose
 
-1. Создайте локальный `.env` из шаблона:
+1. Create a local `.env` from the template:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Для Linux/macOS:
+On Linux/macOS:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Заполните `.env`:
+2. Fill in `.env`:
 
 ```dotenv
 DB_USER=skillroute
@@ -134,19 +134,19 @@ MAIL_BASE_URL=http://localhost:8080
 GITHUB_TOKEN=github_pat_change_me
 ```
 
-3. Соберите и запустите окружение:
+3. Build and start the environment:
 
 ```powershell
 docker compose up --build -d
 ```
 
-4. Проверьте контейнеры:
+4. Check containers:
 
 ```powershell
 docker compose ps
 ```
 
-5. Откройте приложение:
+5. Open the application:
 
 ```text
 http://localhost:8080
@@ -158,21 +158,21 @@ Swagger UI:
 http://localhost:8080/swagger-ui.html
 ```
 
-Остановка окружения:
+Stop the environment:
 
 ```powershell
 docker compose down
 ```
 
-Остановка с удалением данных PostgreSQL и Redis:
+Stop and remove PostgreSQL and Redis data:
 
 ```powershell
 docker compose down -v
 ```
 
-### Локальный запуск из IDE или Gradle
+### Running Locally from IDE or Gradle
 
-Для запуска приложения вне Docker нужны PostgreSQL на `localhost:5432` и Redis на `localhost:6379`. Переменные окружения можно задать в конфигурации IDE или прямо в PowerShell:
+To run the application outside Docker, you need PostgreSQL on `localhost:5432` and Redis on `localhost:6379`. Environment variables can be set in the IDE run configuration or directly in PowerShell:
 
 ```powershell
 $env:DB_USER="skillroute"
@@ -185,187 +185,188 @@ $env:GITHUB_TOKEN="github_pat_change_me"
 .\gradlew.bat bootRun
 ```
 
-Для Linux/macOS используйте `export` и `./gradlew bootRun`.
+On Linux/macOS, use `export` and `./gradlew bootRun`.
 
-При старте Liquibase применяет миграции из `src/main/resources/db/changelog`, а `DatabaseSeeder` наполняет базу специализациями, навыками и GitHub-словарем из `src/main/resources/db/data/skills-seed.sql`, если словарь еще пуст.
+On startup, Liquibase applies migrations from `src/main/resources/db/changelog`, and `DatabaseSeeder` populates the database with specializations, skills, and the GitHub dictionary from `src/main/resources/db/data/skills-seed.sql` if the dictionary is empty.
 
-## Переменные окружения
+## Environment Variables
 
-| Переменная | Назначение |
+| Variable | Purpose |
 | --- | --- |
-| `DB_USER` | Пользователь PostgreSQL |
-| `DB_PASSWORD` | Пароль PostgreSQL |
-| `DB_NAME` | Имя базы данных |
-| `APP_PORT` | Внешний порт приложения в Docker Compose, по умолчанию `8080` |
-| `MAIL_USER` | SMTP-логин отправителя |
-| `MAIL_PASSWORD` | SMTP-пароль или app password |
-| `MAIL_BASE_URL` | Базовый URL для ссылок подтверждения email и сброса пароля |
-| `GITHUB_TOKEN` | Token для GitHub REST API и code search |
-| `SPRING_DATASOURCE_URL` | Опциональный override JDBC URL |
-| `SPRING_DATA_REDIS_HOST` | Опциональный override Redis host |
+| `DB_USER` | PostgreSQL user |
+| `DB_PASSWORD` | PostgreSQL password |
+| `DB_NAME` | Database name |
+| `APP_PORT` | External application port in Docker Compose, default `8080` |
+| `MAIL_USER` | SMTP sender login |
+| `MAIL_PASSWORD` | SMTP password or app password |
+| `MAIL_BASE_URL` | Base URL for email confirmation and password reset links |
+| `GITHUB_TOKEN` | Token for GitHub REST API and code search |
+| `SPRING_DATASOURCE_URL` | Optional JDBC URL override |
+| `SPRING_DATA_REDIS_HOST` | Optional Redis host override |
 
-## Порты
+## Ports
 
-| Компонент | URL |
+| Component | URL |
 | --- | --- |
 | SkillRoute | <http://localhost:8080> |
 | Login | <http://localhost:8080/login> |
 | Swagger UI | <http://localhost:8080/swagger-ui.html> |
 | OpenAPI YAML | <http://localhost:8080/openapi/skillroute-api.yaml> |
 
-В Docker Compose PostgreSQL и Redis доступны внутри сети `skillroute_net`. Наружу публикуется только приложение.
+In Docker Compose, PostgreSQL and Redis are accessible within the `skillroute_net` network. Only the application is exposed externally.
 
-## Пользовательские сценарии
+## User Scenarios
 
-### Студент
+### Student
 
-1. Регистрируется на `/register` с ролью `STUDENT`.
-2. Подтверждает email по ссылке из письма.
-3. Заполняет профиль на `/student/profile/update`.
-4. Добавляет навыки на `/student/skills`.
-5. Указывает GitHub URL и запускает синхронизацию навыков.
-6. Смотрит вакансии на `/student/vacancies`, фильтрует каталог и откликается.
-7. Открывает `/route`, выбирает отслеживаемую вакансию и получает roadmap по недостающим навыкам.
-8. Ведет переписку с компанией в `/student/chats`.
+1. Registers at `/register` with the `STUDENT` role.
+2. Confirms email via the link in the confirmation message.
+3. Fills in their profile at `/student/profile/update`.
+4. Adds skills at `/student/skills`.
+5. Sets a GitHub URL and triggers skill synchronization.
+6. Browses vacancies at `/student/vacancies`, filters the catalog, and applies.
+7. Opens `/route`, selects a tracked vacancy, and gets a roadmap for missing skills.
+8. Communicates with companies in `/student/chats`.
 
-### Компания
+### Company
 
-1. Регистрируется на `/register` с ролью `COMPANY`.
-2. Подтверждает email и заполняет профиль на `/company/profile/update`.
-3. Ждет подтверждения от администратора.
-4. Создает вакансии на `/company/vacancies/create`.
-5. Просматривает кандидатов на `/company/vacancies/{id}/applicants`.
-6. Берет студента в работу, начинает чат и меняет статус отклика.
-7. Добавляет учебные материалы к навыкам через раздел `/company/skills`.
+1. Registers at `/register` with the `COMPANY` role.
+2. Confirms email and fills in the profile at `/company/profile/update`.
+3. Waits for admin approval.
+4. Creates vacancies at `/company/vacancies/create`.
+5. Reviews candidates at `/company/vacancies/{id}/applicants`.
+6. Starts a chat with a student and updates the application status.
+7. Adds learning resources to skills via `/company/skills`.
 
-### Администратор
+### Administrator
 
-Администратор видит компании, ожидающие подтверждения, на `/main` и подтверждает их через `POST /main/companies/{id}/approve`. Регистрация через форму доступна только для студентов и компаний, поэтому админскую учетную запись нужно создавать отдельно, если нужна модерация компаний.
+The administrator sees companies awaiting approval on `/main` and approves them via `POST /main/companies/{id}/approve`. Registration via the form is only available for students and companies, so an admin account must be created separately if company moderation is needed.
 
-## API и контракты
+## API and Contracts
 
-OpenAPI-спецификация находится в `src/main/resources/static/openapi/skillroute-api.yaml`. Swagger UI доступен по адресу `/swagger-ui.html`.
+The OpenAPI specification is located at `src/main/resources/static/openapi/skillroute-api.yaml`. Swagger UI is available at `/swagger-ui.html`.
 
 ### AJAX API
 
-| Метод | Endpoint | Описание |
+| Method | Endpoint | Description |
 | --- | --- | --- |
-| `POST` | `/register/check-field` | Проверка формы регистрации |
-| `POST` | `/password/reset/check-field` | Проверка формы нового пароля |
-| `POST` | `/account/password/check-field` | Проверка смены пароля текущего пользователя |
-| `GET` | `/student/skills/search?name=java` | Поиск навыков студента |
-| `POST` | `/student/skills/github-sync` | Поставить GitHub-синхронизацию в очередь |
-| `GET` | `/student/skills/github-sync/status` | Получить статус GitHub-синхронизации |
-| `GET` | `/chat/{id}/messages` | Получить сообщения чата |
-| `POST` | `/chat/{id}/send` | Отправить сообщение в чат |
+| `POST` | `/register/check-field` | Validate registration form |
+| `POST` | `/password/reset/check-field` | Validate new password form |
+| `POST` | `/account/password/check-field` | Validate current user's password change |
+| `GET` | `/student/skills/search?name=java` | Search student skills |
+| `POST` | `/student/skills/github-sync` | Queue a GitHub synchronization |
+| `GET` | `/student/skills/github-sync/status` | Get GitHub sync status |
+| `GET` | `/chat/{id}/messages` | Get chat messages |
+| `POST` | `/chat/{id}/send` | Send a message to a chat |
 
-### Web-страницы
+### Web Pages
 
-| Раздел | Основные маршруты |
+| Section | Main Routes |
 | --- | --- |
-| Публичные страницы | `/`, `/register`, `/login`, `/verification`, `/password/forgot`, `/password/reset` |
-| Кабинет | `/main` |
-| Студент | `/student/profile`, `/student/skills`, `/student/vacancies`, `/route`, `/student/chats` |
-| Компания | `/company/profile`, `/company/vacancies`, `/company/students`, `/company/skills`, `/company/chats` |
-| Чат | `/chat/{id}/messages`, `/chat/{id}/send` |
-| Документация API | `/swagger-ui.html`, `/openapi/skillroute-api.yaml` |
+| Public pages | `/`, `/register`, `/login`, `/verification`, `/password/forgot`, `/password/reset` |
+| Dashboard | `/main` |
+| Student | `/student/profile`, `/student/skills`, `/student/vacancies`, `/route`, `/student/chats` |
+| Company | `/company/profile`, `/company/vacancies`, `/company/students`, `/company/skills`, `/company/chats` |
+| Chat | `/chat/{id}/messages`, `/chat/{id}/send` |
+| API docs | `/swagger-ui.html`, `/openapi/skillroute-api.yaml` |
 
-Для ручной проверки есть готовые HTTP-запросы:
+Ready-made HTTP requests for manual testing:
 
 - `http/web-pages.http`
 - `http/ajax-api.http`
 
-## GitHub-синхронизация навыков
+## GitHub Skill Synchronization
 
-Синхронизация запускается студентом из раздела навыков. Приложение извлекает username из GitHub URL, собирает сигналы из репозиториев через `https://api.github.com/users/{username}/repos`, а затем при необходимости делает code search по правилам из `skill_dictionary`.
+Synchronization is triggered by the student from the skills section. The application extracts the username from the GitHub URL, collects signals from repositories via `https://api.github.com/users/{username}/repos`, and performs code search as needed using rules from `skill_dictionary`.
 
-Очередь хранится в таблице `github_sync_job`. Worker запускается по расписанию `github.sync.worker-delay-millis`, переводит задачи в `RUNNING`, обновляет прогресс и завершает их статусом `SUCCESS` или `FAILED`. Если GitHub возвращает rate limit, задача возвращается в `PENDING` с `retry_after_at`.
+The queue is stored in the `github_sync_job` table. A worker runs on a schedule defined by `github.sync.worker-delay-millis`, transitions jobs to `RUNNING`, updates progress, and completes them with a status of `SUCCESS` or `FAILED`. If GitHub returns a rate limit response, the job is returned to `PENDING` with a `retry_after_at` timestamp.
 
-## Тесты и качество
+## Tests and Quality
 
-Запуск тестов:
+Run tests:
 
 ```powershell
 .\gradlew.bat test
 ```
 
-Проверка покрытия JaCoCo:
+Check JaCoCo coverage:
 
 ```powershell
 .\gradlew.bat jacocoTestCoverageVerification
 ```
 
-Генерация OpenAPI моделей:
+Generate OpenAPI models:
 
 ```powershell
 .\gradlew.bat openApiGenerate
 ```
 
-Сборка jar:
+Build jar:
 
 ```powershell
 .\gradlew.bat bootJar
 ```
 
-Для Linux/macOS замените `.\gradlew.bat` на `./gradlew`.
+On Linux/macOS, replace `.\gradlew.bat` with `./gradlew`.
 
-## Структура базы данных
+## Database Structure
 
-Миграции подключены через `src/main/resources/db/master.xml`:
+Migrations are connected via `src/main/resources/db/master.xml`:
 
-- `2026-04-21--01-create-profiles-tables.sql` - аккаунты, профили, специализации.
-- `2026-04-22--02-create-skill-tables.sql` - навыки студентов.
-- `2026-04-24--03-create-vacancies-tables.sql` - вакансии, требования и отклики.
-- `2026-04-25--04-create-resource-table.sql` - учебные материалы.
-- `2026-05-03--05-create-chats-tables.sql` - чаты и сообщения.
-- `2026-05-07--06-create-skill-dictionary.sql` - словарь сигналов для GitHub.
-- `2026-05-18--07-create-github-sync-job.sql` - очередь GitHub-синхронизации.
+- `2026-04-21--01-create-profiles-tables.sql` — accounts, profiles, specializations.
+- `2026-04-22--02-create-skill-tables.sql` — student skills.
+- `2026-04-24--03-create-vacancies-tables.sql` — vacancies, requirements, and applications.
+- `2026-04-25--04-create-resource-table.sql` — learning resources.
+- `2026-05-03--05-create-chats-tables.sql` — chats and messages.
+- `2026-05-07--06-create-skill-dictionary.sql` — GitHub signal dictionary.
+- `2026-05-18--07-create-github-sync-job.sql` — GitHub sync queue.
 
-## Скриншоты
+## Screenshots
 
-### Главная страница
+### Home Page
 ![img.png](images/img.png)
 
-### Форма регистрации с выбором роли студента или компании
+### Registration Form with Student or Company Role Selection
 ![img_1.png](images/img_1.png)
 
-### Заполненный профиль студента
+### Completed Student Profile
 ![img_2.png](images/img_2.png)
 
-### Раздел навыков студента
+### Student Skills Section
 ![img_3.png](images/img_3.png)
 
-### Состояние синхронизации навыков с GitHub
+### GitHub Skill Sync Status
 ![img_4.png](images/img_4.png)
 
-### Каталог вакансий студента: рекомендации, фильтры и отслеживаемые вакансии
+### Student Vacancy Catalog: Recommendations, Filters, and Tracked Vacancies
 ![img_5.png](images/img_5.png)
 
-### Roadmap по вакансии с процентом совпадения и недостающими навыками
+### Vacancy Roadmap with Match Percentage and Missing Skills
 ![img_6.png](images/img_6.png)
 
-### Детальная страница навыка из roadmap с учебными материалами
+### Skill Detail Page from Roadmap with Learning Resources
 ![img_7.png](images/img_7.png)
 
-### Профиль компании после заполнения данных
+### Company Profile After Filling In Details
 ![img_8.png](images/img_8.png)
 
-### Список вакансий компании
+### Company Vacancy List
 ![img_9.png](images/img_9.png)
 
-### Форма создания вакансии с требуемыми навыками
+### Vacancy Creation Form with Required Skills
 ![img_10.png](images/img_10.png)
 
-### Список кандидатов по вакансии
+### Candidate List for a Vacancy
 ![img_13.png](images/img_13.png)
 
-### Чат между компанией и студентом
+### Chat Between Company and Student
 ![img_11.png](images/img_11.png)
 
-### Админская страница подтверждения компаний
+### Admin Company Approval Page
 ![img_12.png](images/img_12.png)
 
-## Поддержка и контакты
-Остались вопросы? Нужна помощь с настройкой? Нашли баг?
+## Support & Contact
+
+Have questions? Need help with setup? Found a bug?
 
 Email: **mairabeeva42@gmail.com** | Telegram: @arinkmm
